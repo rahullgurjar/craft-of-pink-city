@@ -4,20 +4,12 @@ export const whatsapp = `https://wa.me/${whatsappNumber}`
 export const email = 'craftofpinkcity@gmail.com'
 
 export const products = [
-  { name: 'Blue Floral Duffle', category: 'Duffle Bag', price: '₹1,499', image: 'duffle-blue-floral.webp', description: 'Quilted block-print duffle with a roomy shape for short escapes.' },
-  { name: 'Pink Floral Duffle', category: 'Duffle Bag', price: '₹1,499', image: 'duffle-pink-floral.webp', description: 'A cheerful floral companion, finished with striped piping.' },
-  { name: 'Patchwork Duffle', category: 'Duffle Bag', price: '₹1,499', image: 'duffle-patchwork.webp', description: 'A one-of-a-kind patchwork duffle full of Jaipur colour.' },
-  { name: 'Pink Leopard Tote', category: 'Tote Bag', price: '₹1,099', image: 'tote-pink-leopard.webp', description: 'A bold quilted tote with shoulder strap for hands-free days.' },
-  { name: 'Red Floral Tote', category: 'Tote Bag', price: '₹1,099', image: 'tote-red-floral.webp', description: 'A bright floral carryall with striped piping and generous space.' },
-  { name: 'Indigo Everyday Tote', category: 'Tote Bag', price: '₹1,099', image: 'tote-indigo-solid.webp', description: 'A structured indigo quilted tote for everyday essentials.' },
-  { name: 'Orange Dot Tote', category: 'Tote Bag', price: '₹1,099', image: 'tote-orange-dot.webp', description: 'An easy printed tote with an adjustable shoulder strap.' },
-  { name: 'Indigo Grid Tote', category: 'Tote Bag', price: '₹1,099', image: 'tote-indigo-grid.webp', description: 'A classic indigo grid print in a spacious quilted silhouette.' },
-  { name: 'Blue Toile Zip Pouch', category: 'Pouch', price: '₹599', image: 'pouch-blue-toile.webp', description: 'A softly structured zip pouch for daily little essentials.' },
-  { name: 'Blue Bandhani Zip Pouch', category: 'Pouch', price: '₹599', image: 'pouch-blue-bandhani.webp', description: 'A rounded quilted pouch in a rich blue block-print pattern.' },
-  { name: 'Indigo Zip Pouch', category: 'Pouch', price: '₹599', image: 'pouch-indigo-solid.webp', description: 'A minimal indigo pouch, neatly finished with striped piping.' },
-  { name: 'Navy Floral Wristlet', category: 'Pouch', price: '₹599', image: 'pouch-navy-floral.webp', description: 'A floral zip wristlet to carry essentials with ease.' },
-  { name: 'Blue Toile Vanity Bag', category: 'Vanity Bag', price: '₹899', image: 'vanity-blue-toile.webp', description: 'A zip-around vanity bag with a top handle and generous room.' },
-  { name: 'Indigo Grid Flat Pouch', category: 'Flat Pouch', price: '₹399', image: 'flat-pouch-indigo-grid.webp', description: 'A slim quilted flat pouch for makeup, stationery or cables.' },
+  { name: 'Patchwork Duffle Bag', category: 'Duffle Bag', price: '₹1,499', image: 'duffle-bag.webp', description: 'A spacious quilted duffle in joyful patchwork prints for short escapes.' },
+  { name: 'Red Floral Tote Bag', category: 'Tote Bag', price: '₹1,199', image: 'tote-bag.webp', description: 'A structured quilted tote with striped piping and generous everyday space.' },
+  { name: 'Blue Floral Pouch', category: 'Pouch', price: '₹599', image: 'pouch.webp', description: 'A rounded zip pouch for makeup, travel pieces and daily essentials.' },
+  { name: 'Indigo Grid Flat Pouch', category: 'Flat Pouch', price: '₹399', image: 'flat-pouch.webp', description: 'A slim quilted zipper pouch for your smaller essentials.' },
+  { name: 'Mini Tote Collection', category: 'Mini Tote Bag', price: '₹899 each', image: 'mini-tote-collection.webp', description: 'Colourful quilted mini totes, each made to carry your everyday essentials.' },
+  { name: 'Blue Toile Vanity Box', category: 'Vanity Box', price: '₹749', image: 'vanity-box.webp', description: 'A structured zip-around vanity box with a top handle and room to organise.' },
 ]
 
 export const faqs = [
