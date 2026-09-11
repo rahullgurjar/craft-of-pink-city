@@ -1,9 +1,18 @@
 import { useMemo, useState } from 'react'
-import { ArrowUpRight, Sparkles, Package } from 'lucide-react'
+import { ArrowUpRight, Package, Check, Sparkles } from 'lucide-react'
 import { products, whatsapp } from '../data/products'
 
 const categories = ['All', ...new Set(products.map((product) => product.category))]
-const productImages = import.meta.glob('../assets/products-new/*', { eager: true, import: 'default' })
+const newImages = import.meta.glob('../assets/products-new/*', { eager: true, import: 'default' })
+const legacyImages = import.meta.glob('../assets/products/*', { eager: true, import: 'default' })
+
+const resolveProductImage = (image) => {
+  return (
+    newImages[`../assets/products-new/${image}`] ||
+    legacyImages[`../assets/products/${image}`] ||
+    image
+  )
+}
 
 export default function Products() {
   const [activeCategory, setActiveCategory] = useState('All')
@@ -22,7 +31,7 @@ export default function Products() {
             <i>your everyday.</i>
           </h2>
           <p className="body-copy">
-            Quilted, block-printed accessories created in Jaipur. Tap a collection to browse, then message us directly to order.
+            Quilted, hand block-printed accessories created by skilled artisans in Jaipur. Filter by collection to browse our {products.length} handcrafted styles, then message us directly on WhatsApp to order.
           </p>
         </div>
 
@@ -48,12 +57,12 @@ export default function Products() {
             className={`filter-chip ${activeCategory === category ? 'filter-chip-active' : ''}`}
             aria-pressed={activeCategory === category}
           >
-            {category}
+            {category} {category === 'All' ? `(${products.length})` : `(${products.filter(p => p.category === category).length})`}
           </button>
         ))}
       </div>
 
-      <div className="mt-10 grid gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-10 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
         {visibleProducts.map((product, index) => {
           const message = encodeURIComponent(
             `Hello Craft of Pink City, I would like to order the ${product.name} (${product.price}). Is it available?`
@@ -63,33 +72,42 @@ export default function Products() {
           )
 
           return (
-            <article className="product-card group" key={product.name}>
-              <div className="product-photo-wrap rounded-2xl">
-                <img
-                  className="product-photo"
-                  src={productImages[`../assets/products-new/${product.image}`]}
-                  alt={product.name}
-                  loading={index < 3 ? 'eager' : 'lazy'}
-                  decoding="async"
-                />
-                <span className="product-category rounded-lg">{product.category}</span>
-              </div>
-              <div className="mt-4 flex items-start justify-between gap-3">
-                <div>
-                  <h3 className="font-serif text-3xl leading-none text-ink">{product.name}</h3>
-                  <p className="mt-2 text-sm leading-5 text-ink/65">{product.description}</p>
+            <article className="product-card group flex flex-col justify-between" key={product.id || product.name}>
+              <div>
+                <div className="product-photo-wrap rounded-2xl relative overflow-hidden bg-ivory/50">
+                  <img
+                    className="product-photo"
+                    src={resolveProductImage(product.image)}
+                    alt={product.name}
+                    loading={index < 4 ? 'eager' : 'lazy'}
+                    decoding="async"
+                  />
+                  <span className="product-category rounded-lg">{product.category}</span>
+                  {product.badge && (
+                    <span className="absolute top-3 right-3 rounded-full bg-rose/90 backdrop-blur-sm px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
+                      {product.badge}
+                    </span>
+                  )}
                 </div>
-                <span className="shrink-0 font-serif text-xl text-rose">{product.price}</span>
+
+                <div className="mt-4 flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="font-serif text-2xl sm:text-3xl leading-snug text-ink">{product.name}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-ink/70">{product.description}</p>
+                  </div>
+                  <span className="shrink-0 font-serif text-xl font-semibold text-rose">{product.price}</span>
+                </div>
               </div>
-              <div className="mt-4 flex items-center justify-between border-t border-ink/10 pt-3">
+
+              <div className="mt-5 flex items-center justify-between border-t border-ink/10 pt-3">
                 <a
-                  className="product-enquiry mt-0"
+                  className="product-enquiry mt-0 text-rose font-bold text-xs uppercase tracking-wider inline-flex items-center gap-1.5 hover:underline"
                   href={`${whatsapp}?text=${message}`}
                   target="_blank"
                   rel="noreferrer"
                   aria-label={`Enquire about ${product.name} on WhatsApp`}
                 >
-                  Order on WhatsApp <ArrowUpRight size={16} />
+                  Order on WhatsApp <ArrowUpRight size={15} />
                 </a>
                 <a
                   className="text-[11px] font-semibold text-ink/60 hover:text-rose transition-colors"
@@ -97,7 +115,7 @@ export default function Products() {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Bulk Inquiry
+                  Wholesale MOQ
                 </a>
               </div>
             </article>
@@ -107,3 +125,4 @@ export default function Products() {
     </section>
   )
 }
+

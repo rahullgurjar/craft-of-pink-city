@@ -5,6 +5,10 @@ import { whatsappNumber, whatsapp, email } from '../data/products'
 const productCategories = [
   'Patchwork Duffle Bags',
   'Quilted Tote Bags',
+  'Ruffled Tote Bags',
+  'Yoga Mat Bags',
+  'Quilted Laptop Sleeves',
+  'Hair Tool & Travel Organizers',
   'Vanity Boxes & Pouches',
   'Mini Tote Bags',
   'Indigo Flat Pouches',
