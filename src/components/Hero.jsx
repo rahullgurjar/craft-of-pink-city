@@ -7,7 +7,6 @@ import heroYellowPouch from '../assets/brand/hero-yellow-pouch.webp';
 import heroPinkDuffle from '../assets/products/duffle-pink-lemonade.jpg';
 import heroPinkRuffleTote from '../assets/products/tote-pink-ruffle.jpg';
 import heroPatchworkDuffle from '../assets/products/duffle-heritage-patchwork.jpg';
-import heroIndigoVanity from '../assets/products/vanity-blue-toile.webp';
 
 const HERO_SLIDES = [
   {
@@ -37,13 +36,6 @@ const HERO_SLIDES = [
     title: 'Sanganeri Floral',
     subtitle: 'timeless Jaipur motif.',
     tag: '🌿 Ruffle Accent Tote',
-  },
-  {
-    image: heroIndigoVanity,
-    alt: 'Vintage Jaipur Blue Toile Vanity Case',
-    title: 'Jaipur Blue Toile',
-    subtitle: 'heirloom craftsmanship.',
-    tag: '🧵 Luxury Vanity Case',
   },
 ];
 
