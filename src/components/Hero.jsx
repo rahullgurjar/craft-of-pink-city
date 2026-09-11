@@ -4,9 +4,11 @@ import { instagram } from '../data/products';
 import InstagramIcon from './InstagramIcon';
 
 import heroYellowPouch from '../assets/brand/hero-yellow-pouch.webp';
-import heroPinkDuffle from '../assets/products/duffle-pink-lemonade.jpg';
-import heroPinkRuffleTote from '../assets/products/tote-pink-ruffle.jpg';
 import heroPatchworkDuffle from '../assets/products/duffle-heritage-patchwork.jpg';
+import heroMintBerryTrio from '../assets/products/pouch-mint-berry-trio.jpg';
+import heroBlueBotanicalVanity from '../assets/products/vanity-blue-botanical.jpg';
+import heroRaspberrySafariYoga from '../assets/products/yoga-bag-raspberry-safari.jpg';
+import heroSageRuffleDuo from '../assets/products/pouch-sage-ruffle-duo.jpg';
 
 const HERO_SLIDES = [
   {
@@ -17,13 +19,6 @@ const HERO_SLIDES = [
     tag: '✨ Pure Handblock Cotton',
   },
   {
-    image: heroPinkDuffle,
-    alt: 'Pink lemonade handcrafted quilted duffle bag',
-    title: 'Artisan Travel',
-    subtitle: 'pure quilted cotton.',
-    tag: '🌸 Quilted Weekender',
-  },
-  {
     image: heroPatchworkDuffle,
     alt: 'Heritage Jaipur Indigo Patchwork Duffle Bag',
     title: 'Dabu & Indigo',
@@ -31,11 +26,32 @@ const HERO_SLIDES = [
     tag: '🪡 Artisan Patchwork',
   },
   {
-    image: heroPinkRuffleTote,
-    alt: 'Blush pink ruffle handcrafted floral tote bag',
-    title: 'Sanganeri Floral',
-    subtitle: 'timeless Jaipur motif.',
-    tag: '🌿 Ruffle Accent Tote',
+    image: heroMintBerryTrio,
+    alt: 'Mint & Raspberry floral quilted pouch set of 3',
+    title: 'Mint Berry Trio',
+    subtitle: 'handcrafted pouch set of 3.',
+    tag: '🌿 Quilted Set of 3',
+  },
+  {
+    image: heroBlueBotanicalVanity,
+    alt: 'Jaipur blue botanical quilted vanity box case',
+    title: 'Blue Botanical Vanity',
+    subtitle: 'heirloom quilted vanity case.',
+    tag: '🧵 Quilted Vanity Case',
+  },
+  {
+    image: heroRaspberrySafariYoga,
+    alt: 'Raspberry pink safari wildlife printed quilted yoga bag',
+    title: 'Safari Wildlife Carrier',
+    subtitle: 'handcrafted quilted yoga mat bag.',
+    tag: '🐆 Quilted Yoga Bag',
+  },
+  {
+    image: heroSageRuffleDuo,
+    alt: 'Sage green marigold ruffle quilted pouch pair',
+    title: 'Sage Ruffle Duo',
+    subtitle: 'marigold ruffle accent pouches.',
+    tag: '🌸 Ruffle Pouch Set',
   },
 ];
 
