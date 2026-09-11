@@ -504,14 +504,6 @@ export const products = [
     badge: 'Daily Essential',
     description: 'A slim quilted zipper pouch for your cards, cosmetics, earphones, and smaller essentials.',
   },
-  {
-    id: 'indigo-minimalist-flat-pouch',
-    name: 'Indigo Minimalist Flat Pouch',
-    category: 'Flat Pouch',
-    price: '₹399',
-    image: 'flat-pouch-indigo-grid.webp',
-    description: 'Slimline block-printed travel organizer for passports, stationery, cables, and bills.',
-  },
 ]
 
 export const faqs = [
