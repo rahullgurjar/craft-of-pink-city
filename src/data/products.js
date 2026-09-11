@@ -13,9 +13,10 @@ export const products = [
 ]
 
 export const faqs = [
-  ['How can I place an order?', 'Choose a product and select “Enquire on WhatsApp”. Send us the product name and we will confirm availability, delivery and payment details.'],
-  ['Are the products handmade?', 'Yes. Every piece is thoughtfully made with block-printed, quilted fabric, so small variations in print and finish are part of its handmade character.'],
-  ['Will the print look exactly the same?', 'The product and print are as shown, but placement may vary slightly from piece to piece. This makes every handmade item unique.'],
-  ['Do you ship across India?', 'Please message us on WhatsApp with your city or PIN code. We will confirm shipping options and delivery timing for your order.'],
-  ['How should I care for my bag or pouch?', 'We recommend gentle hand washing in cold water with mild detergent, then drying in shade. Do not bleach or soak for long periods.'],
+  ['How can I place a retail order?', 'Choose any product from our collection and select “Order on WhatsApp”. Send us the product name and we will confirm availability, payment options, and dispatch timing.'],
+  ['Do you accept bulk, wedding favor, and corporate gifting orders?', 'Yes! We specialize in bulk orders for wedding favors, Mehendi giveaways, corporate hampers, and boutique wholesale. We offer tiered wholesale pricing with custom print selections, personalized brand tags, and bespoke packaging.'],
+  ['What is the Minimum Order Quantity (MOQ) for bulk purchases?', 'Our bulk order MOQ starts from just 25 pieces per category. You can mix and match colorways and block-print patterns.'],
+  ['Are all products authentically handmade?', 'Yes. Every piece is made with authentic hand block-printed, quilted 100% cotton fabric by skilled artisans in Jaipur. Subtle variations in print and dye reflect true handmade heritage.'],
+  ['Do you ship across India and internationally?', 'Yes! We ship across all Indian pin codes via express couriers. For international bulk orders, we provide custom DHL/FedEx insured shipping with door-to-door tracking.'],
+  ['How should I care for my bag or pouch?', 'We recommend gentle hand washing in cold water with mild detergent, then drying in the shade. Do not bleach or soak for long periods.'],
 ]
