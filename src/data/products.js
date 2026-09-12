@@ -394,10 +394,10 @@ export const products = [
 ]
 
 export const faqs = [
-  ['How can I place a retail order?', 'Choose any product from our collection and select “Order on WhatsApp”. Send us the product name and we will confirm availability, payment options, and dispatch timing.'],
+  ['How can I place a retail order?', 'Choose any product from our collection and select “Order on WhatsApp”. Send us the product name and our team will confirm item availability, payment details, and estimated dispatch schedule for your order quantity.'],
   ['Do you accept wholesale, bulk, and corporate gifting orders?', 'Yes! We specialize in wholesale and bulk orders for boutiques, retail stores, and corporate gifting hampers. We offer tiered wholesale pricing with custom print selections, personalized brand tags, and bespoke packaging.'],
   ['What is the Minimum Order Quantity (MOQ) for bulk purchases?', 'Our bulk order MOQ starts from just 25 pieces per category. You can mix and match colorways and block-print patterns.'],
   ['Are all products authentically handmade?', 'Yes. Every piece is made with authentic hand block-printed, quilted 100% cotton fabric by skilled artisans in Jaipur. Subtle variations in print and dye reflect true handmade heritage.'],
-  ['Do you ship across India and internationally?', 'Yes! We ship across all Indian pin codes via express couriers. For international bulk orders, we provide custom DHL/FedEx insured shipping with door-to-door tracking.'],
+  ['Do you ship across India and internationally?', 'Yes! We ship across all Indian pin codes and internationally with door-to-door tracking. Dispatch and delivery schedules are decided based on your order quantity and confirmed directly on WhatsApp.'],
   ['How should I care for my bag or pouch?', 'We recommend gentle hand washing in cold water with mild detergent, then drying in the shade. Do not bleach or soak for long periods.'],
 ]

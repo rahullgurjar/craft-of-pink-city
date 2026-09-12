@@ -158,7 +158,7 @@ export default function ProductModal({
       { label: 'Closure & Hardware', value: 'Smooth Heavy-Duty Zipper + Handcrafted Fabric Tassels' },
       { label: 'Dimensions', value: dimensions },
       { label: 'Wash & Care', value: 'Gentle hand wash in cold water with mild detergent; dry in shade' },
-      { label: 'Dispatch Timeline', value: 'Ready stock ships within 24-48 hours with door-to-door tracking' },
+      { label: 'Dispatch Timeline', value: 'Decided and confirmed upon order on WhatsApp based on quantity' },
     ]
   }
 

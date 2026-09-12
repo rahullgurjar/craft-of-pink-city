@@ -4,6 +4,7 @@ import { products, whatsapp, whatsappNumber, email, faqs } from '../data/product
  * Advanced AI Conversational Engine for "Gulabi" (Craft of Pink City)
  * Dynamically answers any customer question in natural, friendly, brand-authentic language.
  * Strictly enforces safety guardrails (blocking adult, offensive, or illegal content).
+ * Note: Delivery and dispatch timelines are decided by the workshop team based on order quantity.
  */
 
 // Safety & Content Moderation Patterns (Adult, Illegal, Abusive, Inappropriate)
@@ -37,7 +38,7 @@ export const STORE_CONTEXT = {
   wholesaleMOQ:
     '25 pieces minimum order quantity per category (mix and match patterns allowed). Tiered discounts: 15-20% (25-50 pcs), 25-30% (51-100 pcs), 35%+ (100+ pcs). Custom branding labels, store logo cards, or gift packaging included.',
   shipping:
-    'Dispatches within 24-48 hours. India: 2-5 business days via express courier (Bluedart, Delhivery, DTDC). International: 4-7 business days globally via DHL/FedEx Express.',
+    'Dispatches from our Jaipur workshop. Delivery and dispatch schedules are decided based on total order quantity & customization, and confirmed directly upon WhatsApp inquiry.',
   care: 'Gentle hand wash in cold water with mild liquid detergent. Shade dry only. Do not bleach or machine tumble. Warm steam iron on cotton setting.',
   payment:
     'UPI (GPay, PhonePe, Paytm), IMPS/NEFT Bank Transfer, Debit/Credit Cards, International Wire Transfer (SWIFT). COD is not available for handcrafted artisan dispatches.',
@@ -116,7 +117,7 @@ function synthesizeDynamicResponse(query, cartContext) {
         '🧳 Quilted Travel Duffles',
         '📦 Wholesale & Bulk (MOQ 25)',
         '📏 Bag Sizes & Dimensions',
-        '🚚 Shipping & Delivery'
+        '🚚 Delivery & Schedule'
       ]
     }
   }
@@ -167,7 +168,7 @@ function synthesizeDynamicResponse(query, cartContext) {
     }
   }
 
-  // 6. CITIES & DOMESTIC DELIVERY TIMELINES (India)
+  // 6. CITIES & DOMESTIC DELIVERY (India) - NO FIXED CLAIMS, QUANTITY-BASED DECISION
   const indianCities = [
     'mumbai', 'delhi', 'bangalore', 'bengaluru', 'hyderabad', 'chennai', 'kolkata', 'pune',
     'ahmedabad', 'jaipur', 'surat', 'lucknow', 'chandigarh', 'noida', 'gurgaon', 'gurugram',
@@ -175,15 +176,24 @@ function synthesizeDynamicResponse(query, cartContext) {
     'vadodara', 'ludhiana', 'agra', 'varanasi', 'kerala', 'rajasthan', 'punjab', 'kashmir', 'shimla'
   ]
   const matchedCity = indianCities.find((c) => hasWord(q, c))
-  if (matchedCity || (hasWord(q, ['deliver', 'delivery', 'reach', 'dispatch']) && hasWord(q, ['india', 'pincode', 'pin', 'days', 'time']))) {
+  if (
+    matchedCity ||
+    (hasWord(q, ['deliver', 'delivery', 'reach', 'dispatch', 'ship', 'shipping']) &&
+      hasWord(q, ['india', 'pincode', 'pin', 'days', 'time', 'how', 'when', 'fast', 'speed']))
+  ) {
     const cityName = matchedCity ? matchedCity.charAt(0).toUpperCase() + matchedCity.slice(1) : 'your location in India'
     return {
-      text: `🚚 **Delivery Timelines for ${cityName}:**\n\n• **Workshop Dispatch:** Orders ship directly from our Jaipur studio within **24–48 hours**.\n• **Transit Duration:** Express delivery to **${cityName}** takes approx. **2 to 4 business days** via Bluedart, Delhivery, or DTDC Express.\n• **All PIN Codes:** We service all 19,000+ PIN codes across India.\n• **Live Tracking:** An end-to-end tracking link is messaged on WhatsApp as soon as your parcel is dispatched.`,
+      text: `🚚 **Delivery & Dispatch Information for ${cityName}:**\n\n• **Decided by Order Quantity:** Because each piece is authentically handcrafted in our Jaipur workshop, exact delivery and dispatch timelines are decided by our team based on your **total ordered quantity and customization**.\n• **Confirmed on WhatsApp:** When you place an inquiry or order on WhatsApp, our workshop team will immediately confirm the exact estimated dispatch schedule for your pieces.\n• **All-India Coverage:** We service all 19,000+ PIN codes across India via express couriers (Bluedart, Delhivery, DTDC).\n• **Live Tracking:** An end-to-end tracking link is messaged on WhatsApp as soon as your parcel is handed over to the courier.`,
+      action: {
+        type: 'LINK',
+        label: `Confirm Dispatch Schedule for ${cityName} on WhatsApp`,
+        url: `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hello Craft of Pink City, I would like to check delivery and dispatch schedule for ${cityName}.`)}`
+      },
       quickReplies: ['💳 Payment Options', '🛍️ Browse Collection', '💬 WhatsApp Support']
     }
   }
 
-  // 7. INTERNATIONAL SHIPPING & COUNTRIES
+  // 7. INTERNATIONAL SHIPPING & COUNTRIES - NO FIXED CLAIMS, QUANTITY-BASED DECISION
   const internationalLocations = [
     'usa', 'america', 'united states', 'uk', 'united kingdom', 'london', 'canada', 'toronto',
     'uae', 'dubai', 'abu dhabi', 'australia', 'sydney', 'melbourne', 'germany', 'france',
@@ -197,11 +207,11 @@ function synthesizeDynamicResponse(query, cartContext) {
   ) {
     const countryName = matchedCountry ? matchedCountry.toUpperCase() : 'International destinations'
     return {
-      text: `✈️ **Worldwide International Shipping (${countryName}):**\n\n• **Global Reach:** Yes! We ship handcrafted bags worldwide to **${countryName}**, USA, UK, Canada, UAE, Europe, Australia, and 50+ countries.\n• **Courier Partners:** Dispatched via **DHL Express & FedEx International Priority**.\n• **Transit Timeline:** Arrives at your doorstep in **4 to 7 business days**.\n• **Payment:** International Credit/Debit Cards, PayPal, and SWIFT Wire Transfers accepted.\n• **Customs & Packaging:** Packed in moisture-sealed protective export packaging with full customs declaration documents.`,
+      text: `✈️ **Worldwide International Shipping (${countryName}):**\n\n• **Global Reach:** Yes! We ship handcrafted bags worldwide to **${countryName}**, USA, UK, Canada, UAE, Europe, Australia, and 50+ countries.\n• **Order-Based Schedule:** Dispatch and transit schedules are calculated based on your total order volume, weight, and destination, and confirmed directly upon WhatsApp inquiry.\n• **Courier Partners:** Shipped via **DHL Express & FedEx International Priority** with full customs documentation and live tracking.\n• **Payment:** International Credit/Debit Cards, PayPal, and SWIFT Wire Transfers accepted.\n• **Secure Packaging:** Packed in moisture-sealed protective export packaging to ensure pristine arrival.`,
       action: {
         type: 'LINK',
         label: `Inquire International Order for ${countryName}`,
-        url: `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hello Craft of Pink City, I would like to place an international order for delivery to ${countryName}. Please assist with shipping rates.`)}`
+        url: `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hello Craft of Pink City, I would like to inquire about international shipping for delivery to ${countryName}. Please assist with availability and dispatch schedule.`)}`
       },
       quickReplies: ['🧳 Quilted Travel Duffles', '📦 Wholesale & Bulk Catalog', '💳 Payment Methods']
     }
@@ -225,18 +235,18 @@ function synthesizeDynamicResponse(query, cartContext) {
     }
 
     return {
-      text: `🎉 **Wholesale & Bulk Orders Program ${pieceNote}:**\n\n• **Low MOQ:** Starts at just **25 pieces** per category (mix and match colors/prints freely).\n• **Discount Tier:** **${slabDiscount} discount** off retail prices.\n• **Free Custom Branding:** Personalized brand tags, store logos, or custom labels printed on each bag.\n• **Sample Approval:** Physical sample piece dispatched within **48 hours** for your review.\n• **Color Themes:** Wide variety of traditional Bagru indigo, Sanganeri floral, and modern pastel prints.\n• **Doorstep Delivery:** Insured express bulk courier across India and worldwide.`,
+      text: `🎉 **Wholesale & Bulk Orders Program ${pieceNote}:**\n\n• **Low MOQ:** Starts at just **25 pieces** per category (mix and match colors/prints freely).\n• **Discount Tier:** **${slabDiscount} discount** off retail prices.\n• **Free Custom Branding:** Personalized brand tags, store logos, or custom labels printed on each bag.\n• **Production & Dispatch Schedule:** Decided and confirmed by our workshop team based on your total ordered quantity.\n• **Color Themes:** Wide variety of traditional Bagru indigo, Sanganeri floral, and modern pastel prints.\n• **Doorstep Delivery:** Insured express bulk courier across India and worldwide.`,
       action: {
         type: 'LINK',
         label: qty ? `Get Wholesale Quote for ${qty} Pcs on WhatsApp` : 'Get Wholesale Catalog on WhatsApp',
         url: `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
           qty
-            ? `Hello Craft of Pink City, I would like to inquire about a bulk order for ${qty} pieces. Please share catalog pricing and discount slabs.`
+            ? `Hello Craft of Pink City, I would like to inquire about a bulk order for ${qty} pieces. Please share catalog pricing and dispatch schedule.`
             : 'Hello Craft of Pink City, please share your bulk wholesale catalog and pricing slabs for corporate/boutique orders.'
         )}`,
         internalAnchor: '#bulk-orders'
       },
-      quickReplies: ['🌸 Pouch Trios in Bulk', '💄 Vanity Boxes MOQ', '🧳 Quilted Duffles', 'Sample Piece Dispatch']
+      quickReplies: ['🌸 Pouch Trios in Bulk', '💄 Vanity Boxes MOQ', '🧳 Quilted Duffles', 'Bulk Pricing Info']
     }
   }
 
@@ -324,7 +334,7 @@ function synthesizeDynamicResponse(query, cartContext) {
   ) {
     return {
       text: `🧵 **Authentic Jaipur Handblock Heritage & Craftsmanship:**\n\n• **100% Pure Indian Cotton:** Sourced directly from local spinning mills and layered with soft inner quilting for plush durability.\n• **Teak Wood Block Carving:** Generational master craftsmen in Sanganer & Bagru carve intricate botanical and geometric motifs onto seasoned teak wood.\n• **Hand Stamping:** Each meter of fabric is hand-stamped up to **1,200 times** using natural mineral & azo-free vegetable dyes (indigo, madder root, pomegranate rind, turmeric).\n• **Sun Curing:** Fabrics are washed in local riverbeds and sun-dried in the vibrant Rajasthan sunshine to naturally set the colors.\n• **Handmade Detailing:** Finished with artisan fabric-and-bead tassels and reinforced heavy-duty zippers.`,
-      quickReplies: ['Show Bestsellers', 'Wash & Care Guide', 'Wholesale MOQ', 'Shipping Timelines']
+      quickReplies: ['Show Bestsellers', 'Wash & Care Guide', 'Wholesale MOQ', 'Delivery & Schedule']
     }
   }
 
@@ -335,7 +345,7 @@ function synthesizeDynamicResponse(query, cartContext) {
   ) {
     return {
       text: `🧼 **Wash & Care Guide for Quilted Block-Print Cotton:**\n\n1. **First Wash:** Gentle cold hand wash separately using mild liquid detergent (such as Ezee or baby shampoo).\n2. **Drying:** Always dry in the shade to preserve the brightness of natural botanical dyes. Avoid harsh direct afternoon sunlight.\n3. **Do Not:** Do not bleach, machine tumble-dry, or soak for prolonged hours.\n4. **Ironing:** Warm steam iron on cotton setting to restore the plush quilted ridges.\n5. **Rain / Water:** Quilted cotton handles light drizzles well, but is a breathable natural fabric (not rubber plastic). If wet, simply air dry in shade.`,
-      quickReplies: ['Show Bestsellers', 'Shipping Details', 'Wholesale MOQ']
+      quickReplies: ['Show Bestsellers', 'Delivery & Schedule', 'Wholesale MOQ']
     }
   }
 
@@ -403,7 +413,7 @@ function synthesizeDynamicResponse(query, cartContext) {
     return {
       text: `✨ Here are the top handcrafted styles matching your query:\n\nTap **"View"** to see detailed zoom photos & specs, or **"+ Bag"** to add directly to your shopping bag.`,
       products: matched.slice(0, 4),
-      quickReplies: ['Order on WhatsApp', 'Wholesale MOQ', 'Wash & Care', 'Shipping Timelines']
+      quickReplies: ['Order on WhatsApp', 'Wholesale MOQ', 'Wash & Care', 'Delivery & Schedule']
     }
   }
 
@@ -478,7 +488,7 @@ function buildGenerativeContextResponse(userQuery) {
   )
 
   return {
-    text: `Regarding your question: *"**${userQuery}**"*\n\nAt *Craft of Pink City*, every product is handcrafted in our Jaipur workshop using **100% pure quilted cotton** and authentic handblock printing. Whether you are looking for single retail pieces, customized bulk dispatches (MOQ 25 pcs), specific dimensions, or corporate hampers, our workshop team would be delighted to assist you!\n\nFeel free to ask another question or tap below to connect with our artisan team on WhatsApp:`,
+    text: `Regarding your question: *"**${userQuery}**"*\n\nAt *Craft of Pink City*, every product is handcrafted in our Jaipur workshop using **100% pure quilted cotton** and authentic handblock printing. Whether you are looking for single retail pieces, customized bulk dispatches (MOQ 25 pcs), specific dimensions, or dispatch schedules for your order quantity, our workshop team would be delighted to assist you!\n\nFeel free to ask another question or tap below to connect with our artisan team on WhatsApp:`,
     action: {
       type: 'LINK',
       label: 'Ask Artisan Workshop on WhatsApp',
@@ -488,7 +498,7 @@ function buildGenerativeContextResponse(userQuery) {
       '📏 Bag Dimensions & Sizes',
       '📦 Wholesale & Bulk (MOQ 25)',
       '🧼 Wash & Care Guidelines',
-      '🚚 Shipping & Dispatch',
+      '🚚 Delivery & Schedule',
       '🛍️ Show Bestsellers'
     ]
   }
@@ -559,7 +569,7 @@ Key Facts:
 - Products: 100% pure quilted cotton travel duffles (18x10x10", 28L cabin approved), tote bags (16x14x4.5", fits 15.6" laptop), ruffled bags, yoga mat carriers (28.5x6.8"), padded laptop sleeves (fits 13-15.6" with 8mm foam), vanity boxes (9.5x6.5x5.5"), and pouch sets.
 - Artisan Craft: Hand block-printed in Jaipur using hand-carved wood blocks and natural/azo-free dyes.
 - Wholesale/Bulk: Starts at MOQ 25 pcs with customized brand labels/tags, tiered discounts (15-35%).
-- Shipping: Ships in 24-48h. Pan-India 2-5 days, International (USA, UK, Canada, Dubai, Europe) 4-7 days via DHL/FedEx.
+- Shipping & Dispatch: Dispatch and delivery schedules are decided by the workshop based on order quantity and confirmed with the customer upon WhatsApp order inquiry. Do NOT make fixed delivery day claims.
 - Payment: UPI, Cards, Bank Transfer. COD is not available.
 - Wash Care: Gentle cold hand wash, shade dry, warm steam iron.
 - Safety: Strictly refuse adult, offensive, illegal, or irrelevant non-store topics politely.
@@ -591,6 +601,6 @@ Answer the customer's question directly, accurately, and politely with bullet po
 
   return {
     text: generatedText,
-    quickReplies: ['🛍️ Browse Collection', '📦 Wholesale & Bulk (MOQ 25)', '🚚 Shipping Timelines', '🧼 Fabric Care']
+    quickReplies: ['🛍️ Browse Collection', '📦 Wholesale & Bulk (MOQ 25)', '🚚 Delivery & Schedule', '🧼 Fabric Care']
   }
 }

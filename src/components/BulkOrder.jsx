@@ -202,7 +202,7 @@ export default function BulkOrder() {
                   </div>
                   <div className="flex items-start gap-3">
                     <Clock size={18} className="mt-0.5 shrink-0 text-leaf" />
-                    <p className="text-xs text-ink/80"><strong>Fast Sample Dispatch:</strong> Sample pieces dispatched within 48 hours for bulk approval.</p>
+                    <p className="text-xs text-ink/80"><strong>Order-Based Schedule:</strong> Production and dispatch timelines decided based on your total order quantity.</p>
                   </div>
                 </div>
               </div>
