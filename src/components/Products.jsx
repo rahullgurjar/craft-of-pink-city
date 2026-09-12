@@ -181,7 +181,7 @@ export default function Products() {
       )}
 
       <div className="mt-10 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-        {visibleProducts.map((product) => {
+        {visibleProducts.map((product, index) => {
           const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://craftofpinkcity.shop'
           const productLink = `${baseUrl}/?product=${product.id || encodeURIComponent(product.name)}`
           
