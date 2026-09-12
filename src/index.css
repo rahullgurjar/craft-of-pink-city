@@ -436,6 +436,21 @@
   animation: spinSlow 12s linear infinite;
 }
 
+@keyframes soundwave {
+  0%, 100% { height: 4px; }
+  50% { height: 16px; }
+}
+
+.animate-soundwave-1 {
+  animation: soundwave 0.8s ease-in-out infinite;
+}
+.animate-soundwave-2 {
+  animation: soundwave 0.8s ease-in-out 0.2s infinite;
+}
+.animate-soundwave-3 {
+  animation: soundwave 0.8s ease-in-out 0.4s infinite;
+}
+
 @media (max-width: 640px) {
   .hero-pattern { background: #fffaf1; }
   .hero-photo { height: 390px; }

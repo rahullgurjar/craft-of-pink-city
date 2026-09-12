@@ -40,47 +40,31 @@ setTimeout(() => {
             ws.send(JSON.stringify({ id: 2, method: 'Page.enable' }));
 
             setTimeout(() => {
-              // Click the chatbot launcher
               ws.send(JSON.stringify({
                 id: 10,
                 method: 'Runtime.evaluate',
                 params: {
                   expression: `(() => {
-                    const launcher = document.querySelector('button[aria-label="Open AI Craft Assistant Gulabi"]');
-                    if (launcher) launcher.click();
+                    const voices = window.speechSynthesis.getVoices();
+                    const indianFemaleNames = ['heera', 'neerja', 'swara', 'lekha', 'veena', 'anjali'];
+                    let picked = null;
+                    for (const n of indianFemaleNames) {
+                      picked = voices.find(v => v.name.toLowerCase().includes(n));
+                      if (picked) break;
+                    }
+                    if (!picked) {
+                      picked = voices.find(v => v.name.toLowerCase().includes('google uk english female') || v.name.toLowerCase().includes('zira') || v.name.toLowerCase().includes('female'));
+                    }
                     return {
-                      hasLauncher: !!launcher,
-                      productCards: document.querySelectorAll('.product-card').length
+                      totalVoices: voices.length,
+                      selectedVoiceName: picked ? picked.name : 'none',
+                      selectedVoiceLang: picked ? picked.lang : 'none'
                     };
                   })()`,
                   returnByValue: true
                 }
               }));
-
-              setTimeout(() => {
-                ws.send(JSON.stringify({
-                  id: 11,
-                  method: 'Runtime.evaluate',
-                  params: {
-                    expression: `(() => {
-                      const chatHeader = document.querySelector('h3');
-                      const messages = document.querySelectorAll('.animate-fadeIn');
-                      return {
-                        isChatOpen: document.body.innerText.includes('Gulabi AI'),
-                        messagesCount: messages.length
-                      };
-                    })()`,
-                    returnByValue: true
-                  }
-                }));
-
-                ws.send(JSON.stringify({
-                  id: 12,
-                  method: 'Page.captureScreenshot',
-                  params: { format: 'png' }
-                }));
-              }, 1500);
-            }, 2500);
+            }, 1500);
           });
 
           ws.addEventListener('message', (event) => {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import {
   MessageSquare,
   X,
@@ -20,7 +20,8 @@ import {
   VolumeX,
   ThumbsUp,
   ThumbsDown,
-  Eye
+  Eye,
+  AudioWaveform
 } from 'lucide-react'
 import { processUserMessage } from '../utils/aiChatEngine'
 import { useCart } from '../context/CartContext'
@@ -38,6 +39,102 @@ const resolveProductImage = (image) => {
   )
 }
 
+/**
+ * Intelligent Natural Female Voice Selector
+ * Specifically selects warm, human, natural female voices (Heera, Neerja, Swara, Zira, Google UK Female, Samantha)
+ * and strictly avoids male or robotic synthesizers.
+ */
+function selectNaturalFemaleVoice(voices) {
+  if (!voices || voices.length === 0) return null
+
+  // 1. Top Tier: Indian English / Hindi Natural Female Voices
+  const indianFemaleNames = ['heera', 'neerja', 'swara', 'lekha', 'veena', 'anjali', 'geeta', 'shruti', 'kavya', 'priya', 'kalpana']
+  for (const name of indianFemaleNames) {
+    const found = voices.find((v) => v.name.toLowerCase().includes(name))
+    if (found) return found
+  }
+
+  // 2. High-Quality Natural Neural UK & US Female Voices
+  const naturalFemaleNames = [
+    'google uk english female',
+    'google us english',
+    'microsoft zira',
+    'microsoft aria',
+    'microsoft jenny',
+    'microsoft sonia',
+    'microsoft mia',
+    'samantha',
+    'victoria',
+    'karen',
+    'moira',
+    'tessa',
+    'fiona'
+  ]
+  for (const name of naturalFemaleNames) {
+    const found = voices.find((v) => v.name.toLowerCase().includes(name))
+    if (found) return found
+  }
+
+  // 3. Any voice containing "female" or "woman" and NOT in known male list
+  const maleKeywords = ['david', 'ravi', 'mark', 'george', 'rishi', 'james', 'guy', 'male', 'prabhat', 'ajay', 'rahul', 'stefan', 'daniel', 'oliver']
+  const femaleVoice = voices.find((v) => {
+    const n = v.name.toLowerCase()
+    const isMale = maleKeywords.some((m) => n.includes(m))
+    const isFemale = n.includes('female') || n.includes('woman') || n.includes('girl') || n.includes('zira') || n.includes('heera')
+    return isFemale && !isMale
+  })
+  if (femaleVoice) return femaleVoice
+
+  // 4. Fallback: English voice that is not male
+  const fallbackFemale = voices.find((v) => {
+    const n = v.name.toLowerCase()
+    const isMale = maleKeywords.some((m) => n.includes(m))
+    return (v.lang.startsWith('en') || v.lang.startsWith('hi')) && !isMale
+  })
+  if (fallbackFemale) return fallbackFemale
+
+  return voices[0] || null
+}
+
+/**
+ * Naturalizes text for human speech:
+ * - Expands dimensions ("18 x 10 inches")
+ * - Expands prices ("1,449 rupees")
+ * - Converts bullet points into conversational pauses
+ * - Cleans emojis into natural words
+ */
+function naturalizeTextForSpeech(text) {
+  if (!text) return ''
+  return text
+    // Remove markdown formatting
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/`(.*?)`/g, '$1')
+    .replace(/#+\s*/g, '')
+    // Remove web links
+    .replace(/https?:\/\/\S+/g, '')
+    // Convert Indian greetings
+    .replace(/🙏/g, 'Namaste. ')
+    // Remove visual emojis
+    .replace(/🌸|✨|🛍️|🧳|📦|💻|🧘‍♀️|💄|💇‍♀️|🧵|🧼|🚚|✈️|💳|🛡️|🎉|❤️|🌿|●|✦/g, '')
+    // Format prices: ₹1,449 -> 1449 rupees
+    .replace(/₹\s*([0-9,]+)/g, '$1 rupees')
+    // Format dimensions: 18" × 10" × 10" -> 18 by 10 by 10 inches
+    .replace(/(\d+(?:\.\d+)?)\s*"\s*[×x]\s*(\d+(?:\.\d+)?)\s*"\s*[×x]\s*(\d+(?:\.\d+)?)\s*"/g, '$1 by $2 by $3 inches')
+    .replace(/(\d+(?:\.\d+)?)\s*"\s*[×x]\s*(\d+(?:\.\d+)?)\s*"/g, '$1 by $2 inches')
+    .replace(/(\d+(?:\.\d+)?)\s*"/g, '$1 inches')
+    .replace(/(\d+)\s*mm/gi, '$1 millimeters')
+    .replace(/(\d+)\s*L\b/gi, '$1 litres')
+    // Format abbreviations
+    .replace(/\bMOQ\b/gi, 'minimum order quantity')
+    .replace(/\bpcs\b/gi, 'pieces')
+    // Replace bullet points with conversational pauses
+    .replace(/^[•\-\*]\s*/gm, ', ')
+    .replace(/\n+/g, '. ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
 export default function ArtisanChatbot({ onSelectProduct }) {
   const [isOpen, setIsOpen] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
@@ -47,14 +144,31 @@ export default function ArtisanChatbot({ onSelectProduct }) {
   const [streamedText, setStreamedText] = useState('')
   const [isListening, setIsListening] = useState(false)
   const [isSpeaking, setIsSpeaking] = useState(false)
+  const [speakingMessageId, setSpeakingMessageId] = useState(null)
   const [hasUnread, setHasUnread] = useState(true)
   const [copiedId, setCopiedId] = useState(null)
   const [feedbackMap, setFeedbackMap] = useState({})
+  const [availableVoices, setAvailableVoices] = useState([])
 
   const cart = useCart()
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
   const streamTimerRef = useRef(null)
+
+  // Pre-load synthesis voices on mount
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return
+
+    const loadVoices = () => {
+      const v = window.speechSynthesis.getVoices()
+      if (v && v.length > 0) {
+        setAvailableVoices(v)
+      }
+    }
+
+    loadVoices()
+    window.speechSynthesis.onvoiceschanged = loadVoices
+  }, [])
 
   // Initial welcome message
   const [messages, setMessages] = useState([
@@ -89,6 +203,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     if (!isOpen && typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel()
       setIsSpeaking(false)
+      setSpeakingMessageId(null)
     }
   }, [isOpen])
 
@@ -100,7 +215,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     setStreamedText('')
 
     let charIndex = 0
-    const stepSize = Math.max(2, Math.floor(fullText.length / 40)) // Dynamic streaming speed
+    const stepSize = Math.max(2, Math.floor(fullText.length / 40))
 
     streamTimerRef.current = setInterval(() => {
       charIndex += stepSize
@@ -121,36 +236,52 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     }
   }
 
-  // Voice synthesis (Text to Speech)
-  const handleSpeakText = (text) => {
+  // Voice synthesis with Natural Human Female Voice
+  const handleSpeakText = (messageId, rawText) => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
       alert('Text-to-speech is not supported in this browser.')
       return
     }
 
-    if (isSpeaking) {
+    // Toggle off if already speaking this message
+    if (isSpeaking && speakingMessageId === messageId) {
       window.speechSynthesis.cancel()
       setIsSpeaking(false)
+      setSpeakingMessageId(null)
       return
     }
 
     window.speechSynthesis.cancel()
-    const cleanText = text.replace(/[*#•_`~[\]()]/g, '').replace(/https?:\/\/\S+/g, '')
-    const utterance = new SpeechSynthesisUtterance(cleanText)
-    utterance.lang = 'en-IN'
-    utterance.rate = 1.0
-    utterance.pitch = 1.05
+    const naturalSpokenText = naturalizeTextForSpeech(rawText)
+    const utterance = new SpeechSynthesisUtterance(naturalSpokenText)
 
-    // Pick gentle female voice if available
-    const voices = window.speechSynthesis.getVoices()
-    const preferredVoice = voices.find(
-      (v) => v.lang.includes('IN') || v.name.includes('India') || v.name.includes('Google') || v.name.includes('Natural')
-    )
-    if (preferredVoice) utterance.voice = preferredVoice
+    // Select natural female voice
+    const voices = availableVoices.length > 0 ? availableVoices : window.speechSynthesis.getVoices()
+    const femaleVoice = selectNaturalFemaleVoice(voices)
+    if (femaleVoice) {
+      utterance.voice = femaleVoice
+      utterance.lang = femaleVoice.lang || 'en-IN'
+    } else {
+      utterance.lang = 'en-IN'
+    }
 
-    utterance.onstart = () => setIsSpeaking(true)
-    utterance.onend = () => setIsSpeaking(false)
-    utterance.onerror = () => setIsSpeaking(false)
+    // Natural human female speech prosody tuning
+    utterance.rate = 0.94  // Relaxed, conversational tempo
+    utterance.pitch = 1.06 // Warm, friendly female resonance
+    utterance.volume = 1.0
+
+    utterance.onstart = () => {
+      setIsSpeaking(true)
+      setSpeakingMessageId(messageId)
+    }
+    utterance.onend = () => {
+      setIsSpeaking(false)
+      setSpeakingMessageId(null)
+    }
+    utterance.onerror = () => {
+      setIsSpeaking(false)
+      setSpeakingMessageId(null)
+    }
 
     window.speechSynthesis.speak(utterance)
   }
@@ -268,6 +399,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel()
       setIsSpeaking(false)
+      setSpeakingMessageId(null)
     }
     setMessages([
       {
@@ -361,15 +493,31 @@ export default function ArtisanChatbot({ onSelectProduct }) {
                 type="button"
                 onClick={() => {
                   const lastBot = [...messages].reverse().find((m) => m.sender === 'bot')
-                  if (lastBot) handleSpeakText(lastBot.text)
+                  if (lastBot) handleSpeakText(lastBot.id, lastBot.text)
                 }}
-                className={`grid h-8 w-8 place-items-center rounded-xl transition-colors ${
-                  isSpeaking ? 'bg-rose text-white animate-pulse' : 'text-white/75 hover:bg-white/10 hover:text-white'
+                className={`relative flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold transition-colors ${
+                  isSpeaking
+                    ? 'bg-rose text-white shadow-sm'
+                    : 'text-white/75 hover:bg-white/10 hover:text-white'
                 }`}
-                title={isSpeaking ? 'Stop speaking' : 'Read aloud latest answer'}
-                aria-label="Read latest response aloud"
+                title={isSpeaking ? 'Stop speaking' : 'Listen in Natural Female Voice'}
+                aria-label="Listen in Natural Female Voice"
               >
-                {isSpeaking ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                {isSpeaking ? (
+                  <>
+                    <span className="flex items-end gap-0.5 h-3">
+                      <span className="w-0.5 bg-white rounded-full animate-soundwave-1" />
+                      <span className="w-0.5 bg-white rounded-full animate-soundwave-2" />
+                      <span className="w-0.5 bg-white rounded-full animate-soundwave-3" />
+                    </span>
+                    <span className="text-[11px] font-bold">Speaking</span>
+                  </>
+                ) : (
+                  <>
+                    <Volume2 size={16} />
+                    <span className="hidden sm:inline text-[11px]">Voice</span>
+                  </>
+                )}
               </button>
 
               {/* Reset Chat */}
@@ -414,6 +562,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
             {messages.map((msg) => {
               const isUser = msg.sender === 'user'
               const isStreaming = streamingMessageId === msg.id
+              const isThisMessageSpeaking = isSpeaking && speakingMessageId === msg.id
               const displayText = isStreaming ? streamedText : msg.text
 
               return (
@@ -562,14 +711,27 @@ export default function ArtisanChatbot({ onSelectProduct }) {
                               )}
                             </button>
 
-                            {/* Speak button */}
+                            {/* Voice Speak button (Natural Female Voice) */}
                             <button
                               type="button"
-                              onClick={() => handleSpeakText(msg.text)}
-                              className="hover:text-rose transition-colors p-1"
-                              title="Listen to answer"
+                              onClick={() => handleSpeakText(msg.id, msg.text)}
+                              className={`transition-colors p-1 flex items-center gap-1 ${
+                                isThisMessageSpeaking
+                                  ? 'text-rose font-bold animate-pulse'
+                                  : 'hover:text-rose'
+                              }`}
+                              title={isThisMessageSpeaking ? 'Stop speaking' : 'Listen in Natural Female Voice'}
+                              aria-label="Listen in Natural Female Voice"
                             >
-                              <Volume2 size={13} />
+                              {isThisMessageSpeaking ? (
+                                <span className="flex items-end gap-0.5 h-3">
+                                  <span className="w-0.5 bg-rose rounded-full animate-soundwave-1" />
+                                  <span className="w-0.5 bg-rose rounded-full animate-soundwave-2" />
+                                  <span className="w-0.5 bg-rose rounded-full animate-soundwave-3" />
+                                </span>
+                              ) : (
+                                <Volume2 size={13} />
+                              )}
                             </button>
 
                             {/* Thumbs Up */}
@@ -680,7 +842,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
             </form>
 
             <div className="mt-2 flex items-center justify-between text-[10px] text-ink/40 px-1">
-              <span>✦ Powered by Jaipur Artisan Intelligence</span>
+              <span>✦ Natural Human Voice · Jaipur Artisan Intelligence</span>
               <button
                 type="button"
                 onClick={() => cart.setIsCartOpen(true)}
