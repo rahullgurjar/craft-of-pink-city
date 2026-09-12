@@ -12,6 +12,7 @@ const chrome = spawn(chromePath, [
   '--remote-debugging-port=9222',
   '--disable-gpu',
   '--no-sandbox',
+  '--window-size=1280,2400',
   `--user-data-dir=${userDataDir}`
 ]);
 
@@ -20,7 +21,7 @@ setTimeout(() => {
     {
       host: '127.0.0.1',
       port: 9222,
-      path: '/json/new?https://craftofpinkcity.shop/',
+      path: '/json/new?http://localhost:5173/',
       method: 'PUT'
     },
     (res) => {
@@ -31,36 +32,55 @@ setTimeout(() => {
           const page = JSON.parse(raw);
           console.log('Page created, WebSocket URL:', page.webSocketDebuggerUrl);
 
-          // Native WebSocket in Node 22+
           const ws = new WebSocket(page.webSocketDebuggerUrl);
 
           ws.addEventListener('open', () => {
             console.log('DevTools connected!');
             ws.send(JSON.stringify({ id: 1, method: 'Runtime.enable' }));
-            ws.send(JSON.stringify({ id: 2, method: 'Log.enable' }));
-            ws.send(JSON.stringify({ id: 3, method: 'Console.enable' }));
+            ws.send(JSON.stringify({ id: 2, method: 'Page.enable' }));
 
             setTimeout(() => {
+              // Click the chatbot launcher
               ws.send(JSON.stringify({
                 id: 10,
                 method: 'Runtime.evaluate',
                 params: {
-                  expression: `JSON.stringify({
-                    rootLength: document.getElementById('root')?.innerHTML.length,
-                    hasProductsSection: !!document.getElementById('products'),
-                    productCardCount: document.querySelectorAll('.product-card').length,
-                    productTitleCount: document.querySelectorAll('article h3').length,
-                    headings: Array.from(document.querySelectorAll('h2, h3')).slice(0, 10).map(h => h.innerText.replace(/\\n/g, ' ')),
-                    imgCount: document.querySelectorAll('img').length
-                  })`
+                  expression: `(() => {
+                    const launcher = document.querySelector('button[aria-label="Open AI Craft Assistant Gulabi"]');
+                    if (launcher) launcher.click();
+                    return {
+                      hasLauncher: !!launcher,
+                      productCards: document.querySelectorAll('.product-card').length
+                    };
+                  })()`,
+                  returnByValue: true
                 }
               }));
-              ws.send(JSON.stringify({
-                id: 12,
-                method: 'Page.captureScreenshot',
-                params: { format: 'png' }
-              }));
-            }, 3000);
+
+              setTimeout(() => {
+                ws.send(JSON.stringify({
+                  id: 11,
+                  method: 'Runtime.evaluate',
+                  params: {
+                    expression: `(() => {
+                      const chatHeader = document.querySelector('h3');
+                      const messages = document.querySelectorAll('.animate-fadeIn');
+                      return {
+                        isChatOpen: document.body.innerText.includes('Gulabi AI'),
+                        messagesCount: messages.length
+                      };
+                    })()`,
+                    returnByValue: true
+                  }
+                }));
+
+                ws.send(JSON.stringify({
+                  id: 12,
+                  method: 'Page.captureScreenshot',
+                  params: { format: 'png' }
+                }));
+              }, 1500);
+            }, 2500);
           });
 
           ws.addEventListener('message', (event) => {
