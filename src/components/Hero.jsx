@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowDown, Sparkles } from 'lucide-react';
+import { ArrowDown, ShoppingBag, Package, Sparkles } from 'lucide-react';
 import { instagram } from '../data/products';
 import InstagramIcon from './InstagramIcon';
 
@@ -82,12 +82,20 @@ export default function Hero() {
           <p className="mt-7 max-w-xl text-base leading-7 text-ink/75">
             Discover thoughtfully crafted fabrics, quilted travel duffles, and handmade vanity pouches inspired by traditional block-printing techniques and the rich textile heritage of Jaipur.
           </p>
-          <div className="mt-9 flex flex-wrap gap-4">
-            <a className="btn-primary" href="#craft">
-              Explore Our Craft <ArrowDown size={16} />
+          <div className="mt-9 flex flex-wrap items-center gap-4">
+            <a className="btn-primary" href="#products">
+              <ShoppingBag size={16} /> Shop Bags & Pouches
             </a>
-            <a className="btn-secondary" href={instagram} target="_blank" rel="noreferrer">
-              <InstagramIcon size={16} /> Follow on Instagram
+            <a className="btn-secondary" href="#bulk-orders">
+              <Package size={16} /> Wholesale & Bulk Quotes
+            </a>
+            <a
+              className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-rose hover:underline pl-2"
+              href={instagram}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <InstagramIcon size={15} /> @craftofpinkcity
             </a>
           </div>
         </div>

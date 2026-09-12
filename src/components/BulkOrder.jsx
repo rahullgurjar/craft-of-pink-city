@@ -233,10 +233,11 @@ export default function BulkOrder() {
                 {/* Name & Company */}
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-ink/80 mb-2">
+                    <label htmlFor="bulk-name" className="block text-xs font-bold uppercase tracking-wider text-ink/80 mb-2">
                       Your Name *
                     </label>
                     <input
+                      id="bulk-name"
                       type="text"
                       required
                       placeholder="e.g. Ananya Sharma"
@@ -246,10 +247,11 @@ export default function BulkOrder() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-ink/80 mb-2">
+                    <label htmlFor="bulk-company" className="block text-xs font-bold uppercase tracking-wider text-ink/80 mb-2">
                       Organization / Event Name
                     </label>
                     <input
+                      id="bulk-company"
                       type="text"
                       placeholder="e.g. Wedding / Company Name"
                       value={formData.company}
@@ -262,10 +264,11 @@ export default function BulkOrder() {
                 {/* Phone & Email */}
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-ink/80 mb-2">
+                    <label htmlFor="bulk-phone" className="block text-xs font-bold uppercase tracking-wider text-ink/80 mb-2">
                       WhatsApp Number / Phone *
                     </label>
                     <input
+                      id="bulk-phone"
                       type="tel"
                       required
                       placeholder="e.g. +91 98765 43210"
@@ -275,10 +278,11 @@ export default function BulkOrder() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-ink/80 mb-2">
+                    <label htmlFor="bulk-email" className="block text-xs font-bold uppercase tracking-wider text-ink/80 mb-2">
                       Email Address
                     </label>
                     <input
+                      id="bulk-email"
                       type="email"
                       placeholder="e.g. contact@example.com"
                       value={formData.email}
@@ -317,10 +321,11 @@ export default function BulkOrder() {
                 {/* Quantity & Timeline */}
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-ink/80 mb-2">
+                    <label htmlFor="bulk-quantity" className="block text-xs font-bold uppercase tracking-wider text-ink/80 mb-2">
                       Estimated Quantity
                     </label>
                     <select
+                      id="bulk-quantity"
                       value={formData.quantity}
                       onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
                       className="w-full rounded-xl border border-ink/20 bg-ivory/50 px-4 py-3 text-sm text-ink outline-none transition focus:border-rose focus:bg-white focus:ring-2 focus:ring-rose/20"
@@ -333,10 +338,11 @@ export default function BulkOrder() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-ink/80 mb-2">
+                    <label htmlFor="bulk-timeline" className="block text-xs font-bold uppercase tracking-wider text-ink/80 mb-2">
                       Required Delivery Timeline
                     </label>
                     <select
+                      id="bulk-timeline"
                       value={formData.timeline}
                       onChange={(e) => setFormData({ ...formData, timeline: e.target.value })}
                       className="w-full rounded-xl border border-ink/20 bg-ivory/50 px-4 py-3 text-sm text-ink outline-none transition focus:border-rose focus:bg-white focus:ring-2 focus:ring-rose/20"
@@ -352,10 +358,11 @@ export default function BulkOrder() {
 
                 {/* Custom Notes */}
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-ink/80 mb-2">
+                  <label htmlFor="bulk-notes" className="block text-xs font-bold uppercase tracking-wider text-ink/80 mb-2">
                     Customization Details / Specific Requirements (Optional)
                   </label>
                   <textarea
+                    id="bulk-notes"
                     rows={3}
                     placeholder="Tell us about specific colors, monogramming tags, packaging preferences, or target budget..."
                     value={formData.notes}
