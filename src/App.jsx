@@ -13,29 +13,32 @@ import FloatingWhatsApp from './components/FloatingWhatsApp';
 import ArtisanChatbot from './components/ArtisanChatbot';
 import CartDrawer from './components/CartDrawer';
 import { CartProvider } from './context/CartContext';
+import ErrorBoundary from './components/ErrorBoundary';
 
 export default function App() {
   return (
-    <CartProvider>
-      <a className="skip-link" href="#main">
-        Skip to content
-      </a>
-      <Navbar />
-      <main id="main">
-        <Hero />
-        <About />
-        <CraftProcess />
-        <Products />
-        <Reviews />
-        <BulkOrder />
-        <WhyChooseUs />
-        <FAQ />
-        <InstagramCTA />
-      </main>
-      <Footer />
-      <FloatingWhatsApp />
-      <ArtisanChatbot />
-      <CartDrawer />
-    </CartProvider>
+    <ErrorBoundary>
+      <CartProvider>
+        <a className="skip-link" href="#main">
+          Skip to content
+        </a>
+        <ErrorBoundary><Navbar /></ErrorBoundary>
+        <main id="main">
+          <ErrorBoundary><Hero /></ErrorBoundary>
+          <ErrorBoundary><About /></ErrorBoundary>
+          <ErrorBoundary><CraftProcess /></ErrorBoundary>
+          <ErrorBoundary><Products /></ErrorBoundary>
+          <ErrorBoundary><Reviews /></ErrorBoundary>
+          <ErrorBoundary><BulkOrder /></ErrorBoundary>
+          <ErrorBoundary><WhyChooseUs /></ErrorBoundary>
+          <ErrorBoundary><FAQ /></ErrorBoundary>
+          <ErrorBoundary><InstagramCTA /></ErrorBoundary>
+        </main>
+        <ErrorBoundary><Footer /></ErrorBoundary>
+        <ErrorBoundary><FloatingWhatsApp /></ErrorBoundary>
+        <ErrorBoundary><ArtisanChatbot /></ErrorBoundary>
+        <ErrorBoundary><CartDrawer /></ErrorBoundary>
+      </CartProvider>
+    </ErrorBoundary>
   );
 }
