@@ -1,4 +1,4 @@
-import { products, whatsapp, whatsappNumber, email, faqs } from '../data/products'
+import { products, whatsapp, whatsappNumber, email, faqs } from '../data/products.js'
 
 /**
  * Advanced AI Conversational Engine for "Gulabi" (Craft of Pink City)
@@ -30,22 +30,41 @@ export const STORE_CONTEXT = {
     email: email,
     instagram: 'https://www.instagram.com/craftofpinkcity/'
   },
-  materials: '100% Pure Indian Cotton (high-thread-count cambric), plush lightweight foam quilting, heavy-duty brass/nylon zippers, handcrafted fabric-bead tassels, natural and azo-free dyes.',
-  techniques: 'Traditional woodblock carving, Sanganeri floral block printing, Bagru natural vegetable dyes, Dabu mud-resist indigo printing, machine diamond & channel quilting.',
-  wholesaleMOQ: '25 pieces minimum order quantity per category (mix and match patterns allowed). Tiered discounts: 15-20% (25-50 pcs), 25-30% (51-100 pcs), 35%+ (100+ pcs). Custom couple monogram or corporate tags included free.',
-  shipping: 'Dispatches within 24-48 hours. India: 2-5 business days via express courier (Bluedart, Delhivery, DTDC). International: 4-7 business days globally via DHL/FedEx Express.',
+  materials:
+    '100% Pure Indian Cotton (high-thread-count cambric), plush lightweight foam quilting, heavy-duty brass/nylon zippers, handcrafted fabric-bead tassels, natural and azo-free dyes.',
+  techniques:
+    'Traditional woodblock carving, Sanganeri floral block printing, Bagru natural vegetable dyes, Dabu mud-resist indigo printing, machine diamond & channel quilting.',
+  wholesaleMOQ:
+    '25 pieces minimum order quantity per category (mix and match patterns allowed). Tiered discounts: 15-20% (25-50 pcs), 25-30% (51-100 pcs), 35%+ (100+ pcs). Custom couple monogram or corporate tags included free.',
+  shipping:
+    'Dispatches within 24-48 hours. India: 2-5 business days via express courier (Bluedart, Delhivery, DTDC). International: 4-7 business days globally via DHL/FedEx Express.',
   care: 'Gentle hand wash in cold water with mild liquid detergent. Shade dry only. Do not bleach or machine tumble. Warm steam iron on cotton setting.',
-  payment: 'UPI (GPay, PhonePe, Paytm), IMPS/NEFT Bank Transfer, Debit/Credit Cards, International Wire Transfer (SWIFT). COD is not available for handcrafted artisan dispatches.',
+  payment:
+    'UPI (GPay, PhonePe, Paytm), IMPS/NEFT Bank Transfer, Debit/Credit Cards, International Wire Transfer (SWIFT). COD is not available for handcrafted artisan dispatches.',
   returns: '100% Free replacement guarantee for any transit damage reported with unboxing photos within 48 hours.'
+}
+
+// Word & Phrase Matching Utility with Word-Boundary Enforcement
+function hasWord(text, words) {
+  const list = Array.isArray(words) ? words : [words]
+  return list.some((w) => {
+    const escaped = w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    return new RegExp(`\\b${escaped}\\b`, 'i').test(text)
+  })
+}
+
+function hasPhrase(text, phrases) {
+  const list = Array.isArray(phrases) ? phrases : [phrases]
+  return list.some((p) => text.toLowerCase().includes(p.toLowerCase()))
 }
 
 /**
  * Main function used by ArtisanChatbot
- * Handles synchronous/instant reasoning + optional async LLM
+ * Handles synchronous/instant reasoning
  */
 export function processUserMessage(userMessage, cartContext = null) {
   const query = (userMessage || '').trim()
-  if (!query) return getFallbackResponse('')
+  if (!query) return buildGenerativeContextResponse('')
 
   // 1. Safety Guardrail Check
   if (!isContentSafe(query)) {
@@ -84,7 +103,6 @@ export async function generateAIResponse(userMessage, cartContext = null) {
 
 /**
  * Intelligent Dynamic Synthesis Engine
- * Resolves complex queries, semantic questions, calculations, comparisons, locations, styling & craft
  */
 function synthesizeDynamicResponse(query, cartContext) {
   const q = query.toLowerCase()
@@ -112,7 +130,9 @@ function synthesizeDynamicResponse(query, cartContext) {
   }
 
   // 3. WHO ARE YOU / ABOUT GULABI / ABOUT BRAND
-  if (q.includes('who are you') || q.includes('what is your name') || q.includes('about you') || q.includes('about pink city') || q.includes('who made you') || q.includes('about this store')) {
+  if (
+    hasPhrase(q, ['who are you', 'what is your name', 'about you', 'about pink city', 'who made you', 'about this store', 'tell me about yourself'])
+  ) {
     return {
       text: `🌸 **About Gulabi & Craft of Pink City:**\n\n• **I am Gulabi**, the AI concierge for *Craft of Pink City*—a luxury handcrafted textile studio based in **Jaipur, Rajasthan**.\n• **Our Mission:** We celebrate generational Rajasthani block-printing heritage (Sanganeri, Bagru, Dabu) by crafting premium **100% pure quilted cotton** travel duffles, tote bags, vanity boxes, laptop sleeves, and gifting favors.\n• **Direct Artisan Workshop:** Every piece is printed with hand-carved teak wood blocks, padded with soft batting, and tailored with artisan-beaded tassels.`,
       quickReplies: ['🛍️ Show Bestsellers', '🧳 Quilted Duffles', '🎁 Bulk / Wedding Orders', '🧵 How Bags Are Made']
@@ -136,31 +156,45 @@ function synthesizeDynamicResponse(query, cartContext) {
     }
   }
 
-  // 5. CITIES & DOMESTIC DELIVERY TIMELINES (India)
+  // 5. PERFUME BOTTLES / COSMETICS / GLASS BOTTLE TRAVEL PROTECTION
+  if (
+    hasWord(q, ['perfume', 'perfumes', 'bottle', 'bottles', 'glass', 'cosmetics', 'toiletries', 'skincare', 'shampoo', 'lotion', 'serum', 'makeup']) &&
+    hasWord(q, ['carry', 'travel', 'pack', 'hold', 'fit', 'protect', 'train', 'flight', 'bag'])
+  ) {
+    return {
+      text: `💄 **Carrying Perfumes, Skincare & Glass Bottles Safely:**\n\n• **Best Choice: Structured Vanity Box (9.5" × 6.5" × 5.5")**\n• **Upright Bottle Storage:** Designed with firm padded vertical sidewalls specifically to keep full-size glass perfume bottles, foundations, and serums standing upright without tipping or leaking during train or flight journeys.\n• **Cushioning Protection:** High-density foam padding absorbs bumps and impacts on the road.\n• **Easy Cleanup:** Water-resistant wipeable inner lining in case of minor cosmetic spills.`,
+      quickReplies: ['Show Vanity Boxes', 'Show Pouch Sets', 'Order on WhatsApp']
+    }
+  }
+
+  // 6. CITIES & DOMESTIC DELIVERY TIMELINES (India)
   const indianCities = [
     'mumbai', 'delhi', 'bangalore', 'bengaluru', 'hyderabad', 'chennai', 'kolkata', 'pune',
     'ahmedabad', 'jaipur', 'surat', 'lucknow', 'chandigarh', 'noida', 'gurgaon', 'gurugram',
     'kochi', 'cochin', 'indore', 'bhopal', 'nagpur', 'patna', 'guwahati', 'goa', 'coimbatore',
     'vadodara', 'ludhiana', 'agra', 'varanasi', 'kerala', 'rajasthan', 'punjab', 'kashmir', 'shimla'
   ]
-  const matchedCity = indianCities.find((c) => q.includes(c))
-  if (matchedCity || (q.includes('deliver') && q.includes('india')) || q.includes('pincode') || q.includes('pin code')) {
+  const matchedCity = indianCities.find((c) => hasWord(q, c))
+  if (matchedCity || (hasWord(q, ['deliver', 'delivery', 'reach', 'dispatch']) && hasWord(q, ['india', 'pincode', 'pin', 'days', 'time']))) {
     const cityName = matchedCity ? matchedCity.charAt(0).toUpperCase() + matchedCity.slice(1) : 'your location in India'
     return {
-      text: `🚚 **Delivery to ${cityName}:**\n\n• **Dispatch:** Orders are packed and shipped directly from our Jaipur workshop within **24–48 hours**.\n• **Transit Timeline:** Delivery to **${cityName}** takes approx. **2 to 4 business days** via Bluedart, Delhivery, or DTDC Express.\n• **Serviceable Coverage:** We deliver across all 19,000+ PIN codes in India.\n• **Live Tracking:** An end-to-end tracking link is shared with you via WhatsApp and SMS as soon as the parcel is dispatched.`,
+      text: `🚚 **Delivery Timelines for ${cityName}:**\n\n• **Workshop Dispatch:** Orders ship directly from our Jaipur studio within **24–48 hours**.\n• **Transit Duration:** Express delivery to **${cityName}** takes approx. **2 to 4 business days** via Bluedart, Delhivery, or DTDC Express.\n• **All PIN Codes:** We service all 19,000+ PIN codes across India.\n• **Live Tracking:** An end-to-end tracking link is messaged on WhatsApp as soon as your parcel is dispatched.`,
       quickReplies: ['💳 Payment Options', '🛍️ Browse Collection', '💬 WhatsApp Support']
     }
   }
 
-  // 6. INTERNATIONAL SHIPPING & COUNTRIES
+  // 7. INTERNATIONAL SHIPPING & COUNTRIES
   const internationalLocations = [
     'usa', 'america', 'united states', 'uk', 'united kingdom', 'london', 'canada', 'toronto',
     'uae', 'dubai', 'abu dhabi', 'australia', 'sydney', 'melbourne', 'germany', 'france',
     'paris', 'italy', 'singapore', 'netherlands', 'new zealand', 'malaysia', 'saudi', 'qatar',
     'europe', 'overseas', 'international', 'foreign'
   ]
-  const matchedCountry = internationalLocations.find((c) => q.includes(c))
-  if (matchedCountry || q.includes('international shipping') || q.includes('ship abroad') || q.includes('deliver overseas')) {
+  const matchedCountry = internationalLocations.find((c) => hasWord(q, c))
+  if (
+    matchedCountry ||
+    hasPhrase(q, ['international shipping', 'ship abroad', 'deliver overseas', 'outside india', 'global delivery', 'worldwide shipping'])
+  ) {
     const countryName = matchedCountry ? matchedCountry.toUpperCase() : 'International destinations'
     return {
       text: `✈️ **Worldwide International Shipping (${countryName}):**\n\n• **Global Reach:** Yes! We ship handcrafted bags worldwide to **${countryName}**, USA, UK, Canada, UAE, Europe, Australia, and 50+ countries.\n• **Courier Partners:** Dispatched via **DHL Express & FedEx International Priority**.\n• **Transit Timeline:** Arrives at your doorstep in **4 to 7 business days**.\n• **Payment:** International Credit/Debit Cards, PayPal, and SWIFT Wire Transfers accepted.\n• **Customs & Packaging:** Packed in moisture-sealed protective export packaging with full customs declaration documents.`,
@@ -173,22 +207,11 @@ function synthesizeDynamicResponse(query, cartContext) {
     }
   }
 
-  // 7. BULK ORDERS, WEDDING FAVORS & QUANTITY QUOTES
+  // 8. BULK ORDERS, WEDDING FAVORS & QUANTITY QUOTES
   const qtyMatch = q.match(/(\d+)\s*(pcs|pieces|bags|units|pouches|sets|totes|duffles|favors|gifts)?/i)
   if (
     qtyMatch ||
-    q.includes('bulk') ||
-    q.includes('wholesale') ||
-    q.includes('wedding') ||
-    q.includes('favor') ||
-    q.includes('mehendi') ||
-    q.includes('sangeet') ||
-    q.includes('haldi') ||
-    q.includes('moq') ||
-    q.includes('resell') ||
-    q.includes('corporate') ||
-    q.includes('hamper') ||
-    q.includes('discount')
+    hasWord(q, ['bulk', 'wholesale', 'wedding', 'favor', 'favors', 'mehendi', 'sangeet', 'haldi', 'moq', 'resell', 'corporate', 'hamper', 'hampers', 'discount'])
   ) {
     const qty = qtyMatch ? parseInt(qtyMatch[1], 10) : null
     let slabDiscount = '15% to 35%+'
@@ -217,18 +240,10 @@ function synthesizeDynamicResponse(query, cartContext) {
     }
   }
 
-  // 8. FLIGHT / AIRLINE / CABIN LUGGAGE
+  // 9. FLIGHT / AIRLINE / CABIN LUGGAGE
   if (
-    q.includes('flight') ||
-    q.includes('airport') ||
-    q.includes('cabin') ||
-    q.includes('plane') ||
-    q.includes('travel luggage') ||
-    q.includes('overhead') ||
-    q.includes('indigo') ||
-    q.includes('air india') ||
-    q.includes('carry on') ||
-    q.includes('carry-on')
+    hasWord(q, ['flight', 'airport', 'cabin', 'plane', 'airplane', 'overhead', 'indigo', 'carryon', 'airlines']) ||
+    hasPhrase(q, ['carry on', 'travel luggage', 'air india', 'hand luggage'])
   ) {
     return {
       text: `✈️ **Airline & Cabin Luggage Suitability:**\n\n• **100% Flight Cabin-Approved:** Our Quilted Barrel Duffles (**18" × 10" × 10"**) comply with standard cabin carry-on regulations for all major domestic & international airlines (IndiGo, Air India, Emirates, Delta, Singapore Airlines, British Airways, etc.).\n• **Overhead & Under-Seat Fit:** The soft, flexible quilted cotton body slides effortlessly into tight overhead bins or under the seat in front of you.\n• **Ultra-Lightweight:** Weighs only **~500g empty**, saving your precious cabin baggage weight allowance for your personal items.\n• **Comfort Straps:** Reinforced dual striped handles with an ergonomic grip for easy airport terminal walking.`,
@@ -236,79 +251,65 @@ function synthesizeDynamicResponse(query, cartContext) {
     }
   }
 
-  // 9. SIZES, DIMENSIONS & FITS (Laptop, Duffle, Tote, Vanity, Yoga, Pouch)
+  // 10. SIZES, DIMENSIONS & FITS (Laptop, Duffle, Tote, Vanity, Yoga, Pouch)
   if (
-    q.includes('size') ||
-    q.includes('dimension') ||
-    q.includes('how big') ||
-    q.includes('measurement') ||
-    q.includes('fit') ||
-    q.includes('inches') ||
-    q.includes('capacity') ||
-    q.includes('height') ||
-    q.includes('width') ||
-    q.includes('weight')
+    hasWord(q, ['size', 'sizes', 'dimension', 'dimensions', 'measurement', 'measurements', 'inches', 'capacity', 'height', 'width', 'weight', 'fit', 'fits']) ||
+    hasPhrase(q, ['how big', 'how large', 'what size'])
   ) {
-    if (q.includes('laptop') || q.includes('macbook') || q.includes('dell') || q.includes('hp') || q.includes('ipad')) {
+    if (hasWord(q, ['laptop', 'macbook', 'dell', 'hp', 'lenovo', 'thinkpad', 'ipad', 'asus', 'sleeve'])) {
       return {
         text: `💻 **Laptop Sleeve Dimensions & Compatibility:**\n\n• **Outer Dimensions:** **15.5" (L) × 11.2" (H) × 1.2" (W)**.\n• **Device Fit:** Fits **13-inch, 14-inch, and 15.6-inch laptops** (Apple MacBook Pro/Air, Dell XPS/Inspiron, HP Pavilion/Spectre, Lenovo ThinkPad, ASUS ZenBook, iPad Pro).\n• **Impact Protection:** Triple-layer construction with **8mm shock-absorbent high-density foam** and smooth scratch-free inner cotton lining.\n• **Top Closure:** Smooth dual brass zipper sliders with fabric pulls.`,
         quickReplies: ['Show Laptop Sleeves', 'Order on WhatsApp', 'Wash & Care']
       }
     }
-    if (q.includes('duffle') || q.includes('travel') || q.includes('weekender') || q.includes('barrel')) {
+    if (hasWord(q, ['duffle', 'travel', 'weekender', 'barrel'])) {
       return {
         text: `🧳 **Quilted Barrel Duffle Dimensions & Capacity:**\n\n• **Dimensions:** **18" (Length) × 10" (Diameter) × 10" (Height)**.\n• **Volume Capacity:** Approx. **28 Litres**.\n• **Packing Capacity:** Holds **3 to 4 days of travel clothes**, 1 pair of shoes, vanity toiletry pouch, chargers, and travel documents.\n• **Features:** Outer slip pocket for boarding passes/phone, heavy-duty zipper, and reinforced handles.`,
         quickReplies: ['Show Duffle Bags', 'Cabin Fit Details', 'Wholesale MOQ']
       }
     }
-    if (q.includes('vanity') || q.includes('box') || q.includes('cosmetic') || q.includes('makeup')) {
+    if (hasWord(q, ['vanity', 'box', 'cosmetic', 'makeup'])) {
       return {
         text: `💄 **Structured Vanity Box Dimensions:**\n\n• **Dimensions:** **9.5" (Length) × 6.5" (Width) × 5.5" (Height)**.\n• **Capacity:** Structured padded vertical walls keep full-sized lotion bottles, skincare serums, perfumes, and foundation upright to prevent leaks.\n• **Features:** Cushioned top carry handle, mirror pocket on inner lid, and water-resistant wipeable base.`,
         quickReplies: ['Show Vanity Boxes', 'Show Pouch Sets', 'Order on WhatsApp']
       }
     }
-    if (q.includes('tote') || q.includes('ruffle') || q.includes('shopping bag')) {
+    if (hasWord(q, ['tote', 'ruffle'])) {
       return {
         text: `👜 **Quilted Tote Bag Dimensions:**\n\n• **Dimensions:** **16" (Height) × 14" (Width) × 4.5" (Base Gusset)**.\n• **Handle Drop:** **11 inches** (comfortable shoulder drop over winter coats and summer outfits).\n• **Fit:** Fits a 15.6" laptop, A4 notebooks, water bottle, wallet, sunglasses, and makeup pouch.\n• **Style:** Available in playful **Ruffle Trim** or sleek **Classic Clean Edge** finishes.`,
         quickReplies: ['Show Ruffle Totes', 'Show Classic Totes', 'Order on WhatsApp']
       }
     }
-    if (q.includes('pouch') || q.includes('trio') || q.includes('set')) {
+    if (hasWord(q, ['pouch', 'trio', 'pouches'])) {
       return {
         text: `🌸 **Pouch Trio (Set of 3) Nested Dimensions:**\n\n• **Large Pouch:** **9.0" × 6.0"** (makeup, skincare, chargers).\n• **Medium Pouch:** **7.5" × 5.0"** (medicines, cards, lipsticks).\n• **Small Pouch:** **6.0" × 4.0"** (coins, jewelry, earphones).\n• All 3 pouches nest inside each other when empty to save space!`,
         quickReplies: ['Show Pouch Trios', 'Wedding Favor MOQ', 'Order on WhatsApp']
       }
     }
-    if (q.includes('yoga') || q.includes('mat')) {
+    if (hasWord(q, ['yoga', 'mat'])) {
       return {
         text: `🧘 **Yoga Mat Carrier Dimensions:**\n\n• **Length:** **28.5 inches (72 cm)** × **Diameter:** **6.8 inches (17 cm)**.\n• **Fit:** Accommodates all standard and extra-thick yoga mats (4mm, 6mm, 8mm, and 10mm) with room for straps and a small towel.\n• **Features:** Breathable side eyelets, full-length zipper, and adjustable shoulder sling.`,
         quickReplies: ['Show Yoga Bags', 'Fabric Details', 'Wholesale MOQ']
       }
     }
 
-    // General dimensions overview
     return {
       text: `📏 **Quick Dimensions & Size Guide:**\n\n• **Travel Duffles:** 18" × 10" × 10" (28L cabin size, 3-4 days trip)\n• **Ruffle Totes:** 16" × 14" × 4.5" (fits 15.6" laptop & daily essentials)\n• **Laptop Sleeves:** 15.5" × 11.2" × 1.2" (fits 13" to 15.6" laptops with 8mm padding)\n• **Vanity Boxes:** 9.5" × 6.5" × 5.5" (upright cosmetic bottle storage)\n• **Pouch Trio:** 3 nested sizes (9"×6", 7.5"×5", 6"×4")\n• **Yoga Carriers:** 28.5" × 6.8" (fits up to 10mm thick mats)`,
       quickReplies: ['🧳 Travel Duffles', '💻 Laptop Sleeves', '👜 Tote Bags', '💄 Vanity Boxes']
     }
   }
 
-  // 10. PRODUCT COMPARISONS (e.g. "duffle vs tote", "difference between vanity and pouch")
+  // 11. PRODUCT COMPARISONS (e.g. "duffle vs tote", "difference between vanity and pouch")
   if (
-    q.includes(' vs ') ||
-    q.includes('versus') ||
-    q.includes('difference between') ||
-    q.includes('better between') ||
-    q.includes('compare') ||
-    q.includes('which one is better')
+    hasPhrase(q, [' vs ', 'versus', 'difference between', 'better between', 'compare', 'which one is better', 'which should i choose'])
   ) {
-    if (q.includes('duffle') && q.includes('tote')) {
+    if (hasWord(q, 'duffle') && hasWord(q, 'tote')) {
       return {
         text: `⚖️ **Duffle Bag vs. Quilted Tote Bag:**\n\n• **Quilted Barrel Duffle (18"×10"×10", 28L):**\n  - *Best For:* Weekend travel, gym, flights, overnight getaways.\n  - *Capacity:* 3–4 days clothes, shoes, toiletry pouch.\n• **Quilted Tote Bag (16"×14"×4.5"):**\n  - *Best For:* Daily office, college, shopping, cafes, everyday carry.\n  - *Capacity:* 15.6" laptop, planner, water bottle, wallet.\n\n*Recommendation:* Get the **Duffle** for trips & holidays, and the **Tote** for everyday chic carry!`,
         quickReplies: ['Show Duffle Bags', 'Show Tote Bags', 'Wholesale MOQs']
       }
     }
-    if (q.includes('vanity') || q.includes('pouch')) {
+    if (hasWord(q, 'vanity') || hasWord(q, 'pouch')) {
       return {
         text: `⚖️ **Vanity Box vs. Pouch Trio:**\n\n• **Structured Vanity Box (9.5"×6.5"×5.5"):**\n  - *Best For:* Storing full-size skincare bottles, perfumes, and foundation upright on dressers and during travel.\n  - *Structure:* Firm padded walls with top handle.\n• **Pouch Trio (Set of 3 Nested Pouches):**\n  - *Best For:* Handbag organizing, makeup touch-ups, chargers, coins, and wedding favor gifting.\n  - *Structure:* Soft, flexible, collapsible.\n\n*Recommendation:* The **Vanity Box** is ideal for travel toiletries; the **Pouch Trio** is our top pick for gifting hampers!`,
         quickReplies: ['Show Vanity Boxes', 'Show Pouch Sets', 'Wedding Favors MOQ']
@@ -316,22 +317,10 @@ function synthesizeDynamicResponse(query, cartContext) {
     }
   }
 
-  // 11. ARTISAN CRAFT, BLOCK PRINTING, HERITAGE & MATERIALS
+  // 12. ARTISAN CRAFT, BLOCK PRINTING, HERITAGE & MATERIALS
   if (
-    q.includes('craft') ||
-    q.includes('how made') ||
-    q.includes('block print') ||
-    q.includes('handblock') ||
-    q.includes('sanganeri') ||
-    q.includes('bagru') ||
-    q.includes('dabu') ||
-    q.includes('cotton') ||
-    q.includes('material') ||
-    q.includes('fabric') ||
-    q.includes('authentic') ||
-    q.includes('dye') ||
-    q.includes('natural') ||
-    q.includes('wooden block')
+    hasWord(q, ['craft', 'craftsmanship', 'handblock', 'sanganeri', 'bagru', 'dabu', 'cotton', 'material', 'materials', 'fabric', 'authentic', 'dye', 'dyes', 'wooden', 'artisan']) ||
+    hasPhrase(q, ['how made', 'how are bags made', 'block print', 'block printing'])
   ) {
     return {
       text: `🧵 **Authentic Jaipur Handblock Heritage & Craftsmanship:**\n\n• **100% Pure Indian Cotton:** Sourced directly from local spinning mills and layered with soft inner quilting for plush durability.\n• **Teak Wood Block Carving:** Generational master craftsmen in Sanganer & Bagru carve intricate botanical and geometric motifs onto seasoned teak wood.\n• **Hand Stamping:** Each meter of fabric is hand-stamped up to **1,200 times** using natural mineral & azo-free vegetable dyes (indigo, madder root, pomegranate rind, turmeric).\n• **Sun Curing:** Fabrics are washed in local riverbeds and sun-dried in the vibrant Rajasthan sunshine to naturally set the colors.\n• **Handmade Detailing:** Finished with artisan fabric-and-bead tassels and reinforced heavy-duty zippers.`,
@@ -339,18 +328,10 @@ function synthesizeDynamicResponse(query, cartContext) {
     }
   }
 
-  // 12. WASH & CARE INSTRUCTIONS
+  // 13. WASH & CARE INSTRUCTIONS
   if (
-    q.includes('wash') ||
-    q.includes('care') ||
-    q.includes('clean') ||
-    q.includes('dry clean') ||
-    q.includes('iron') ||
-    q.includes('stain') ||
-    q.includes('detergent') ||
-    q.includes('waterproof') ||
-    q.includes('rain') ||
-    q.includes('machine wash')
+    hasWord(q, ['wash', 'washing', 'care', 'clean', 'cleaning', 'iron', 'ironing', 'stain', 'detergent', 'waterproof', 'bleach', 'dryclean']) ||
+    hasPhrase(q, ['machine wash', 'hand wash', 'how to clean', 'in rain'])
   ) {
     return {
       text: `🧼 **Wash & Care Guide for Quilted Block-Print Cotton:**\n\n1. **First Wash:** Gentle cold hand wash separately using mild liquid detergent (such as Ezee or baby shampoo).\n2. **Drying:** Always dry in the shade to preserve the brightness of natural botanical dyes. Avoid harsh direct afternoon sunlight.\n3. **Do Not:** Do not bleach, machine tumble-dry, or soak for prolonged hours.\n4. **Ironing:** Warm steam iron on cotton setting to restore the plush quilted ridges.\n5. **Rain / Water:** Quilted cotton handles light drizzles well, but is a breathable natural fabric (not rubber plastic). If wet, simply air dry in shade.`,
@@ -358,19 +339,10 @@ function synthesizeDynamicResponse(query, cartContext) {
     }
   }
 
-  // 13. PAYMENT METHODS & CASH ON DELIVERY (COD)
+  // 14. PAYMENT METHODS & CASH ON DELIVERY (COD)
   if (
-    q.includes('pay') ||
-    q.includes('payment') ||
-    q.includes('cod') ||
-    q.includes('cash on delivery') ||
-    q.includes('upi') ||
-    q.includes('gpay') ||
-    q.includes('google pay') ||
-    q.includes('phonepe') ||
-    q.includes('paytm') ||
-    q.includes('card') ||
-    q.includes('bank')
+    hasWord(q, ['pay', 'payment', 'cod', 'upi', 'gpay', 'phonepe', 'paytm', 'card', 'cards', 'bhim', 'netbanking']) ||
+    hasPhrase(q, ['cash on delivery', 'google pay', 'bank transfer'])
   ) {
     return {
       text: `💳 **Payment Modes & COD Policy:**\n\n• **Accepted Payment Modes:** UPI (Google Pay, PhonePe, Paytm, BHIM), Net Banking / IMPS, Credit & Debit Cards (Visa, Mastercard, RuPay, Amex), and International Wire Transfer (SWIFT).\n• **About COD (Cash on Delivery):** Because each piece is handcrafted, inspected, and shipped directly from our artisan workshop in Jaipur, we operate on direct digital payment to guarantee dispatch, reserve inventory, and pay artisans upfront without transit-return waste.\n• **100% Secure & Verified:** Instant digital receipt and direct courier tracking link provided upon confirmation.`,
@@ -378,16 +350,10 @@ function synthesizeDynamicResponse(query, cartContext) {
     }
   }
 
-  // 14. TRANSIT DAMAGE, REPLACEMENTS & RETURNS
+  // 15. TRANSIT DAMAGE, REPLACEMENTS & RETURNS
   if (
-    q.includes('return') ||
-    q.includes('refund') ||
-    q.includes('damage') ||
-    q.includes('broken') ||
-    q.includes('exchange') ||
-    q.includes('guarantee') ||
-    q.includes('warranty') ||
-    q.includes('policy')
+    hasWord(q, ['return', 'returns', 'refund', 'refunds', 'damage', 'damaged', 'broken', 'exchange', 'guarantee', 'warranty']) ||
+    hasPhrase(q, ['return policy', 'what if broken', 'transit damage'])
   ) {
     return {
       text: `🛡️ **100% Quality & Transit Damage Guarantee:**\n\n• **Artisan Quality Check:** Every single bag undergoes a 3-stage quality check for stitching, zipper smoothness, and block-print clarity before dispatch.\n• **Transit Protection:** In the rare event that a parcel arrives damaged, simply share an unboxing photo/video on WhatsApp within **48 hours** of delivery.\n• **Free Immediate Replacement:** We will ship a brand-new replacement immediately at zero extra cost to you!\n• **Customer Happiness:** Our Jaipur workshop team is available on WhatsApp daily (9 AM – 9 PM IST) to assist with any order needs.`,
@@ -400,18 +366,9 @@ function synthesizeDynamicResponse(query, cartContext) {
     }
   }
 
-  // 15. GIFTING, GIFT NOTES & WEDDING HAMPERS
+  // 16. GIFTING, GIFT NOTES & WEDDING HAMPERS
   if (
-    q.includes('gift') ||
-    q.includes('present') ||
-    q.includes('birthday') ||
-    q.includes('anniversary') ||
-    q.includes('sister') ||
-    q.includes('mother') ||
-    q.includes('friend') ||
-    q.includes('wrap') ||
-    q.includes('note') ||
-    q.includes('hamper')
+    hasWord(q, ['gift', 'gifting', 'present', 'presents', 'birthday', 'anniversary', 'sister', 'mother', 'friend', 'wrap', 'note', 'hamper'])
   ) {
     return {
       text: `🎁 **Artisan Gifting & Handwritten Notes:**\n\n• **Personalized Gift Notes:** We include a complimentary handwritten artisan note card with your custom message!\n• **Direct Recipient Delivery:** We can ship directly to your recipient's address with discreet pricing.\n• **Gift Packaging:** Beautifully wrapped in sustainable tissue with handmade fabric-bead tags.\n• **Top Gifting Choices:**\n  1. **Vanity Box & Pouch Trio Bundle** (Ideal for bridesmaids, mothers & sisters)\n  2. **Quilted Travel Duffle** (Perfect for frequent travelers & weekend getaways)\n  3. **Padded Laptop Sleeve** (Thoughtful gift for working professionals & students)`,
@@ -419,17 +376,10 @@ function synthesizeDynamicResponse(query, cartContext) {
     }
   }
 
-  // 16. PRICING & BUDGET OVERVIEW
+  // 17. PRICING & BUDGET OVERVIEW
   if (
-    q.includes('price') ||
-    q.includes('cost') ||
-    q.includes('how much') ||
-    q.includes('rate') ||
-    q.includes('cheap') ||
-    q.includes('expensive') ||
-    q.includes('affordable') ||
-    q.includes('discount code') ||
-    q.includes('offer')
+    hasWord(q, ['price', 'prices', 'cost', 'costs', 'rate', 'rates', 'cheap', 'expensive', 'affordable', 'offer']) ||
+    hasPhrase(q, ['how much', 'discount code', 'price list'])
   ) {
     return {
       text: `🏷️ **Craft of Pink City Price Overview:**\n\n• **Pouch Trios (Set of 3):** ₹899 – ₹1,099\n• **Padded Laptop Sleeves:** ₹1,199 – ₹1,399\n• **Structured Vanity Boxes:** ₹1,099 – ₹1,349\n• **Quilted Tote Bags & Ruffle Bags:** ₹1,299 – ₹1,599\n• **Quilted Barrel Travel Duffles:** ₹1,699 – ₹1,899\n• **Yoga Mat Carriers:** ₹1,199 – ₹1,399\n\n💡 *Wholesale & Bulk Orders (25+ pcs) receive 15% to 35%+ tiered volume discounts!*`,
@@ -437,15 +387,9 @@ function synthesizeDynamicResponse(query, cartContext) {
     }
   }
 
-  // 17. STYLING & OCCASION RECOMMENDATIONS
+  // 18. STYLING & OCCASION RECOMMENDATIONS
   if (
-    q.includes('wear') ||
-    q.includes('style') ||
-    q.includes('outfit') ||
-    q.includes('match') ||
-    q.includes('occasion') ||
-    q.includes('dress') ||
-    q.includes('aesthetic')
+    hasWord(q, ['wear', 'style', 'outfit', 'match', 'occasion', 'dress', 'aesthetic', 'pair'])
   ) {
     return {
       text: `👗 **Styling Your Handcrafted Jaipur Bag:**\n\n• **Ethnic & Festive:** Pair our Marigold Yellow, Sanganeri Crimson, or Booti print bags with white chikankari kurtas, linen sarees, or pastel anarkalis for an effortless royal aesthetic.\n• **Contemporary & Casual:** Our Indigo Patchwork duffles and Candy-Stripe Ruffle totes look stunning with crisp white shirts, blue denim, and sundresses.\n• **Airport & Travel Look:** Carry a matching quilted duffle + pouch trio for an Instagram-worthy bohemian travel ensemble.\n• **Studio & Fitness:** The Royal Bengal Tiger yoga bag brings regal Jaipur heritage to modern workout gear.`,
@@ -453,7 +397,7 @@ function synthesizeDynamicResponse(query, cartContext) {
     }
   }
 
-  // 18. SPECIFIC PRODUCT MATCHING (Search & Filtering)
+  // 19. SPECIFIC PRODUCT MATCHING (Search & Filtering)
   const matched = findMatchingProducts(q)
   if (matched.length > 0) {
     return {
@@ -463,8 +407,7 @@ function synthesizeDynamicResponse(query, cartContext) {
     }
   }
 
-  // 19. DYNAMIC CONTEXTUAL REASONING FOR OPEN-ENDED QUESTIONS
-  // If no static category matched, synthesize a bespoke answer directly addressing the user's words
+  // 20. DYNAMIC CONTEXTUAL REASONING FOR OPEN-ENDED QUESTIONS
   return buildGenerativeContextResponse(query)
 }
 
@@ -474,20 +417,20 @@ function synthesizeDynamicResponse(query, cartContext) {
 function findMatchingProducts(query) {
   const q = query.toLowerCase()
 
-  if (q.includes('yoga')) return products.filter((p) => p.category.toLowerCase().includes('yoga'))
-  if (q.includes('duffle') || q.includes('travel') || q.includes('weekender') || q.includes('barrel')) {
+  if (hasWord(q, ['yoga'])) return products.filter((p) => p.category.toLowerCase().includes('yoga'))
+  if (hasWord(q, ['duffle', 'travel', 'weekender', 'barrel'])) {
     return products.filter((p) => p.category.toLowerCase().includes('duffle'))
   }
-  if (q.includes('tote') || q.includes('ruffle') || q.includes('shoulder bag')) {
+  if (hasWord(q, ['tote', 'ruffle'])) {
     return products.filter((p) => p.category.toLowerCase().includes('tote'))
   }
-  if (q.includes('vanity') || q.includes('cosmetic') || q.includes('makeup')) {
+  if (hasWord(q, ['vanity', 'cosmetic'])) {
     return products.filter((p) => p.category.toLowerCase().includes('vanity'))
   }
-  if (q.includes('laptop') || q.includes('sleeve') || q.includes('macbook')) {
+  if (hasWord(q, ['laptop', 'sleeve', 'macbook'])) {
     return products.filter((p) => p.category.toLowerCase().includes('laptop'))
   }
-  if (q.includes('pouch') || q.includes('trio')) {
+  if (hasWord(q, ['pouch', 'trio', 'pouches'])) {
     return products.filter((p) => p.category.toLowerCase().includes('pouch'))
   }
 
@@ -515,7 +458,7 @@ function findMatchingProducts(query) {
   ]
 
   for (const kw of printKeywords) {
-    if (q.includes(kw)) {
+    if (hasWord(q, kw)) {
       const matches = products.filter(
         (p) => p.name.toLowerCase().includes(kw) || p.description.toLowerCase().includes(kw)
       )
@@ -600,14 +543,8 @@ function isGratitude(q) {
  */
 function isCartQuery(q) {
   return (
-    (q.includes('cart') || q.includes('bag')) &&
-    (q.includes('my') ||
-      q.includes('what is in') ||
-      q.includes('check') ||
-      q.includes('items') ||
-      q.includes('status') ||
-      q.includes('view') ||
-      q.includes('show'))
+    (hasWord(q, ['cart', 'bag', 'items']) || hasPhrase(q, ['shopping bag'])) &&
+    (hasWord(q, ['my', 'check', 'status', 'view', 'show']) || hasPhrase(q, ['what is in', 'in my cart', 'in my bag']))
   )
 }
 
