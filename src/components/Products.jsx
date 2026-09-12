@@ -180,11 +180,8 @@ export default function Products() {
         </div>
       )}
 
-      <div
-        key={`${activeCategory}-${searchQuery}`}
-        className="animate-tabFade mt-10 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3"
-      >
-        {visibleProducts.map((product, index) => {
+      <div className="mt-10 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+        {visibleProducts.map((product) => {
           const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://craftofpinkcity.shop'
           const productLink = `${baseUrl}/?product=${product.id || encodeURIComponent(product.name)}`
           
@@ -197,8 +194,7 @@ export default function Products() {
 
           return (
             <article
-              className="product-card group flex flex-col justify-between animate-cardEnter"
-              style={{ animationDelay: `${Math.min(index * 45, 400)}ms` }}
+              className="product-card group flex flex-col justify-between"
               key={product.id || product.name}
             >
               {/* Clickable Card Body */}

@@ -356,53 +356,24 @@
 /* PAGE & SECTION TRANSITION ANIMATIONS                                     */
 /* ========================================================================= */
 
-/* Section Scroll Reveal Animation */
-.scroll-reveal {
-  opacity: 0;
-  transform: translateY(32px) scale(0.985);
-  filter: blur(4px);
-  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-    filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform, filter;
-}
-
-.scroll-revealed {
-  opacity: 1 !important;
-  transform: translateY(0) scale(1) !important;
-  filter: blur(0px) !important;
-}
-
-/* Staggered Card Entrance Animation */
-@keyframes cardEnter {
-  0% {
-    opacity: 0;
-    transform: translateY(24px) scale(0.95);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.animate-cardEnter {
-  animation: cardEnter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+.section-shell {
+  transition: transform 0.3s ease;
 }
 
 /* Tab & Category Filter Page Change Animation */
 @keyframes tabFadeSlide {
   0% {
-    opacity: 0;
-    transform: translateY(14px) scale(0.98);
+    opacity: 0.85;
+    transform: translateY(6px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
 .animate-tabFade {
-  animation: tabFadeSlide 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: tabFadeSlide 0.25s ease-out both;
 }
 
 /* Keyframes */
