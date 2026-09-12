@@ -90,7 +90,7 @@ export default function Products() {
             className="group inline-flex items-center gap-2.5 rounded-2xl border border-rose/30 bg-rose/5 px-5 py-3.5 text-xs font-bold uppercase tracking-wider text-rose transition-all hover:bg-rose hover:text-white shadow-sm"
           >
             <Package size={16} />
-            <span>Need Bulk / Wedding Favors?</span>
+            <span>Need Wholesale / Bulk Orders?</span>
             <span className="font-semibold lowercase underline group-hover:no-underline">(Get Wholesale Quote)</span>
           </a>
         </div>

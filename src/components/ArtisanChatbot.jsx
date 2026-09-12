@@ -45,11 +45,11 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     {
       id: 1,
       sender: 'bot',
-      text: `Namaste! 🙏 I'm **Gulabi**, your Jaipur Craft Assistant.\n\nAsk me anything about our hand block-printed duffles, wedding favors, wholesale prices, or fabric care!`,
+      text: `Namaste! 🙏 I'm **Gulabi**, your Jaipur Craft Assistant.\n\nAsk me anything about our hand block-printed duffles, totes, wholesale prices, or fabric care!`,
       quickReplies: [
         '🛍️ Show Bestsellers',
         '🧳 Quilted Travel Duffles',
-        '🎁 Wedding Favors (MOQ 25)',
+        '📦 Wholesale & Bulk (MOQ 25)',
         '🧵 How are products made?',
         '🚚 Shipping & Timelines'
       ],
@@ -173,7 +173,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
         quickReplies: [
           '🛍️ Show Bestsellers',
           '🧳 Quilted Travel Duffles',
-          '🎁 Wedding Favors (MOQ 25)',
+          '📦 Wholesale & Bulk (MOQ 25)',
           '🧵 How are products made?'
         ],
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -397,7 +397,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder={isListening ? 'Listening...' : 'Ask about bags, wedding orders, prints...'}
+              placeholder={isListening ? 'Listening...' : 'Ask about bags, wholesale orders, prints...'}
               className="flex-1 rounded-xl border border-ink/20 bg-ivory/40 px-3.5 py-2 text-xs text-ink placeholder-ink/40 outline-none focus:border-rose focus:bg-white focus:ring-2 focus:ring-rose/20"
             />
 

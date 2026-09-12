@@ -4,11 +4,11 @@ const reviews = [
   {
     name: 'Pooja Singhal',
     location: 'Delhi NCR',
-    role: 'Wedding Favors (85 Pcs)',
+    role: 'Artisan Gifting (85 Pcs)',
     rating: 5,
-    title: 'Exquisite Mehendi Return Favors!',
+    title: 'Exquisite Handcrafted Gifting Pouches!',
     comment:
-      'We ordered 85 Marigold Bloom Pouches for my sister’s Mehendi giveaway hampers. Every guest raved about the fabric richness, diamond quilting, and artisan tassels. Dispatched right on time with custom tags!',
+      'We ordered 85 Marigold Bloom Pouches for our artisan gifting hampers. Everyone raved about the fabric richness, diamond quilting, and artisan tassels. Dispatched right on time with custom tags!',
     product: 'Marigold Bloom Pouch Trio',
   },
   {
@@ -53,7 +53,7 @@ export default function Reviews() {
               <Sparkles size={13} /> Verified Customer Love
             </p>
             <h2 className="section-title">
-              Loved by Brides, Boutiques<br />
+              Loved by Boutiques, Travelers<br />
               <i>& Everyday Carriers.</i>
             </h2>
           </div>

@@ -18,7 +18,7 @@ const productCategories = [
 
 const quantityRanges = [
   '25 - 50 pcs (Starter Wholesale)',
-  '51 - 100 pcs (Weddings / Events)',
+  '51 - 100 pcs (Mid-Volume Wholesale)',
   '101 - 250 pcs (Festive / Corporate)',
   '251 - 500 pcs (Boutique Orders)',
   '500+ pcs (Large Scale Production)',
@@ -34,8 +34,8 @@ const timelineOptions = [
 const bulkPerks = [
   {
     icon: Gift,
-    title: 'Weddings & Celebrations',
-    desc: 'Mehendi & Sangeet favors, bridesmaid vanity kits, and personalized return gifts handcrafted in Jaipur.',
+    title: 'Bespoke Artisan Gifting',
+    desc: 'Premium gift hampers, vanity kits, and personalized keepsake bags handcrafted with custom tags.',
   },
   {
     icon: Building2,
@@ -61,7 +61,7 @@ export default function BulkOrder() {
     phone: '',
     email: '',
     selectedProducts: ['Quilted Tote Bags', 'Vanity Boxes & Pouches'],
-    quantity: '51 - 100 pcs (Weddings / Events)',
+    quantity: '51 - 100 pcs (Mid-Volume Wholesale)',
     timeline: 'Within 2 - 3 Weeks',
     notes: '',
   })
@@ -88,7 +88,7 @@ export default function BulkOrder() {
       `*🌟 NEW BULK / WHOLESALE ENQUIRY - Craft of Pink City*`,
       `----------------------------------------`,
       `👤 *Name:* ${formData.name || 'Not provided'}`,
-      formData.company ? `🏢 *Company / Event:* ${formData.company}` : '',
+      formData.company ? `🏢 *Company / Studio:* ${formData.company}` : '',
       `📞 *Phone / WhatsApp:* ${formData.phone || 'Not provided'}`,
       formData.email ? `✉️ *Email:* ${formData.email}` : '',
       `🛍️ *Interested In:* ${formData.selectedProducts.join(', ')}`,
@@ -126,7 +126,7 @@ export default function BulkOrder() {
               <i>Cherished for a Lifetime.</i>
             </h2>
             <p className="body-copy">
-              Planning wedding favors, festive corporate hampers, or stocking your boutique? We craft bespoke,
+              Stocking your boutique, curating corporate hampers, or planning bulk retail dispatches? We craft bespoke,
               artisan block-printed collections in bulk with personalized branding and tiered wholesale pricing.
             </p>
           </div>
@@ -194,7 +194,7 @@ export default function BulkOrder() {
                 <div className="mt-8 space-y-4">
                   <div className="flex items-start gap-3">
                     <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-leaf" />
-                    <p className="text-xs text-ink/80"><strong>Custom Tagging & Packaging:</strong> Brand tags, wedding monograms & festive ribbons.</p>
+                    <p className="text-xs text-ink/80"><strong>Custom Tagging & Packaging:</strong> Brand tags, custom monograms & festive ribbons.</p>
                   </div>
                   <div className="flex items-start gap-3">
                     <ShieldCheck size={18} className="mt-0.5 shrink-0 text-leaf" />
@@ -248,12 +248,12 @@ export default function BulkOrder() {
                   </div>
                   <div>
                     <label htmlFor="bulk-company" className="block text-xs font-bold uppercase tracking-wider text-ink/80 mb-2">
-                      Organization / Event Name
+                      Organization / Studio Name
                     </label>
                     <input
                       id="bulk-company"
                       type="text"
-                      placeholder="e.g. Wedding / Company Name"
+                      placeholder="e.g. Boutique, Studio, or Company Name"
                       value={formData.company}
                       onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                       className="w-full rounded-xl border border-ink/20 bg-ivory/50 px-4 py-3 text-sm text-ink outline-none transition focus:border-rose focus:bg-white focus:ring-2 focus:ring-rose/20"

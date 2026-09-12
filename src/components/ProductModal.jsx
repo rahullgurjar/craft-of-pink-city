@@ -360,7 +360,7 @@ export default function ProductModal({
                   </div>
 
                   <span className="text-[11px] text-ink/60">
-                    Need 25+ pieces for wedding favors or gifting? Special wholesale rates apply.
+                    Need 25+ pieces for wholesale or bulk orders? Tiered wholesale rates apply.
                   </span>
                 </div>
               </div>
@@ -405,7 +405,7 @@ export default function ProductModal({
                     href="#bulk-orders"
                     onClick={onClose}
                     className="flex items-center justify-center rounded-xl border border-ink/15 bg-white px-3 py-2.5 text-xs font-semibold text-ink/80 hover:border-rose hover:text-rose transition-all"
-                    title="Customize for Wedding / Corporate Hampers"
+                    title="Customize for Wholesale / Corporate Hampers"
                   >
                     Bulk Form
                   </a>

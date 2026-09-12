@@ -35,7 +35,7 @@ export const STORE_CONTEXT = {
   techniques:
     'Traditional woodblock carving, Sanganeri floral block printing, Bagru natural vegetable dyes, Dabu mud-resist indigo printing, machine diamond & channel quilting.',
   wholesaleMOQ:
-    '25 pieces minimum order quantity per category (mix and match patterns allowed). Tiered discounts: 15-20% (25-50 pcs), 25-30% (51-100 pcs), 35%+ (100+ pcs). Custom couple monogram or corporate tags included free.',
+    '25 pieces minimum order quantity per category (mix and match patterns allowed). Tiered discounts: 15-20% (25-50 pcs), 25-30% (51-100 pcs), 35%+ (100+ pcs). Custom branding labels, store logo cards, or gift packaging included.',
   shipping:
     'Dispatches within 24-48 hours. India: 2-5 business days via express courier (Bluedart, Delhivery, DTDC). International: 4-7 business days globally via DHL/FedEx Express.',
   care: 'Gentle hand wash in cold water with mild liquid detergent. Shade dry only. Do not bleach or machine tumble. Warm steam iron on cotton setting.',
@@ -70,7 +70,7 @@ export function processUserMessage(userMessage, cartContext = null) {
   if (!isContentSafe(query)) {
     return {
       text: `Namaste. 🙏 I am **Gulabi**, the dedicated AI assistant for *Craft of Pink City*.\n\nI am here exclusively to help you with our handcrafted Jaipur bags, orders, wholesale inquiries, fabric care, dimensions, and customer service.\n\nPlease let me know how I can assist with our collection or order inquiries!`,
-      quickReplies: ['🛍️ Browse Collection', '🧳 Quilted Duffles', '🎁 Wedding Favors (MOQ 25)', '🧼 Fabric Care']
+      quickReplies: ['🛍️ Browse Collection', '🧳 Quilted Duffles', '📦 Wholesale & Bulk (MOQ 25)', '🧼 Fabric Care']
     }
   }
 
@@ -110,11 +110,11 @@ function synthesizeDynamicResponse(query, cartContext) {
   // 1. GREETINGS & CASUAL INTROS
   if (isGreeting(q)) {
     return {
-      text: `Namaste! 🙏 I'm **Gulabi**, your personal Jaipur Craft & Shopping Assistant at *Craft of Pink City*.\n\nWhether you're looking for everyday quilted totes, travel duffles, wedding favors, wholesale pricing, or fabric details, I am here to answer everything instantly. How can I help you today?`,
+      text: `Namaste! 🙏 I'm **Gulabi**, your personal Jaipur Craft & Shopping Assistant at *Craft of Pink City*.\n\nWhether you're looking for everyday quilted totes, travel duffles, boutique wholesale pricing, or fabric details, I am here to answer everything instantly. How can I help you today?`,
       quickReplies: [
         '🛍️ Show Bestsellers',
         '🧳 Quilted Travel Duffles',
-        '🎁 Wedding Favors (MOQ 25)',
+        '📦 Wholesale & Bulk (MOQ 25)',
         '📏 Bag Sizes & Dimensions',
         '🚚 Shipping & Delivery'
       ]
@@ -124,8 +124,8 @@ function synthesizeDynamicResponse(query, cartContext) {
   // 2. GRATITUDE / COURTESY
   if (isGratitude(q)) {
     return {
-      text: `You are most welcome! 🌸 It is our absolute joy to assist you. If you need help with dimensions, custom monogramming, or placing an order, just message me here or tap WhatsApp to speak with our workshop team. Have a wonderful day!`,
-      quickReplies: ['🛍️ Browse Retail Collection', '🎁 Wholesale Inquiries', '💬 Chat on WhatsApp']
+      text: `You are most welcome! 🌸 It is our absolute joy to assist you. If you need help with dimensions, custom branding tags, or placing an order, just message me here or tap WhatsApp to speak with our workshop team. Have a wonderful day!`,
+      quickReplies: ['🛍️ Browse Retail Collection', '📦 Wholesale Inquiries', '💬 Chat on WhatsApp']
     }
   }
 
@@ -134,8 +134,8 @@ function synthesizeDynamicResponse(query, cartContext) {
     hasPhrase(q, ['who are you', 'what is your name', 'about you', 'about pink city', 'who made you', 'about this store', 'tell me about yourself'])
   ) {
     return {
-      text: `🌸 **About Gulabi & Craft of Pink City:**\n\n• **I am Gulabi**, the AI concierge for *Craft of Pink City*—a luxury handcrafted textile studio based in **Jaipur, Rajasthan**.\n• **Our Mission:** We celebrate generational Rajasthani block-printing heritage (Sanganeri, Bagru, Dabu) by crafting premium **100% pure quilted cotton** travel duffles, tote bags, vanity boxes, laptop sleeves, and gifting favors.\n• **Direct Artisan Workshop:** Every piece is printed with hand-carved teak wood blocks, padded with soft batting, and tailored with artisan-beaded tassels.`,
-      quickReplies: ['🛍️ Show Bestsellers', '🧳 Quilted Duffles', '🎁 Bulk / Wedding Orders', '🧵 How Bags Are Made']
+      text: `🌸 **About Gulabi & Craft of Pink City:**\n\n• **I am Gulabi**, the AI concierge for *Craft of Pink City*—a luxury handcrafted textile studio based in **Jaipur, Rajasthan**.\n• **Our Mission:** We celebrate generational Rajasthani block-printing heritage (Sanganeri, Bagru, Dabu) by crafting premium **100% pure quilted cotton** travel duffles, tote bags, vanity boxes, laptop sleeves, and boutique accessories.\n• **Direct Artisan Workshop:** Every piece is printed with hand-carved teak wood blocks, padded with soft batting, and tailored with artisan-beaded tassels.`,
+      quickReplies: ['🛍️ Show Bestsellers', '🧳 Quilted Duffles', '📦 Wholesale & Bulk Catalog', '🧵 How Bags Are Made']
     }
   }
 
@@ -203,15 +203,15 @@ function synthesizeDynamicResponse(query, cartContext) {
         label: `Inquire International Order for ${countryName}`,
         url: `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hello Craft of Pink City, I would like to place an international order for delivery to ${countryName}. Please assist with shipping rates.`)}`
       },
-      quickReplies: ['🧳 Quilted Travel Duffles', '🎁 Bulk Orders / Gifting', '💳 Payment Methods']
+      quickReplies: ['🧳 Quilted Travel Duffles', '📦 Wholesale & Bulk Catalog', '💳 Payment Methods']
     }
   }
 
-  // 8. BULK ORDERS, WEDDING FAVORS & QUANTITY QUOTES
-  const qtyMatch = q.match(/(\d+)\s*(pcs|pieces|bags|units|pouches|sets|totes|duffles|favors|gifts)?/i)
+  // 8. WHOLESALE, BULK ORDERS & QUANTITY QUOTES
+  const qtyMatch = q.match(/(\d+)\s*(pcs|pieces|bags|units|pouches|sets|totes|duffles|hampers|gifts)?/i)
   if (
     qtyMatch ||
-    hasWord(q, ['bulk', 'wholesale', 'wedding', 'favor', 'favors', 'mehendi', 'sangeet', 'haldi', 'moq', 'resell', 'corporate', 'hamper', 'hampers', 'discount'])
+    hasWord(q, ['bulk', 'wholesale', 'moq', 'resell', 'retail', 'boutique', 'corporate', 'hamper', 'hampers', 'discount', 'quantity', 'units'])
   ) {
     const qty = qtyMatch ? parseInt(qtyMatch[1], 10) : null
     let slabDiscount = '15% to 35%+'
@@ -225,18 +225,18 @@ function synthesizeDynamicResponse(query, cartContext) {
     }
 
     return {
-      text: `🎉 **Wholesale & Wedding Favors Program ${pieceNote}:**\n\n• **Low MOQ:** Starts at just **25 pieces** per category (mix and match colors/prints freely).\n• **Discount Tier:** **${slabDiscount} discount** off retail prices.\n• **Free Custom Monogramming:** Personalized bride & groom tags, wedding dates, or company logos printed on each bag.\n• **Sample Approval:** Physical sample piece dispatched within **48 hours** for your review.\n• **Color Schemes:** Customized prints for Mehendi (Greens), Haldi (Yellows), Sangeet (Crimson/Pink), and Corporate themes.\n• **Doorstep Delivery:** Insured express bulk courier across India and worldwide.`,
+      text: `🎉 **Wholesale & Bulk Orders Program ${pieceNote}:**\n\n• **Low MOQ:** Starts at just **25 pieces** per category (mix and match colors/prints freely).\n• **Discount Tier:** **${slabDiscount} discount** off retail prices.\n• **Free Custom Branding:** Personalized brand tags, store logos, or custom labels printed on each bag.\n• **Sample Approval:** Physical sample piece dispatched within **48 hours** for your review.\n• **Color Themes:** Wide variety of traditional Bagru indigo, Sanganeri floral, and modern pastel prints.\n• **Doorstep Delivery:** Insured express bulk courier across India and worldwide.`,
       action: {
         type: 'LINK',
         label: qty ? `Get Wholesale Quote for ${qty} Pcs on WhatsApp` : 'Get Wholesale Catalog on WhatsApp',
         url: `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
           qty
             ? `Hello Craft of Pink City, I would like to inquire about a bulk order for ${qty} pieces. Please share catalog pricing and discount slabs.`
-            : 'Hello Craft of Pink City, please share your bulk wholesale catalog and pricing slabs for wedding favors/corporate orders.'
+            : 'Hello Craft of Pink City, please share your bulk wholesale catalog and pricing slabs for corporate/boutique orders.'
         )}`,
         internalAnchor: '#bulk-orders'
       },
-      quickReplies: ['🌸 Pouch Trios for Gifting', '💄 Vanity Boxes MOQ', '🧳 Quilted Duffles', 'Sample Piece Dispatch']
+      quickReplies: ['🌸 Pouch Trios in Bulk', '💄 Vanity Boxes MOQ', '🧳 Quilted Duffles', 'Sample Piece Dispatch']
     }
   }
 
@@ -283,7 +283,7 @@ function synthesizeDynamicResponse(query, cartContext) {
     if (hasWord(q, ['pouch', 'trio', 'pouches'])) {
       return {
         text: `🌸 **Pouch Trio (Set of 3) Nested Dimensions:**\n\n• **Large Pouch:** **9.0" × 6.0"** (makeup, skincare, chargers).\n• **Medium Pouch:** **7.5" × 5.0"** (medicines, cards, lipsticks).\n• **Small Pouch:** **6.0" × 4.0"** (coins, jewelry, earphones).\n• All 3 pouches nest inside each other when empty to save space!`,
-        quickReplies: ['Show Pouch Trios', 'Wedding Favor MOQ', 'Order on WhatsApp']
+        quickReplies: ['Show Pouch Trios', 'Wholesale MOQ (25 Pcs)', 'Order on WhatsApp']
       }
     }
     if (hasWord(q, ['yoga', 'mat'])) {
@@ -311,8 +311,8 @@ function synthesizeDynamicResponse(query, cartContext) {
     }
     if (hasWord(q, 'vanity') || hasWord(q, 'pouch')) {
       return {
-        text: `⚖️ **Vanity Box vs. Pouch Trio:**\n\n• **Structured Vanity Box (9.5"×6.5"×5.5"):**\n  - *Best For:* Storing full-size skincare bottles, perfumes, and foundation upright on dressers and during travel.\n  - *Structure:* Firm padded walls with top handle.\n• **Pouch Trio (Set of 3 Nested Pouches):**\n  - *Best For:* Handbag organizing, makeup touch-ups, chargers, coins, and wedding favor gifting.\n  - *Structure:* Soft, flexible, collapsible.\n\n*Recommendation:* The **Vanity Box** is ideal for travel toiletries; the **Pouch Trio** is our top pick for gifting hampers!`,
-        quickReplies: ['Show Vanity Boxes', 'Show Pouch Sets', 'Wedding Favors MOQ']
+        text: `⚖️ **Vanity Box vs. Pouch Trio:**\n\n• **Structured Vanity Box (9.5"×6.5"×5.5"):**\n  - *Best For:* Storing full-size skincare bottles, perfumes, and foundation upright on dressers and during travel.\n  - *Structure:* Firm padded walls with top handle.\n• **Pouch Trio (Set of 3 Nested Pouches):**\n  - *Best For:* Handbag organizing, makeup touch-ups, chargers, coins, and gifting hampers.\n  - *Structure:* Soft, flexible, collapsible.\n\n*Recommendation:* The **Vanity Box** is ideal for travel toiletries; the **Pouch Trio** is our top pick for organizing and bulk gifting!`,
+        quickReplies: ['Show Vanity Boxes', 'Show Pouch Sets', 'Wholesale MOQ (25 Pcs)']
       }
     }
   }
@@ -346,7 +346,7 @@ function synthesizeDynamicResponse(query, cartContext) {
   ) {
     return {
       text: `💳 **Payment Modes & COD Policy:**\n\n• **Accepted Payment Modes:** UPI (Google Pay, PhonePe, Paytm, BHIM), Net Banking / IMPS, Credit & Debit Cards (Visa, Mastercard, RuPay, Amex), and International Wire Transfer (SWIFT).\n• **About COD (Cash on Delivery):** Because each piece is handcrafted, inspected, and shipped directly from our artisan workshop in Jaipur, we operate on direct digital payment to guarantee dispatch, reserve inventory, and pay artisans upfront without transit-return waste.\n• **100% Secure & Verified:** Instant digital receipt and direct courier tracking link provided upon confirmation.`,
-      quickReplies: ['🛍️ Browse Collection', '🎁 Wholesale Inquiries', '💬 Chat on WhatsApp']
+      quickReplies: ['🛍️ Browse Collection', '📦 Wholesale Inquiries', '💬 Chat on WhatsApp']
     }
   }
 
@@ -366,12 +366,12 @@ function synthesizeDynamicResponse(query, cartContext) {
     }
   }
 
-  // 16. GIFTING, GIFT NOTES & WEDDING HAMPERS
+  // 16. GIFTING, GIFT NOTES & CORPORATE HAMPERS
   if (
     hasWord(q, ['gift', 'gifting', 'present', 'presents', 'birthday', 'anniversary', 'sister', 'mother', 'friend', 'wrap', 'note', 'hamper'])
   ) {
     return {
-      text: `🎁 **Artisan Gifting & Handwritten Notes:**\n\n• **Personalized Gift Notes:** We include a complimentary handwritten artisan note card with your custom message!\n• **Direct Recipient Delivery:** We can ship directly to your recipient's address with discreet pricing.\n• **Gift Packaging:** Beautifully wrapped in sustainable tissue with handmade fabric-bead tags.\n• **Top Gifting Choices:**\n  1. **Vanity Box & Pouch Trio Bundle** (Ideal for bridesmaids, mothers & sisters)\n  2. **Quilted Travel Duffle** (Perfect for frequent travelers & weekend getaways)\n  3. **Padded Laptop Sleeve** (Thoughtful gift for working professionals & students)`,
+      text: `🎁 **Artisan Gifting & Handwritten Notes:**\n\n• **Personalized Gift Notes:** We include a complimentary handwritten artisan note card with your custom message!\n• **Direct Recipient Delivery:** We can ship directly to your recipient's address with discreet pricing.\n• **Gift Packaging:** Beautifully wrapped in sustainable tissue with handmade fabric-bead tags.\n• **Top Gifting Choices:**\n  1. **Vanity Box & Pouch Trio Bundle** (Ideal for skincare lovers & organizers)\n  2. **Quilted Travel Duffle** (Perfect for frequent travelers & weekend getaways)\n  3. **Padded Laptop Sleeve** (Thoughtful gift for working professionals & students)`,
       quickReplies: ['Show Pouch Sets', 'Show Vanity Boxes', 'Show Travel Duffles', 'Order on WhatsApp']
     }
   }
@@ -383,7 +383,7 @@ function synthesizeDynamicResponse(query, cartContext) {
   ) {
     return {
       text: `🏷️ **Craft of Pink City Price Overview:**\n\n• **Pouch Trios (Set of 3):** ₹899 – ₹1,099\n• **Padded Laptop Sleeves:** ₹1,199 – ₹1,399\n• **Structured Vanity Boxes:** ₹1,099 – ₹1,349\n• **Quilted Tote Bags & Ruffle Bags:** ₹1,299 – ₹1,599\n• **Quilted Barrel Travel Duffles:** ₹1,699 – ₹1,899\n• **Yoga Mat Carriers:** ₹1,199 – ₹1,399\n\n💡 *Wholesale & Bulk Orders (25+ pcs) receive 15% to 35%+ tiered volume discounts!*`,
-      quickReplies: ['🛍️ Browse Catalog', '🎁 Bulk / Wedding MOQ', '🧳 Travel Duffles', 'Order on WhatsApp']
+      quickReplies: ['🛍️ Browse Catalog', '📦 Wholesale MOQ (25 Pcs)', '🧳 Travel Duffles', 'Order on WhatsApp']
     }
   }
 
@@ -478,7 +478,7 @@ function buildGenerativeContextResponse(userQuery) {
   )
 
   return {
-    text: `Regarding your question: *"**${userQuery}**"*\n\nAt *Craft of Pink City*, every product is handcrafted in our Jaipur workshop using **100% pure quilted cotton** and authentic handblock printing. Whether you are looking for single retail pieces, customized wedding hampers (MOQ 25 pcs), specific dimensions, or custom dispatches, our workshop team would be delighted to assist you!\n\nFeel free to ask another question or tap below to connect with our artisan team on WhatsApp:`,
+    text: `Regarding your question: *"**${userQuery}**"*\n\nAt *Craft of Pink City*, every product is handcrafted in our Jaipur workshop using **100% pure quilted cotton** and authentic handblock printing. Whether you are looking for single retail pieces, customized bulk dispatches (MOQ 25 pcs), specific dimensions, or corporate hampers, our workshop team would be delighted to assist you!\n\nFeel free to ask another question or tap below to connect with our artisan team on WhatsApp:`,
     action: {
       type: 'LINK',
       label: 'Ask Artisan Workshop on WhatsApp',
@@ -486,7 +486,7 @@ function buildGenerativeContextResponse(userQuery) {
     },
     quickReplies: [
       '📏 Bag Dimensions & Sizes',
-      '🎁 Wedding Favors (MOQ 25)',
+      '📦 Wholesale & Bulk (MOQ 25)',
       '🧼 Wash & Care Guidelines',
       '🚚 Shipping & Dispatch',
       '🛍️ Show Bestsellers'
@@ -558,7 +558,7 @@ async function callGeminiAPI(userQuery, apiKey, cartContext) {
 Key Facts:
 - Products: 100% pure quilted cotton travel duffles (18x10x10", 28L cabin approved), tote bags (16x14x4.5", fits 15.6" laptop), ruffled bags, yoga mat carriers (28.5x6.8"), padded laptop sleeves (fits 13-15.6" with 8mm foam), vanity boxes (9.5x6.5x5.5"), and pouch sets.
 - Artisan Craft: Hand block-printed in Jaipur using hand-carved wood blocks and natural/azo-free dyes.
-- Wholesale/Bulk: Starts at MOQ 25 pcs with customized monogram tags, tiered discounts (15-35%).
+- Wholesale/Bulk: Starts at MOQ 25 pcs with customized brand labels/tags, tiered discounts (15-35%).
 - Shipping: Ships in 24-48h. Pan-India 2-5 days, International (USA, UK, Canada, Dubai, Europe) 4-7 days via DHL/FedEx.
 - Payment: UPI, Cards, Bank Transfer. COD is not available.
 - Wash Care: Gentle cold hand wash, shade dry, warm steam iron.
@@ -591,6 +591,6 @@ Answer the customer's question directly, accurately, and politely with bullet po
 
   return {
     text: generatedText,
-    quickReplies: ['🛍️ Browse Collection', '🎁 Wedding Favors (MOQ 25)', '🚚 Shipping Timelines', '🧼 Fabric Care']
+    quickReplies: ['🛍️ Browse Collection', '📦 Wholesale & Bulk (MOQ 25)', '🚚 Shipping Timelines', '🧼 Fabric Care']
   }
 }
