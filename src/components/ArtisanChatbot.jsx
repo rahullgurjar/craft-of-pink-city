@@ -144,6 +144,7 @@ const STANDARD_HUMAN_SPEAKING_SPEED = 1.0
 /**
  * Intelligent Natural Voice Selector
  * Matches language (Hindi, Hinglish, English) and selects high quality Neural / Natural voices
+ * Strictly penalizes and filters robotic legacy SAPI desktop voices.
  */
 function rankAndSelectNaturalVoice(voices, personaId = 'jaipur', targetLang = 'en') {
   if (!voices || voices.length === 0) return null
@@ -184,7 +185,7 @@ function rankAndSelectNaturalVoice(voices, personaId = 'jaipur', targetLang = 'e
   // Filter out male voices
   const femaleVoices = voices.filter((v) => !isMale(v.name))
 
-  // If Target Language is Hindi, strictly prioritize Hindi voices first
+  // If Target Language is Hindi, strictly prioritize authentic Hindi voices first
   if (targetLang === 'hi') {
     const hindiKeywords = ['swara', 'google हिन्दी', 'google hi', 'kalpana', 'geeta', 'shruti', 'hindi']
     for (const kw of hindiKeywords) {
@@ -199,7 +200,7 @@ function rankAndSelectNaturalVoice(voices, personaId = 'jaipur', targetLang = 'e
     if (anyHindi) return anyHindi
   }
 
-  // If Hinglish, prioritize Indian English / Hindi voices (Neerja, Swara, Google Indian English)
+  // If Hinglish, prioritize Indian English / Hindi natural voices (Neerja, Swara, Google Indian English)
   if (targetLang === 'hinglish') {
     const hinglishKeywords = ['neerja', 'swara', 'google हिन्दी', 'indian english', 'heera online', 'anjali', 'geeta']
     for (const kw of hinglishKeywords) {
@@ -245,11 +246,23 @@ function rankAndSelectNaturalVoice(voices, personaId = 'jaipur', targetLang = 'e
 }
 
 /**
- * Naturalizes text for human speech in English, Hindi, and Hinglish without emojis
+ * Naturalizes text for human speech in English, Hindi, and Hinglish.
+ * Full expansion of symbols (&, +, /, @, #, %, ~, ₹, $, quotes, dimensions, abbreviations)
+ * and natural conversational micro-pauses.
  */
 function naturalizeTextForSpeech(text, targetLang = 'en') {
   if (!text) return ''
+
   let cleaned = text
+    // 1. Decode HTML entities
+    .replace(/&amp;/gi, ' and ')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&nbsp;/gi, ' ')
+
+    // 2. Strip Markdown syntax
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
     .replace(/https?:\/\/\S+/g, '')
     .replace(/```[\s\S]*?```/g, '')
@@ -257,74 +270,206 @@ function naturalizeTextForSpeech(text, targetLang = 'en') {
     .replace(/\*\*([^*]+)\*\*/g, '$1')
     .replace(/\*([^*]+)\*/g, '$1')
     .replace(/_{1,2}([^_]+)_{1,2}/g, '$1')
+    .replace(/~~([^~]+)~~/g, '$1')
     .replace(/#+\s*/g, '')
-    .replace(/[^\w\s.,!?:;'"–—\u0900-\u097F]/g, ' ')
 
+    // 3. Parentheses into natural conversational pauses
+    .replace(/\(([^)]+)\)/g, ', $1, ')
+
+    // 4. Bullet points and list markers into smooth pauses
+    .replace(/^\s*[\u2022\u2023\u25E6\u2043\u2219\*\-\+]\s+/gm, '. ')
+    .replace(/^\s*\d+\.\s+/gm, '. ')
+
+    // 5. Special compound abbreviations BEFORE single symbol replacements
+    .replace(/\bw\/o\s+/gi, targetLang === 'hi' ? ' के बिना ' : targetLang === 'hinglish' ? ' bina ' : ' without ')
+    .replace(/\bw\/\s+/gi, targetLang === 'hi' ? ' के साथ ' : targetLang === 'hinglish' ? ' with ' : ' with ')
+    .replace(/\band\/or\b/gi, targetLang === 'hi' ? ' और या ' : targetLang === 'hinglish' ? ' aur ya ' : ' and or ')
+    .replace(/\bT&C\b|\bT&Cs\b/gi, targetLang === 'hi' ? 'नियम और शर्तें' : targetLang === 'hinglish' ? 'Terms aur Conditions' : 'Terms and Conditions')
+    .replace(/\bB&B\b/gi, 'Bed and Breakfast')
+
+    // 6. Number ranges with hyphen: e.g. 5-7 days -> 5 to 7 days
+    .replace(/(\d+)\s*[-–—]\s*(\d+)\s*(days?|दिन|din|hrs?|hours?|weeks?|months?)/gi, (m, p1, p2, p3) => {
+      if (targetLang === 'hi') return `${p1} से ${p2} ${p3}`
+      if (targetLang === 'hinglish') return `${p1} se ${p2} ${p3}`
+      return `${p1} to ${p2} ${p3}`
+    })
+
+  // 7. Expand universal symbols & abbreviations by language
   if (targetLang === 'hi') {
     cleaned = cleaned
-      .replace(/₹\s*([0-9,]+)/g, '$1 रुपये')
-      .replace(/(\d+)\s*["”]\s*[×xX]\s*(\d+)\s*["”]\s*[×xX]\s*(\d+)\s*["”]/g, '$1 बाई $2 बाई $3 इंच')
-      .replace(/(\d+)\s*["”]\s*[×xX]\s*(\d+)\s*["”]/g, '$1 बाई $2 इंच')
-      .replace(/(\d+)\s*["”]/g, '$1 इंच')
-      .replace(/(\d+)\s*%\s*[–-]\s*(\d+)\s*%/g, '$1 से $2 प्रतिशत')
-      .replace(/(\d+)\s*%/g, '$1 प्रतिशत')
-      .replace(/\bMOQ\s*(\d+)\b/gi, 'कम से कम $1 पीस')
-      .replace(/\bMOQ\b/gi, 'न्यूनतम ऑर्डर')
-      .replace(/\bpcs\b/gi, 'पीस')
+      // Ampersand & Conjunctions
+      .replace(/\s*&\s*/g, ' और ')
+      .replace(/\s*\+\s*/g, ' प्लस ')
+      .replace(/(\w+)\s*[/]\s*(\w+)/g, '$1 या $2')
+      .replace(/\s*[/]\s*/g, ' या ')
+      .replace(/\s*[@]\s*/g, ' एट ')
+      .replace(/#(\d+)/g, 'नंबर $1')
+      .replace(/[~～≈](\d+)/g, 'लगभग $1')
+
+      // Currencies
+      .replace(/₹\s*([0-9,]+(?:\.\d+)?)/g, '$1 रुपये')
+      .replace(/\b(?:Rs\.?|INR)\s*([0-9,]+(?:\.\d+)?)/gi, '$1 रुपये')
+      .replace(/\$\s*([0-9,]+(?:\.\d+)?)/g, '$1 डॉलर')
+
+      // Dimensions & Measurements
+      .replace(/(\d+(?:\.\d+)?)\s*["”]\s*[×xX]\s*(\d+(?:\.\d+)?)\s*["”]\s*[×xX]\s*(\d+(?:\.\d+)?)\s*["”]/g, '$1 बाई $2 बाई $3 इंच')
+      .replace(/(\d+(?:\.\d+)?)\s*["”]\s*[×xX]\s*(\d+(?:\.\d+)?)\s*["”]/g, '$1 बाई $2 इंच')
+      .replace(/(\d+(?:\.\d+)?)\s*["”]\s*[–-]\s*(\d+(?:\.\d+)?)\s*["”]/g, '$1 से $2 इंच')
+      .replace(/(\d+(?:\.\d+)?)\s*["”]/g, '$1 इंच')
+      .replace(/(\d+(?:\.\d+)?)\s*cm\b/gi, '$1 सेंटीमीटर')
+      .replace(/(\d+(?:\.\d+)?)\s*mm\b/gi, '$1 मिलीमीटर')
+      .replace(/(\d+(?:\.\d+)?)\s*kg\b/gi, '$1 किलोग्राम')
+      .replace(/(\d+(?:\.\d+)?)\s*gm?\b/gi, '$1 ग्राम')
+      .replace(/(\d+(?:\.\d+)?)\s*(?:Litres|Liters|L)\b/gi, '$1 लीटर')
+
+      // Percentages
+      .replace(/(\d+(?:\.\d+)?)\s*%\s*[–-]\s*(\d+(?:\.\d+)?)\s*%\+?/g, '$1 से $2 प्रतिशत')
+      .replace(/(\d+(?:\.\d+)?)\s*%\+/g, '$1 प्रतिशत या अधिक')
+      .replace(/(\d+(?:\.\d+)?)\s*%/g, '$1 प्रतिशत')
+
+      // Common Business & Retail terms
+      .replace(/\bMOQ\s*(\d+)\s*(?:pcs|pieces)?\b/gi, 'कम से कम $1 पीस')
+      .replace(/\bMOQ\b/gi, 'न्यूनतम ऑर्डर मात्रा')
+      .replace(/\b(?:pcs|pc)\b/gi, 'पीस')
+      .replace(/\bvs\.?\s*/gi, 'बनाम ')
+      .replace(/\b(?:e\.g\.|eg\.?)\s*/gi, 'जैसे कि ')
+      .replace(/\b(?:i\.e\.|ie\.?)\s*/gi, 'अर्थात ')
+      .replace(/\b(?:etc\.|etc)\b/gi, 'इत्यादि')
+      .replace(/\b(?:approx\.|approx)\b/gi, 'लगभग')
+      .replace(/\bavail\.?\b/gi, 'उपलब्ध')
+      .replace(/\b(?:incl\.|inc\.)\b/gi, 'सहित')
+      .replace(/\bCOD\b/gi, 'कैश ऑन डिलीवरी')
+      .replace(/\bUPI\b/gi, 'यू पी आई')
+      .replace(/\bGST\b/gi, 'जी एस टी')
+      .replace(/\bPIN:\s*(\d{6})\b/gi, 'पिन कोड $1')
+      .replace(/\bQty:\s*(\d+)/gi, 'मात्रा $1')
   } else if (targetLang === 'hinglish') {
     cleaned = cleaned
-      .replace(/₹\s*([0-9,]+)/g, '$1 rupaye')
+      // Ampersand & Conjunctions
+      .replace(/\s*&\s*/g, ' aur ')
+      .replace(/\s*\+\s*/g, ' plus ')
+      .replace(/(\w+)\s*[/]\s*(\w+)/g, '$1 ya $2')
+      .replace(/\s*[/]\s*/g, ' ya ')
+      .replace(/\s*[@]\s*/g, ' at ')
+      .replace(/#(\d+)/g, 'Number $1')
+      .replace(/[~～≈](\d+)/g, 'lagbhag $1')
+
+      // Currencies
+      .replace(/₹\s*([0-9,]+(?:\.\d+)?)/g, '$1 rupaye')
+      .replace(/\b(?:Rs\.?|INR)\s*([0-9,]+(?:\.\d+)?)/gi, '$1 rupaye')
+      .replace(/\$\s*([0-9,]+(?:\.\d+)?)/g, '$1 dollars')
+
+      // Dimensions & Measurements
       .replace(/(\d+(?:\.\d+)?)\s*["”]\s*[×xX]\s*(\d+(?:\.\d+)?)\s*["”]\s*[×xX]\s*(\d+(?:\.\d+)?)\s*["”]/g, '$1 by $2 by $3 inch')
       .replace(/(\d+(?:\.\d+)?)\s*["”]\s*[×xX]\s*(\d+(?:\.\d+)?)\s*["”]/g, '$1 by $2 inch')
       .replace(/(\d+(?:\.\d+)?)\s*["”]\s*[–-]\s*(\d+(?:\.\d+)?)\s*["”]/g, '$1 to $2 inch')
       .replace(/(\d+(?:\.\d+)?)\s*["”]/g, '$1 inch')
-      .replace(/(\d+)\s*mm\b/gi, '$1 millimeter')
-      .replace(/[~～](\d+)\s*(?:Litres|Liters|L)\b/gi, 'lagbhag $1 litres')
-      .replace(/(\d+)\s*%\s*[–-]\s*(\d+)\s*%\+?/g, '$1 se $2 percent')
-      .replace(/(\d+)\s*%\+/g, '$1 percent ya usse zyada')
-      .replace(/(\d+)\s*%/g, '$1 percent')
-      .replace(/\bMOQ\s*(\d+)\s*pcs\b/gi, 'minimum $1 pieces ka wholesale order')
-      .replace(/\bMOQ\s*(\d+)\b/gi, 'minimum $1 pieces')
-      .replace(/\bMOQ\b/gi, 'minimum wholesale quantity')
-      .replace(/\bpcs\b/gi, 'pieces')
-      .replace(/\bPIN:\s*(\d{6})\b/gi, 'PIN code $1')
+      .replace(/(\d+(?:\.\d+)?)\s*cm\b/gi, '$1 centimeter')
+      .replace(/(\d+(?:\.\d+)?)\s*mm\b/gi, '$1 millimeter')
+      .replace(/(\d+(?:\.\d+)?)\s*kg\b/gi, '$1 kg')
+      .replace(/(\d+(?:\.\d+)?)\s*gm?\b/gi, '$1 gram')
+      .replace(/(\d+(?:\.\d+)?)\s*(?:Litres|Liters|L)\b/gi, '$1 litres')
+
+      // Percentages
+      .replace(/(\d+(?:\.\d+)?)\s*%\s*[–-]\s*(\d+(?:\.\d+)?)\s*%\+?/g, '$1 se $2 percent')
+      .replace(/(\d+(?:\.\d+)?)\s*%\+/g, '$1 percent ya usse zyada')
+      .replace(/(\d+(?:\.\d+)?)\s*%/g, '$1 percent')
+
+      // Common Business & Retail terms
+      .replace(/\bMOQ\s*(\d+)\s*(?:pcs|pieces)?\b/gi, 'minimum $1 pieces')
+      .replace(/\bMOQ\b/gi, 'minimum order quantity')
+      .replace(/\b(?:pcs|pc)\b/gi, 'pieces')
+      .replace(/\bvs\.?\s*/gi, 'versus ')
+      .replace(/\b(?:e\.g\.|eg\.?)\s*/gi, 'jaise ki ')
+      .replace(/\b(?:i\.e\.|ie\.?)\s*/gi, 'yani ')
+      .replace(/\b(?:etc\.|etc)\b/gi, 'vagerah')
+      .replace(/\b(?:approx\.|approx)\b/gi, 'lagbhag')
+      .replace(/\bavail\.?\b/gi, 'available')
+      .replace(/\b(?:incl\.|inc\.)\b/gi, 'including')
       .replace(/\bCOD\b/gi, 'Cash on Delivery')
+      .replace(/\bUPI\b/gi, 'U P I')
+      .replace(/\bGST\b/gi, 'G S T')
+      .replace(/\bPIN:\s*(\d{6})\b/gi, 'PIN code $1')
       .replace(/\bQty:\s*(\d+)/gi, 'Quantity $1')
   } else {
+    // English (Global)
     cleaned = cleaned
-      .replace(/₹\s*([0-9,]+)/g, '$1 rupees')
-      .replace(/\bRs\.?\s*([0-9,]+)/gi, '$1 rupees')
+      // Ampersand & Conjunctions
+      .replace(/\s*&\s*/g, ' and ')
+      .replace(/\s*\+\s*/g, ' plus ')
+      .replace(/(\w+)\s*[/]\s*(\w+)/g, '$1 or $2')
+      .replace(/\s*[/]\s*/g, ' or ')
+      .replace(/\s*[@]\s*/g, ' at ')
+      .replace(/#(\d+)/g, 'Number $1')
+      .replace(/[~～≈](\d+)/g, 'about $1')
+
+      // Currencies
+      .replace(/₹\s*([0-9,]+(?:\.\d+)?)/g, '$1 rupees')
+      .replace(/\b(?:Rs\.?|INR)\s*([0-9,]+(?:\.\d+)?)/gi, '$1 rupees')
+      .replace(/\$\s*([0-9,]+(?:\.\d+)?)/g, '$1 dollars')
+
+      // Dimensions & Measurements
       .replace(/(\d+(?:\.\d+)?)\s*["”]\s*[×xX]\s*(\d+(?:\.\d+)?)\s*["”]\s*[×xX]\s*(\d+(?:\.\d+)?)\s*["”]/g, '$1 by $2 by $3 inches')
       .replace(/(\d+(?:\.\d+)?)\s*["”]\s*[×xX]\s*(\d+(?:\.\d+)?)\s*["”]/g, '$1 by $2 inches')
       .replace(/(\d+(?:\.\d+)?)\s*["”]\s*[–-]\s*(\d+(?:\.\d+)?)\s*["”]/g, '$1 to $2 inches')
       .replace(/(\d+(?:\.\d+)?)\s*["”]/g, '$1 inches')
-      .replace(/(\d+)\s*mm\b/gi, '$1 millimeter')
-      .replace(/[~～](\d+)\s*(?:Litres|Liters|L)\b/gi, 'about $1 litres')
-      .replace(/(\d+)\s*(?:Litres|Liters|L)\b/gi, '$1 litres')
-      .replace(/(\d+)\s*%\s*[–-]\s*(\d+)\s*%\+?/g, '$1 to $2 percent')
-      .replace(/(\d+)\s*%\+/g, '$1 percent or more')
-      .replace(/(\d+)\s*%/g, '$1 percent')
-      .replace(/\bMOQ\s*(\d+)\s*pcs\b/gi, 'minimum order of $1 pieces')
-      .replace(/\bMOQ\s*(\d+)\b/gi, 'minimum order of $1 pieces')
+      .replace(/(\d+(?:\.\d+)?)\s*cm\b/gi, '$1 centimeters')
+      .replace(/(\d+(?:\.\d+)?)\s*mm\b/gi, '$1 millimeters')
+      .replace(/(\d+(?:\.\d+)?)\s*kg\b/gi, '$1 kilograms')
+      .replace(/(\d+(?:\.\d+)?)\s*gm?\b/gi, '$1 grams')
+      .replace(/(\d+(?:\.\d+)?)\s*(?:Litres|Liters|L)\b/gi, '$1 litres')
+
+      // Percentages
+      .replace(/(\d+(?:\.\d+)?)\s*%\s*[–-]\s*(\d+(?:\.\d+)?)\s*%\+?/g, '$1 to $2 percent')
+      .replace(/(\d+(?:\.\d+)?)\s*%\+/g, '$1 percent or more')
+      .replace(/(\d+(?:\.\d+)?)\s*%/g, '$1 percent')
+
+      // Common Business & Retail terms
+      .replace(/\bMOQ\s*(\d+)\s*(?:pcs|pieces)?\b/gi, 'minimum order of $1 pieces')
       .replace(/\bMOQ\b/gi, 'minimum order quantity')
-      .replace(/\bpcs\b/gi, 'pieces')
-      .replace(/\bPIN:\s*(\d{6})\b/gi, 'PIN code $1')
+      .replace(/\b(?:pcs|pc)\b/gi, 'pieces')
+      .replace(/\bvs\.?\s*/gi, 'versus ')
+      .replace(/\b(?:e\.g\.|eg\.?)\s*/gi, 'for example, ')
+      .replace(/\b(?:i\.e\.|ie\.?)\s*/gi, 'that is, ')
+      .replace(/\b(?:etc\.|etc)\b/gi, 'and so on')
+      .replace(/\b(?:approx\.|approx)\b/gi, 'approximately')
+      .replace(/\bavail\.?\b/gi, 'available')
+      .replace(/\b(?:incl\.|inc\.)\b/gi, 'including')
       .replace(/\bCOD\b/gi, 'Cash on Delivery')
+      .replace(/\bUPI\b/gi, 'U P I')
+      .replace(/\bGST\b/gi, 'G S T')
+      .replace(/\bPIN:\s*(\d{6})\b/gi, 'PIN code $1')
       .replace(/\bQty:\s*(\d+)/gi, 'Quantity $1')
   }
 
-  return cleaned
-    .replace(/^\s*\d+\.\s+/gm, '. ')
-    .replace(/^\s*[\-\*]\s+/gm, '. ')
+  // 8. Phone Numbers formatting for clear spoken cadence (e.g. +91 99824 51833 -> plus 91, 9 9 8 2 4, 5 1 8 3 3)
+  cleaned = cleaned.replace(/\+91\s*(\d{5})\s*(\d{5})/g, (match, p1, p2) => {
+    return 'plus 91, ' + p1.split('').join(' ') + ', ' + p2.split('').join(' ')
+  })
+
+  // 9. Conversational Human Micro-pauses (inserting natural pauses after greetings & transitions)
+  if (targetLang === 'hi') {
+    cleaned = cleaned.replace(/\b(नमस्ते|धन्यवाद|जरूर|बिल्कुल)\b(?!\s*[,.!?])/g, '$1,')
+  } else if (targetLang === 'hinglish') {
+    cleaned = cleaned.replace(/\b(Namaste|Dhanyawad|Zaroor|Bilkul|Haan ji|Ji)\b(?!\s*[,.!?])/gi, '$1,')
+  } else {
+    cleaned = cleaned.replace(/\b(Hello|Hi|Greetings|Certainly|Sure|Thank you)\b(?!\s*[,.!?])/gi, '$1,')
+  }
+
+  // 10. Final Clean of remaining non-pronounceable special symbols (preserving Devnagari and punctuation)
+  cleaned = cleaned
+    .replace(/[^\w\s.,!?:;'"–—\u0900-\u097F]/g, ' ')
+    .replace(/\s+/g, ' ')
     .replace(/\n+/g, '. ')
     .replace(/\.\s*\.+/g, '.')
     .replace(/,\s*,+/g, ',')
-    .replace(/\s+/g, ' ')
     .trim()
+
+  return cleaned
 }
 
 /**
- * Splits text into natural conversational sentence chunks
+ * Splits text into natural human breath-length clauses (under 110 chars)
  */
 function splitTextIntoSentences(text) {
   if (!text) return []
@@ -335,7 +480,7 @@ function splitTextIntoSentences(text) {
 
   const chunks = []
   for (const s of rawSentences) {
-    if (s.length > 160) {
+    if (s.length > 110) {
       const sub = s.split(/(?<=[,;:])\s+/).filter(Boolean)
       chunks.push(...sub)
     } else {
@@ -529,9 +674,9 @@ export default function ArtisanChatbot({ onSelectProduct }) {
       utterance.lang = lang === 'hi' ? 'hi-IN' : 'en-IN'
     }
 
-    // Locked to 1.0x normal natural human speaking speed
+    // Locked to 1.0x normal natural human speaking speed with warm conversational pitch
     utterance.rate = STANDARD_HUMAN_SPEAKING_SPEED
-    utterance.pitch = 1.0
+    utterance.pitch = 1.02
     utterance.volume = 1.0
 
     utterance.onstart = () => {
@@ -543,13 +688,21 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     utterance.onend = () => {
       if (isCancelledRef.current) return
       currentChunkIndexRef.current += 1
-      playNextSpeechChunk(messageId, persona, lang)
+      setTimeout(() => {
+        if (!isCancelledRef.current) {
+          playNextSpeechChunk(messageId, persona, lang)
+        }
+      }, 35)
     }
 
     utterance.onerror = (e) => {
       if (e.error === 'interrupted' || e.error === 'canceled') return
       currentChunkIndexRef.current += 1
-      playNextSpeechChunk(messageId, persona, lang)
+      setTimeout(() => {
+        if (!isCancelledRef.current) {
+          playNextSpeechChunk(messageId, persona, lang)
+        }
+      }, 35)
     }
 
     window.speechSynthesis.speak(utterance)
