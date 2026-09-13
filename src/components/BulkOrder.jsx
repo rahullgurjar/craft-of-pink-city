@@ -248,12 +248,12 @@ export default function BulkOrder() {
                   </div>
                   <div>
                     <label htmlFor="bulk-company" className="block text-xs font-bold uppercase tracking-wider text-ink/80 mb-2">
-                      Organization / Studio Name
+                      Organization / Studio Name <span className="text-[10px] font-medium text-ink/50 normal-case">(optional)</span>
                     </label>
                     <input
                       id="bulk-company"
                       type="text"
-                      placeholder="e.g. Boutique, Studio, or Company Name"
+                      placeholder="e.g. Boutique, Studio, or Company Name (optional)"
                       value={formData.company}
                       onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                       className="w-full rounded-xl border border-ink/20 bg-ivory/50 px-4 py-3 text-sm text-ink outline-none transition focus:border-rose focus:bg-white focus:ring-2 focus:ring-rose/20"
@@ -279,12 +279,12 @@ export default function BulkOrder() {
                   </div>
                   <div>
                     <label htmlFor="bulk-email" className="block text-xs font-bold uppercase tracking-wider text-ink/80 mb-2">
-                      Email Address
+                      Email Address <span className="text-[10px] font-medium text-ink/50 normal-case">(optional)</span>
                     </label>
                     <input
                       id="bulk-email"
                       type="email"
-                      placeholder="e.g. contact@example.com"
+                      placeholder="e.g. contact@example.com (optional)"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="w-full rounded-xl border border-ink/20 bg-ivory/50 px-4 py-3 text-sm text-ink outline-none transition focus:border-rose focus:bg-white focus:ring-2 focus:ring-rose/20"
