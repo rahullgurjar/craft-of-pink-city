@@ -52,8 +52,7 @@ const resolveProductImage = (image) => {
  */
 export const SUPPORTED_LANGUAGES = [
   { id: 'en', label: 'English', code: 'EN', tag: 'Global' },
-  { id: 'hi', label: 'हिंदी', code: 'HI', tag: 'Hindi' },
-  { id: 'hinglish', label: 'Hinglish', code: 'HN', tag: 'Jaipuri' }
+  { id: 'hi', label: 'हिंदी', code: 'HI', tag: 'Hindi' }
 ]
 
 /**
@@ -143,7 +142,7 @@ const STANDARD_HUMAN_SPEAKING_SPEED = 1.0
 
 /**
  * Intelligent Natural Voice Selector
- * Matches language (Hindi, Hinglish, English) and selects high quality Neural / Natural voices
+ * Matches language (Hindi, English) and selects high quality Neural / Natural voices
  * Strictly penalizes and filters robotic legacy SAPI desktop voices.
  */
 function rankAndSelectNaturalVoice(voices, personaId = 'jaipur', targetLang = 'en') {
@@ -200,19 +199,6 @@ function rankAndSelectNaturalVoice(voices, personaId = 'jaipur', targetLang = 'e
     if (anyHindi) return anyHindi
   }
 
-  // If Hinglish, prioritize Indian English / Hindi natural voices (Neerja, Swara, Google Indian English)
-  if (targetLang === 'hinglish') {
-    const hinglishKeywords = ['neerja', 'swara', 'google हिन्दी', 'indian english', 'heera online', 'anjali', 'geeta']
-    for (const kw of hinglishKeywords) {
-      const match = femaleVoices.find((v) => v.name.toLowerCase().includes(kw) && isHighQualityNeural(v))
-      if (match) return match
-    }
-    for (const kw of hinglishKeywords) {
-      const match = femaleVoices.find((v) => v.name.toLowerCase().includes(kw) && !isLowQualityRobotic(v.name))
-      if (match) return match
-    }
-  }
-
   const persona = VOICE_PERSONAS.find((p) => p.id === personaId) || VOICE_PERSONAS[0]
 
   // Tier 1: Persona match with Neural / High Quality
@@ -246,7 +232,7 @@ function rankAndSelectNaturalVoice(voices, personaId = 'jaipur', targetLang = 'e
 }
 
 /**
- * Naturalizes text for human speech in English, Hindi, and Hinglish.
+ * Naturalizes text for human speech in English and Hindi.
  * Full expansion of symbols (&, +, /, @, #, %, ~, ₹, $, quotes, dimensions, abbreviations)
  * and natural conversational micro-pauses.
  */
@@ -281,16 +267,15 @@ function naturalizeTextForSpeech(text, targetLang = 'en') {
     .replace(/^\s*\d+\.\s+/gm, '. ')
 
     // 5. Special compound abbreviations BEFORE single symbol replacements
-    .replace(/\bw\/o\s+/gi, targetLang === 'hi' ? ' के बिना ' : targetLang === 'hinglish' ? ' bina ' : ' without ')
-    .replace(/\bw\/\s+/gi, targetLang === 'hi' ? ' के साथ ' : targetLang === 'hinglish' ? ' with ' : ' with ')
-    .replace(/\band\/or\b/gi, targetLang === 'hi' ? ' और या ' : targetLang === 'hinglish' ? ' aur ya ' : ' and or ')
-    .replace(/\bT&C\b|\bT&Cs\b/gi, targetLang === 'hi' ? 'नियम और शर्तें' : targetLang === 'hinglish' ? 'Terms aur Conditions' : 'Terms and Conditions')
+    .replace(/\bw\/o\s+/gi, targetLang === 'hi' ? ' के बिना ' : ' without ')
+    .replace(/\bw\/\s+/gi, targetLang === 'hi' ? ' के साथ ' : ' with ')
+    .replace(/\band\/or\b/gi, targetLang === 'hi' ? ' और या ' : ' and or ')
+    .replace(/\bT&C\b|\bT&Cs\b/gi, targetLang === 'hi' ? 'नियम और शर्तें' : 'Terms and Conditions')
     .replace(/\bB&B\b/gi, 'Bed and Breakfast')
 
     // 6. Number ranges with hyphen: e.g. 5-7 days -> 5 to 7 days
     .replace(/(\d+)\s*[-–—]\s*(\d+)\s*(days?|दिन|din|hrs?|hours?|weeks?|months?)/gi, (m, p1, p2, p3) => {
       if (targetLang === 'hi') return `${p1} से ${p2} ${p3}`
-      if (targetLang === 'hinglish') return `${p1} se ${p2} ${p3}`
       return `${p1} to ${p2} ${p3}`
     })
 
@@ -343,54 +328,6 @@ function naturalizeTextForSpeech(text, targetLang = 'en') {
       .replace(/\bGST\b/gi, 'जी एस टी')
       .replace(/\bPIN:\s*(\d{6})\b/gi, 'पिन कोड $1')
       .replace(/\bQty:\s*(\d+)/gi, 'मात्रा $1')
-  } else if (targetLang === 'hinglish') {
-    cleaned = cleaned
-      // Ampersand & Conjunctions
-      .replace(/\s*&\s*/g, ' aur ')
-      .replace(/\s*\+\s*/g, ' plus ')
-      .replace(/(\w+)\s*[/]\s*(\w+)/g, '$1 ya $2')
-      .replace(/\s*[/]\s*/g, ' ya ')
-      .replace(/\s*[@]\s*/g, ' at ')
-      .replace(/#(\d+)/g, 'Number $1')
-      .replace(/[~～≈](\d+)/g, 'lagbhag $1')
-
-      // Currencies
-      .replace(/₹\s*([0-9,]+(?:\.\d+)?)/g, '$1 rupaye')
-      .replace(/\b(?:Rs\.?|INR)\s*([0-9,]+(?:\.\d+)?)/gi, '$1 rupaye')
-      .replace(/\$\s*([0-9,]+(?:\.\d+)?)/g, '$1 dollars')
-
-      // Dimensions & Measurements
-      .replace(/(\d+(?:\.\d+)?)\s*["”]\s*[×xX]\s*(\d+(?:\.\d+)?)\s*["”]\s*[×xX]\s*(\d+(?:\.\d+)?)\s*["”]/g, '$1 by $2 by $3 inch')
-      .replace(/(\d+(?:\.\d+)?)\s*["”]\s*[×xX]\s*(\d+(?:\.\d+)?)\s*["”]/g, '$1 by $2 inch')
-      .replace(/(\d+(?:\.\d+)?)\s*["”]\s*[–-]\s*(\d+(?:\.\d+)?)\s*["”]/g, '$1 to $2 inch')
-      .replace(/(\d+(?:\.\d+)?)\s*["”]/g, '$1 inch')
-      .replace(/(\d+(?:\.\d+)?)\s*cm\b/gi, '$1 centimeter')
-      .replace(/(\d+(?:\.\d+)?)\s*mm\b/gi, '$1 millimeter')
-      .replace(/(\d+(?:\.\d+)?)\s*kg\b/gi, '$1 kg')
-      .replace(/(\d+(?:\.\d+)?)\s*gm?\b/gi, '$1 gram')
-      .replace(/(\d+(?:\.\d+)?)\s*(?:Litres|Liters|L)\b/gi, '$1 litres')
-
-      // Percentages
-      .replace(/(\d+(?:\.\d+)?)\s*%\s*[–-]\s*(\d+(?:\.\d+)?)\s*%\+?/g, '$1 se $2 percent')
-      .replace(/(\d+(?:\.\d+)?)\s*%\+/g, '$1 percent ya usse zyada')
-      .replace(/(\d+(?:\.\d+)?)\s*%/g, '$1 percent')
-
-      // Common Business & Retail terms
-      .replace(/\bMOQ\s*(\d+)\s*(?:pcs|pieces)?\b/gi, 'minimum $1 pieces')
-      .replace(/\bMOQ\b/gi, 'minimum order quantity')
-      .replace(/\b(?:pcs|pc)\b/gi, 'pieces')
-      .replace(/\bvs\.?\s*/gi, 'versus ')
-      .replace(/\b(?:e\.g\.|eg\.?)\s*/gi, 'jaise ki ')
-      .replace(/\b(?:i\.e\.|ie\.?)\s*/gi, 'yani ')
-      .replace(/\b(?:etc\.|etc)\b/gi, 'vagerah')
-      .replace(/\b(?:approx\.|approx)\b/gi, 'lagbhag')
-      .replace(/\bavail\.?\b/gi, 'available')
-      .replace(/\b(?:incl\.|inc\.)\b/gi, 'including')
-      .replace(/\bCOD\b/gi, 'Cash on Delivery')
-      .replace(/\bUPI\b/gi, 'U P I')
-      .replace(/\bGST\b/gi, 'G S T')
-      .replace(/\bPIN:\s*(\d{6})\b/gi, 'PIN code $1')
-      .replace(/\bQty:\s*(\d+)/gi, 'Quantity $1')
   } else {
     // English (Global)
     cleaned = cleaned
@@ -450,8 +387,6 @@ function naturalizeTextForSpeech(text, targetLang = 'en') {
   // 9. Conversational Human Micro-pauses (inserting natural pauses after greetings & transitions)
   if (targetLang === 'hi') {
     cleaned = cleaned.replace(/\b(नमस्ते|धन्यवाद|जरूर|बिल्कुल)\b(?!\s*[,.!?])/g, '$1,')
-  } else if (targetLang === 'hinglish') {
-    cleaned = cleaned.replace(/\b(Namaste|Dhanyawad|Zaroor|Bilkul|Haan ji|Ji)\b(?!\s*[,.!?])/gi, '$1,')
   } else {
     cleaned = cleaned.replace(/\b(Hello|Hi|Greetings|Certainly|Sure|Thank you)\b(?!\s*[,.!?])/gi, '$1,')
   }
@@ -499,7 +434,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
   const [streamedText, setStreamedText] = useState('')
   const [isListening, setIsListening] = useState(false)
 
-  // Language state: 'en', 'hi', 'hinglish'
+  // Language state: 'en', 'hi'
   const [currentLanguage, setCurrentLanguage] = useState('en')
 
   // Voice & Speech synthesis state (Locked to 1.0x standard human speed)
@@ -558,14 +493,13 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     {
       id: 1,
       sender: 'bot',
-      text: `Namaste. I'm **Gulabi**, your Jaipur Shopping & Craft Concierge for *Craft of Pink City*.\n\n**Language:** You can chat with me in **English**, **Hindi**, or **Hinglish**.\n\nAsk me anything about:\n• **Quilted Travel Duffles & Tote Bags**\n• **Wholesale & Bulk Orders (MOQ 25 pcs)** with custom brand tags\n• **Bag Sizing & Laptop Fit (13"–16")**\n• **Authentic Jaipuri Fabric Care**`,
+      text: `Namaste. I'm **Gulabi**, your Jaipur Shopping & Craft Concierge for *Craft of Pink City*.\n\n**Language:** You can chat with me in **English** or **हिंदी**.\n\nAsk me anything about:\n• **Quilted Travel Duffles & Tote Bags**\n• **Wholesale & Bulk Orders (MOQ 25 pcs)** with custom brand tags\n• **Bag Sizing & Laptop Fit (13"–16")**\n• **Authentic Jaipuri Fabric Care**`,
       quickReplies: [
         'Show Bestsellers',
         'Quilted Travel Duffles',
         'Wholesale & Bulk (MOQ 25)',
         'Laptop Bag Sizes',
-        'Hindi',
-        'Hinglish'
+        'हिंदी'
       ],
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
@@ -822,8 +756,6 @@ export default function ArtisanChatbot({ onSelectProduct }) {
 
     if (query === 'हिंदी' || query.toLowerCase() === 'hindi') {
       handleLanguageChange('hi')
-    } else if (query.toLowerCase() === 'hinglish') {
-      handleLanguageChange('hinglish')
     } else if (query.toLowerCase() === 'english') {
       handleLanguageChange('en')
     }
@@ -896,8 +828,6 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     stopSpeaking()
     const welcome = currentLanguage === 'hi'
       ? `चैट सत्र रीसेट हो गया। मैं **गुलाबी** हूँ। आज आपके लिए क्या जयपुरी बैग्स या थोक कोटेशन तैयार करूँ?`
-      : currentLanguage === 'hinglish'
-      ? `Chat session reset. Main **Gulabi** hoon. Bataiye aaj handcrafted styles ya wholesale bulk quotes me kya share karoon?`
       : `Chat session reset. I'm **Gulabi**. What handcrafted styles or wholesale quotes can I prepare for you?`
 
     setMessages([
@@ -945,7 +875,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
                   <span className="text-xs font-bold tracking-wide text-white">Ask Gulabi AI</span>
                   <span className="rounded bg-rose/30 px-1 py-0.2 text-[9px] font-semibold uppercase text-rose-200">Pro</span>
                 </div>
-                <p className="text-[10px] text-white/70">English · Hindi · Hinglish</p>
+                <p className="text-[10px] text-white/70">English · हिंदी</p>
               </div>
             </div>
           </button>
@@ -1454,7 +1384,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
                     <span className="h-2 w-2 rounded-full bg-rose animate-bounce" style={{ animationDelay: '150ms' }} />
                     <span className="h-2 w-2 rounded-full bg-rose animate-bounce" style={{ animationDelay: '300ms' }} />
                     <span className="text-xs text-ink/50 font-medium ml-2">
-                      {currentLanguage === 'hi' ? 'सोच रहे हैं...' : currentLanguage === 'hinglish' ? 'Thinking...' : 'Reasoning...'}
+                      {currentLanguage === 'hi' ? 'सोच रहे हैं...' : 'Reasoning...'}
                     </span>
                   </div>
                 </div>
@@ -1475,8 +1405,6 @@ export default function ArtisanChatbot({ onSelectProduct }) {
                 placeholder={
                   currentLanguage === 'hi'
                     ? 'डफल बैग्स, थोक भाव, साइज के बारे में पूछें...'
-                    : currentLanguage === 'hinglish'
-                    ? 'Duffle bags, bulk wholesale quotes, size ke bare me puchein...'
                     : 'Ask about travel duffles, bulk quotes, sizes...'
                 }
                 className="flex-1 rounded-2xl border border-ink/20 bg-ivory/50 px-4 py-3 text-xs sm:text-sm text-ink placeholder-ink/40 outline-none transition focus:border-rose focus:bg-white focus:ring-2 focus:ring-rose/20"
