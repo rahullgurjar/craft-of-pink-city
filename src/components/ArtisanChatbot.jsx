@@ -140,12 +140,12 @@ export const VOICE_PERSONAS = [
   }
 ]
 
-// Speed options tuned for human conversational pacing (1.28x default for lively human speed)
+// Speed options centered around standard natural human conversational pacing (1.0x default)
 export const SPEED_OPTIONS = [
-  { value: 1.1, label: '1.1x', desc: 'Gentle & Relaxed' },
-  { value: 1.28, label: '1.28x', desc: 'Natural Human Speed (Default)' },
-  { value: 1.45, label: '1.45x', desc: 'Crisp & Fast' },
-  { value: 1.65, label: '1.65x', desc: 'Speed Reader' }
+  { value: 0.9, label: '0.9x', desc: 'Gentle & Clear' },
+  { value: 1.0, label: '1.0x', desc: 'Normal Human (Default)' },
+  { value: 1.15, label: '1.15x', desc: 'Lively & Crisp' },
+  { value: 1.3, label: '1.3x', desc: 'Fast' }
 ]
 
 /**
@@ -370,7 +370,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
   const [speakingMessageId, setSpeakingMessageId] = useState(null)
   const [speakingSentenceIndex, setSpeakingSentenceIndex] = useState(0)
   const [totalSentences, setTotalSentences] = useState(0)
-  const [selectedSpeed, setSelectedSpeed] = useState(1.28) // Fast natural human conversational speed
+  const [selectedSpeed, setSelectedSpeed] = useState(1.0) // Normal natural human conversational speed
   const [selectedPersona, setSelectedPersona] = useState('jaipur')
   const [showVoiceSettings, setShowVoiceSettings] = useState(false)
   const [activeVoiceName, setActiveVoiceName] = useState('')
@@ -1081,7 +1081,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
                 <button
                   type="button"
                   onClick={() => {
-                    const nextSpeed = selectedSpeed === 1.1 ? 1.28 : selectedSpeed === 1.28 ? 1.45 : selectedSpeed === 1.65 ? 1.1 : 1.28
+                    const nextSpeed = selectedSpeed === 0.9 ? 1.0 : selectedSpeed === 1.0 ? 1.15 : selectedSpeed === 1.15 ? 1.3 : 1.0
                     handleSpeedChange(nextSpeed)
                   }}
                   className="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-[10px] font-bold text-saffron transition-colors"
