@@ -198,6 +198,10 @@ export default function BulkOrder() {
                   </div>
                   <div className="flex items-start gap-3">
                     <ShieldCheck size={18} className="mt-0.5 shrink-0 text-leaf" />
+                    <p className="text-xs text-ink/80"><strong>Transparent Payment Terms:</strong> 60% advance to confirm order & begin artisan crafting; remaining 40% before dispatch after video proof of ready batch.</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <ShieldCheck size={18} className="mt-0.5 shrink-0 text-leaf" />
                     <p className="text-xs text-ink/80"><strong>100% Artisan Guaranteed:</strong> Pure cotton quilted fabric printed with traditional wooden blocks.</p>
                   </div>
                   <div className="flex items-start gap-3">

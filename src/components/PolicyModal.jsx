@@ -225,22 +225,39 @@ function TermsContent() {
       </section>
 
       <section className="space-y-2">
-        <h3 className="font-serif text-lg font-bold text-ink">2. Retail & Wholesale Orders</h3>
+        <h3 className="font-serif text-lg font-bold text-ink">2. Retail & Wholesale Order Terms</h3>
         <ul className="list-disc pl-5 space-y-1 text-ink/75">
-          <li><strong>Retail Purchases:</strong> Available with instant cart checkout and fast door delivery.</li>
-          <li><strong>Wholesale & Bulk Orders:</strong> Minimum Order Quantity (MOQ) starts at 25 units. Quantity tiers, custom logo tag options, and delivery timelines are confirmed in writing on WhatsApp or email invoice before production commencement.</li>
+          <li><strong>Retail Purchases:</strong> Direct cart checkout with doorstep express delivery.</li>
+          <li><strong>Wholesale & Bulk Orders:</strong> Minimum Order Quantity (MOQ) starts at 25 units per category with tiered volume discounts.</li>
         </ul>
       </section>
 
       <section className="space-y-2">
-        <h3 className="font-serif text-lg font-bold text-ink">3. Pricing & Taxes</h3>
+        <h3 className="font-serif text-lg font-bold text-ink">3. Wholesale Payment Milestones (60% / 40% Policy)</h3>
+        <div className="rounded-2xl border border-saffron/40 bg-saffron/10 p-4 text-xs text-ink/90 leading-relaxed space-y-2">
+          <p className="font-bold text-ink text-sm">
+            Strict Milestone Structure for Wholesale & Bulk Orders:
+          </p>
+          <ul className="list-disc pl-5 space-y-1.5">
+            <li>
+              <strong>60% Advance Payment (Mandatory to Confirm Order):</strong> A 60% advance payment is strictly required to confirm the wholesale order, lock fabric print selections, procure pure cotton/dyes, and schedule artisan workshop batch stitching.
+            </li>
+            <li>
+              <strong>Remaining 40% Balance (Payable Prior to Dispatch):</strong> Once your complete batch is stitched, quilted, and packaged, our workshop team shares high-definition photos and video footage of your ready stock on WhatsApp for your inspection. The remaining 40% balance is payable prior to courier handover.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section className="space-y-2">
+        <h3 className="font-serif text-lg font-bold text-ink">4. Pricing & Taxes</h3>
         <p>
           All retail product prices displayed on the website are in Indian Rupees (INR) and inclusive of applicable taxes unless stated otherwise. Wholesale prices are offered at tiered volume discounts. We reserve the right to revise catalog prices without prior notice based on raw cotton and fabric yarn market fluctuations.
         </p>
       </section>
 
       <section className="space-y-2">
-        <h3 className="font-serif text-lg font-bold text-ink">4. Intellectual Property</h3>
+        <h3 className="font-serif text-lg font-bold text-ink">5. Intellectual Property</h3>
         <p>
           All photographs, product descriptions, brand identity, logo, and artwork on this website are the intellectual property of <strong>Craft of Pink City</strong>. Reproduction, scraping, or commercial resale without written authorization is strictly prohibited.
         </p>

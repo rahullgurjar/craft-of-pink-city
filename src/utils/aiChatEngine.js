@@ -172,7 +172,7 @@ function synthesizeDynamicResponse(query, cartContext, lang = 'en') {
 
     if (lang === 'hi') {
       return {
-        text: `**थोक व बल्क ऑर्डर प्रोग्राम ${qty ? `(${qty} पीस)` : ''}:**\n\n• **कम MOQ:** केवल **25 पीस** प्रति श्रेणी से शुरू (आप प्रिंट्स और कलर्स मिक्स कर सकते हैं)।\n• **छूट स्लैब:** **${discount}** (${tierTitle})।\n• **फ्री कस्टम ब्रांडिंग:** आपके बुटीक का लोगो टैग और ब्रांड कार्ड बिना किसी अतिरिक्त शुल्क के लगाया जाता है।\n• **डिस्पैच समय:** आपके ऑर्डर की मात्रा के अनुसार वर्कशॉप टीम द्वारा तय कर व्हाट्सएप पर कन्फर्म किया जाता है।\n• **डिलीवरी:** पूरे भारत व विदेश में सुरक्षित एक्सप्रेस कूरियर द्वारा।`,
+        text: `**थोक व बल्क ऑर्डर प्रोग्राम ${qty ? `(${qty} पीस)` : ''}:**\n\n• **कम MOQ:** केवल **25 पीस** प्रति श्रेणी से शुरू (आप प्रिंट्स और कलर्स मिक्स कर सकते हैं)।\n• **छूट स्लैब:** **${discount}** (${tierTitle})।\n• **भुगतान शर्तें:** ऑर्डर कन्फर्म करने और कारीगरी शुरू करने के लिए **60% एडवांस**; बाकी **40% बैलेंस** डिस्पैच से पहले (व्हाट्सएप पर तैयार माल के वीडियो देखने के बाद)।\n• **फ्री कस्टम ब्रांडिंग:** आपके बुटीक का लोगो टैग और ब्रांड कार्ड बिना किसी अतिरिक्त शुल्क के लगाया जाता है।\n• **डिस्पैच समय:** आपके ऑर्डर की मात्रा के अनुसार वर्कशॉप टीम द्वारा तय कर व्हाट्सएप पर कन्फर्म किया जाता है।\n• **डिलीवरी:** पूरे भारत व विदेश में सुरक्षित एक्सप्रेस कूरियर द्वारा।`,
         action: {
           type: 'LINK',
           label: qty ? `व्हाट्सएप पर ${qty} पीस का थोक कोट प्राप्त करें` : 'व्हाट्सएप पर थोक कैटलॉग मांगें',
@@ -188,7 +188,7 @@ function synthesizeDynamicResponse(query, cartContext, lang = 'en') {
     }
 
     return {
-      text: `**Wholesale & Bulk Orders Program ${qty ? `(${qty} Pieces)` : ''}:**\n\n• **Low MOQ:** Starts at just **25 pieces** per category (mix and match prints & colors freely).\n• **Discount Tier:** **${discount}** (${tierTitle}).\n• **Bespoke Customization:** Add your own brand logo tags or cards at no extra charge.\n• **Production & Dispatch:** Timelines are decided by our workshop team based on total order quantity and confirmed instantly on WhatsApp.\n• **Global & Pan-India Shipping:** Insured express courier to your doorstep.`,
+      text: `**Wholesale & Bulk Orders Program ${qty ? `(${qty} Pieces)` : ''}:**\n\n• **Low MOQ:** Starts at just **25 pieces** per category (mix and match prints & colors freely).\n• **Discount Tier:** **${discount}** (${tierTitle}).\n• **Payment Terms:** **60% advance** to confirm order & start workshop crafting; remaining **40% balance** prior to dispatch (after sharing ready stock batch photos/videos).\n• **Bespoke Customization:** Add your own brand logo tags or cards at no extra charge.\n• **Production & Dispatch:** Timelines are decided by our workshop team based on total order quantity and confirmed instantly on WhatsApp.\n• **Global & Pan-India Shipping:** Insured express courier to your doorstep.`,
       action: {
         type: 'LINK',
         label: qty ? `Get Wholesale Quote for ${qty} Pcs on WhatsApp` : 'Request Wholesale Catalog on WhatsApp',
