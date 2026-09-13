@@ -50,23 +50,23 @@ const resolveProductImage = (image) => {
 }
 
 /**
- * Languages supported by Gulabi AI
+ * Languages supported by Gulabi AI (Zero-Emoji Edition)
  */
 export const SUPPORTED_LANGUAGES = [
-  { id: 'en', label: 'English', flag: '🇬🇧', tag: 'Global' },
-  { id: 'hi', label: 'हिंदी', flag: '🇮🇳', tag: 'Hindi' },
-  { id: 'hinglish', label: 'Hinglish', flag: '🪷', tag: 'Jaipuri' }
+  { id: 'en', label: 'English', code: 'EN', tag: 'Global' },
+  { id: 'hi', label: 'हिंदी', code: 'HI', tag: 'Hindi' },
+  { id: 'hinglish', label: 'Hinglish', code: 'HN', tag: 'Jaipuri' }
 ]
 
 /**
- * Curated Voice Personas with Human Natural Sounding Profiles
+ * Curated Voice Personas with Human Natural Sounding Profiles (Zero-Emoji)
  */
 export const VOICE_PERSONAS = [
   {
     id: 'jaipur',
     name: 'Gulabi (Jaipur Natural)',
     badge: 'Artisan Native',
-    desc: 'Warm Indian English / Hindi natural intonation',
+    desc: 'Warm Indian English and Hindi natural intonation',
     keywords: [
       'neerja online',
       'neerja',
@@ -86,7 +86,7 @@ export const VOICE_PERSONAS = [
   },
   {
     id: 'hindi_native',
-    name: 'Swara (शुद्ध हिंदी)',
+    name: 'Swara (Hindi Natural)',
     badge: 'Hindi HD',
     desc: 'Pure authentic Hindi natural voice',
     keywords: [
@@ -252,15 +252,11 @@ function rankAndSelectNaturalVoice(voices, personaId = 'jaipur', targetLang = 'e
 }
 
 /**
- * Naturalizes text for human speech in English, Hindi, and Hinglish:
- * - Converts raw numbers, dimensions, prices, and percentages into spoken human phrases
- * - Cleans markdown, formatting, emojis, hashtags
- * - Translates numbers and phrases appropriately for Hindi / Hinglish pronunciation
+ * Naturalizes text for human speech in English, Hindi, and Hinglish without emojis
  */
 function naturalizeTextForSpeech(text, targetLang = 'en') {
   if (!text) return ''
   let cleaned = text
-    // 1. Remove markdown links, code blocks, hashtags, formatting
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
     .replace(/https?:\/\/\S+/g, '')
     .replace(/```[\s\S]*?```/g, '')
@@ -269,15 +265,9 @@ function naturalizeTextForSpeech(text, targetLang = 'en') {
     .replace(/\*([^*]+)\*/g, '$1')
     .replace(/_{1,2}([^_]+)_{1,2}/g, '$1')
     .replace(/#+\s*/g, '')
-
-    // 2. Cultural & Indian Greetings
-    .replace(/🙏/g, 'Namaste. ')
-
-    // 3. Emojis and visual symbols removal for clean speech flow
-    .replace(/[🌸✨🛍️🧳📦💻🧘‍♀️💄💇‍♀️🧵🧼🚚✈️💳🛡️🎉❤️🌿●✦•—–]/g, ' ')
+    .replace(/[^\w\s.,!?:;'"–—\u0900-\u097F]/g, ' ')
 
   if (targetLang === 'hi') {
-    // Hindi specific naturalization
     cleaned = cleaned
       .replace(/₹\s*([0-9,]+)/g, '$1 रुपये')
       .replace(/(\d+)\s*["”]\s*[×xX]\s*(\d+)\s*["”]\s*[×xX]\s*(\d+)\s*["”]/g, '$1 बाई $2 बाई $3 इंच')
@@ -289,7 +279,6 @@ function naturalizeTextForSpeech(text, targetLang = 'en') {
       .replace(/\bMOQ\b/gi, 'न्यूनतम ऑर्डर')
       .replace(/\bpcs\b/gi, 'पीस')
   } else if (targetLang === 'hinglish') {
-    // Hinglish specific naturalization
     cleaned = cleaned
       .replace(/₹\s*([0-9,]+)/g, '$1 rupaye')
       .replace(/(\d+(?:\.\d+)?)\s*["”]\s*[×xX]\s*(\d+(?:\.\d+)?)\s*["”]\s*[×xX]\s*(\d+(?:\.\d+)?)\s*["”]/g, '$1 by $2 by $3 inch')
@@ -309,7 +298,6 @@ function naturalizeTextForSpeech(text, targetLang = 'en') {
       .replace(/\bCOD\b/gi, 'Cash on Delivery')
       .replace(/\bQty:\s*(\d+)/gi, 'Quantity $1')
   } else {
-    // English naturalization
     cleaned = cleaned
       .replace(/₹\s*([0-9,]+)/g, '$1 rupees')
       .replace(/\bRs\.?\s*([0-9,]+)/gi, '$1 rupees')
@@ -332,7 +320,6 @@ function naturalizeTextForSpeech(text, targetLang = 'en') {
       .replace(/\bQty:\s*(\d+)/gi, 'Quantity $1')
   }
 
-  // Conversational smoothing for lists & bullet points
   return cleaned
     .replace(/^\s*\d+\.\s+/gm, '. ')
     .replace(/^\s*[\-\*]\s+/gm, '. ')
@@ -345,7 +332,6 @@ function naturalizeTextForSpeech(text, targetLang = 'en') {
 
 /**
  * Splits text into natural conversational sentence chunks
- * for crisp pronunciation and zero browser timeout bugs.
  */
 function splitTextIntoSentences(text) {
   if (!text) return []
@@ -430,19 +416,19 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     }
   }, [selectedPersona, currentLanguage, availableVoices])
 
-  // Initial welcome message
+  // Initial welcome message (Zero-Emoji)
   const [messages, setMessages] = useState([
     {
       id: 1,
       sender: 'bot',
-      text: `Namaste! 🙏 I'm **Gulabi 2.5**, your Jaipur Shopping & Craft Concierge for *Craft of Pink City*.\n\n🌐 **Language:** You can chat with me in **English**, **हिंदी (Hindi)**, or **Hinglish**!\n\nAsk me anything about:\n• 🧳 **Quilted Travel Duffles & Tote Bags**\n• 📦 **Wholesale & Bulk Orders (MOQ 25 pcs)** with custom brand tags\n• 📏 **Bag Sizing & Laptop Fit (13"–16")**\n• 🧼 **Authentic Jaipuri Fabric Care**`,
+      text: `Namaste. I'm **Gulabi 2.5**, your Jaipur Shopping & Craft Concierge for *Craft of Pink City*.\n\n**Language:** You can chat with me in **English**, **Hindi**, or **Hinglish**.\n\nAsk me anything about:\n• **Quilted Travel Duffles & Tote Bags**\n• **Wholesale & Bulk Orders (MOQ 25 pcs)** with custom brand tags\n• **Bag Sizing & Laptop Fit (13"–16")**\n• **Authentic Jaipuri Fabric Care**`,
       quickReplies: [
-        '🛍️ Show Bestsellers',
-        '🧳 Quilted Travel Duffles',
-        '📦 Wholesale & Bulk (MOQ 25)',
-        '💻 Laptop Bag Sizes',
-        '🇮🇳 हिंदी में बात करें',
-        '🪷 Hinglish'
+        'Show Bestsellers',
+        'Quilted Travel Duffles',
+        'Wholesale & Bulk (MOQ 25)',
+        'Laptop Bag Sizes',
+        'Hindi',
+        'Hinglish'
       ],
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
@@ -493,7 +479,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     }
   }
 
-  // Stream simulation effect (like Gemini / Meta AI)
+  // Stream simulation effect
   const streamBotResponse = (botMsg) => {
     if (streamTimerRef.current) clearInterval(streamTimerRef.current)
     const fullText = botMsg.text
@@ -522,7 +508,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     }
   }
 
-  // Sequential sentence player for natural continuous speech without pauses
+  // Sequential sentence player for natural continuous speech
   const playNextSpeechChunk = useCallback((messageId, rate = selectedSpeed, persona = selectedPersona, lang = currentLanguage) => {
     if (isCancelledRef.current) return
     if (currentChunkIndexRef.current >= speechQueueRef.current.length) {
@@ -540,7 +526,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     const utterance = new SpeechSynthesisUtterance(currentSentence)
     currentUtteranceRef.current = utterance
 
-    // Voice Selection matching language and persona
+    // Voice Selection
     const voices = availableVoices.length > 0 ? availableVoices : window.speechSynthesis.getVoices()
     const chosenVoice = rankAndSelectNaturalVoice(voices, persona, lang)
 
@@ -551,7 +537,6 @@ export default function ArtisanChatbot({ onSelectProduct }) {
       utterance.lang = lang === 'hi' ? 'hi-IN' : 'en-IN'
     }
 
-    // Fast Natural Human Conversational Prosody
     utterance.rate = rate
     utterance.pitch = 1.0
     utterance.volume = 1.0
@@ -565,7 +550,6 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     utterance.onend = () => {
       if (isCancelledRef.current) return
       currentChunkIndexRef.current += 1
-      // Continuous pipeline without artificial setTimeout delays
       playNextSpeechChunk(messageId, rate, persona, lang)
     }
 
@@ -578,14 +562,13 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     window.speechSynthesis.speak(utterance)
   }, [availableVoices, selectedSpeed, selectedPersona, currentLanguage])
 
-  // Voice synthesis with Natural Human Voice & Speed Controls
+  // Voice synthesis with Natural Human Voice
   const handleSpeakText = (messageId, rawText, overrideSpeed = null, overridePersona = null, overrideLang = null) => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
       alert('Text-to-speech is not supported in this browser.')
       return
     }
 
-    // Toggle off if already speaking this message and not changing settings
     if (isSpeaking && speakingMessageId === messageId && !overrideSpeed && !overridePersona && !overrideLang) {
       stopSpeaking()
       return
@@ -611,13 +594,11 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     setIsSpeaking(true)
     setIsPaused(false)
 
-    // Immediate playback start
     setTimeout(() => {
       playNextSpeechChunk(messageId, speed, persona, lang)
     }, 40)
   }
 
-  // Change speed on the fly during speech
   const handleSpeedChange = (newSpeed) => {
     setSelectedSpeed(newSpeed)
     if (isSpeaking && speakingMessageId) {
@@ -628,7 +609,6 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     }
   }
 
-  // Change persona on the fly
   const handlePersonaChange = (newPersona) => {
     setSelectedPersona(newPersona)
     if (availableVoices.length > 0) {
@@ -643,7 +623,6 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     }
   }
 
-  // Change language on the fly
   const handleLanguageChange = (newLang) => {
     setCurrentLanguage(newLang)
     if (availableVoices.length > 0) {
@@ -658,7 +637,6 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     }
   }
 
-  // Voice recognition setup (Web Speech API) supporting Hindi and English
   const handleVoiceInput = () => {
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition
@@ -707,12 +685,11 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     const query = (textToSend || input).trim()
     if (!query) return
 
-    // Check if user explicitly clicked a language switch quick reply
-    if (query === '🇮🇳 हिंदी में बात करें' || query.toLowerCase() === 'hindi') {
+    if (query === 'हिंदी' || query.toLowerCase() === 'hindi') {
       handleLanguageChange('hi')
-    } else if (query === '🪷 Hinglish' || query.toLowerCase() === 'hinglish') {
+    } else if (query.toLowerCase() === 'hinglish') {
       handleLanguageChange('hinglish')
-    } else if (query.toLowerCase() === 'english' || query.toLowerCase() === 'speak in english') {
+    } else if (query.toLowerCase() === 'english') {
       handleLanguageChange('en')
     }
 
@@ -731,10 +708,8 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     if (!textToSend) setInput('')
     setIsTyping(true)
 
-    // Stop previous speech
     stopSpeaking()
 
-    // Simulate AI thinking time and stream response
     setTimeout(() => {
       const botResponse = processUserMessage(query, cart, updatedHistory, effectiveLang)
       const botMsg = {
@@ -785,10 +760,10 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     if (streamTimerRef.current) clearInterval(streamTimerRef.current)
     stopSpeaking()
     const welcome = currentLanguage === 'hi'
-      ? `चैट सत्र रीसेट हो गया! 🙏 मैं **गुलाबी 2.5 प्रो** हूँ। आज आपके लिए क्या जयपुरी बैग्स या थोक कोटेशन तैयार करूँ?`
+      ? `चैट सत्र रीसेट हो गया। मैं **गुलाबी 2.5 प्रो** हूँ। आज आपके लिए क्या जयपुरी बैग्स या थोक कोटेशन तैयार करूँ?`
       : currentLanguage === 'hinglish'
-      ? `Chat session reset! 🙏 Main **Gulabi 2.5 Pro** hoon. Bataiye aaj handcrafted styles ya wholesale bulk quotes me kya share karoon?`
-      : `Chat session reset! 🙏 I'm **Gulabi 2.5 Pro**. What handcrafted styles or wholesale quotes can I prepare for you?`
+      ? `Chat session reset. Main **Gulabi 2.5 Pro** hoon. Bataiye aaj handcrafted styles ya wholesale bulk quotes me kya share karoon?`
+      : `Chat session reset. I'm **Gulabi 2.5 Pro**. What handcrafted styles or wholesale quotes can I prepare for you?`
 
     setMessages([
       {
@@ -796,10 +771,10 @@ export default function ArtisanChatbot({ onSelectProduct }) {
         sender: 'bot',
         text: welcome,
         quickReplies: [
-          '🛍️ Show Bestsellers',
-          '🧳 Quilted Travel Duffles',
-          '📦 Wholesale & Bulk (MOQ 25)',
-          '🧵 How are bags made?'
+          'Show Bestsellers',
+          'Quilted Travel Duffles',
+          'Wholesale & Bulk (MOQ 25)',
+          'How are bags made?'
         ],
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
@@ -820,16 +795,13 @@ export default function ArtisanChatbot({ onSelectProduct }) {
             className="group relative flex items-center gap-3 rounded-full bg-gradient-to-r from-ink via-[#2a1728] to-ink p-1 pl-4 pr-5 text-white shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-rose/40 ring-1 ring-white/20"
             aria-label="Open AI Craft Assistant Gulabi"
           >
-            {/* Meta AI / Gemini Iridescent Aura Ring */}
             <span className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-rose via-saffron to-rose opacity-75 blur-sm group-hover:opacity-100 animate-pulse transition duration-500" />
 
             <div className="relative flex items-center gap-2.5">
               <div className="relative flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-tr from-rose to-saffron text-white shadow-inner">
                 <Sparkles size={18} className="animate-pulse" />
                 {hasUnread && (
-                  <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-saffron text-[9px] font-bold text-ink">
-                    ●
-                  </span>
+                  <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5 rounded-full bg-saffron ring-2 ring-ink" />
                 )}
               </div>
 
@@ -838,14 +810,14 @@ export default function ArtisanChatbot({ onSelectProduct }) {
                   <span className="text-xs font-bold tracking-wide text-white">Ask Gulabi AI</span>
                   <span className="rounded bg-rose/30 px-1 py-0.2 text-[9px] font-semibold uppercase text-rose-200">2.5 Pro</span>
                 </div>
-                <p className="text-[10px] text-white/70">English · हिंदी · Hinglish</p>
+                <p className="text-[10px] text-white/70">English · Hindi · Hinglish</p>
               </div>
             </div>
           </button>
         )}
       </div>
 
-      {/* Main Meta/Gemini AI Chat Window */}
+      {/* Main AI Chat Window */}
       {isOpen && (
         <div
           className={`fixed z-50 flex flex-col bg-ivory shadow-2xl border border-ink/15 transition-all duration-300 animate-slideUp overflow-hidden ${
@@ -856,10 +828,9 @@ export default function ArtisanChatbot({ onSelectProduct }) {
           role="dialog"
           aria-label="Gulabi AI Shopping Assistant"
         >
-          {/* Gemini/Meta AI Luxury Glowing Header */}
+          {/* Header */}
           <div className="relative flex items-center justify-between border-b border-ink/10 bg-gradient-to-r from-ink via-[#2b172a] to-ink px-4 sm:px-5 py-3 text-white shadow-md">
             <div className="flex items-center gap-2.5">
-              {/* AI Avatar */}
               <div className="relative flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-tr from-rose to-saffron text-white shadow-md shrink-0">
                 <Sparkles size={18} className="animate-spin-slow" />
                 <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-ink bg-emerald-500" />
@@ -869,13 +840,13 @@ export default function ArtisanChatbot({ onSelectProduct }) {
                 <div className="flex items-center gap-1.5">
                   <h3 className="font-serif text-base sm:text-lg font-bold tracking-wide text-white">Gulabi AI</h3>
                   <span className="rounded-full bg-gradient-to-r from-rose/40 to-saffron/40 px-1.5 py-0.2 text-[9px] font-bold uppercase tracking-wider text-saffron border border-saffron/30">
-                    ✦ Pro
+                    Pro
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5 text-[10px] text-white/75">
                   <span>Jaipur Concierge</span>
                   <span className="text-white/40">•</span>
-                  <span className="text-saffron font-medium">{currentLangObj.flag} {currentLangObj.label}</span>
+                  <span className="text-saffron font-medium">{currentLangObj.label}</span>
                 </div>
               </div>
             </div>
@@ -896,7 +867,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
                     }`}
                     title={`Switch to ${l.label}`}
                   >
-                    {l.flag} {l.label.split(' ')[0]}
+                    {l.code}
                   </button>
                 ))}
               </div>
@@ -913,7 +884,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
                     ? 'bg-rose text-white shadow-sm'
                     : 'text-white/75 hover:bg-white/10 hover:text-white'
                 }`}
-                title={isSpeaking ? 'Stop speaking' : 'Listen with Fast Human Voice'}
+                title={isSpeaking ? 'Stop speaking' : `Listen (${selectedSpeed}x Voice)`}
                 aria-label="Listen with Fast Human Voice"
               >
                 {isSpeaking ? (
@@ -942,7 +913,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
                     ? 'bg-saffron text-ink font-bold shadow'
                     : 'text-white/75 hover:bg-white/10 hover:text-white'
                 }`}
-                title="Voice, Speed & Language Settings"
+                title="Voice, Speed and Language Settings"
                 aria-label="Voice settings"
               >
                 <SlidersHorizontal size={14} />
@@ -988,21 +959,21 @@ export default function ArtisanChatbot({ onSelectProduct }) {
               <div className="flex items-center justify-between pb-2 border-b border-white/10">
                 <div className="flex items-center gap-1.5 font-bold text-saffron">
                   <AudioWaveform size={14} />
-                  <span>Human Voice, Speed & Language Studio</span>
+                  <span>Human Voice, Speed and Language Studio</span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowVoiceSettings(false)}
                   className="text-white/60 hover:text-white text-[11px]"
                 >
-                  ✕ Close
+                  Close
                 </button>
               </div>
 
               {/* 1. Language Preference */}
               <div className="mt-3">
                 <label className="text-[10px] font-bold uppercase tracking-wider text-white/70 block mb-1.5">
-                  🌐 Bot Speaking & Chat Language:
+                  Bot Speaking & Chat Language:
                 </label>
                 <div className="grid grid-cols-3 gap-1.5">
                   {SUPPORTED_LANGUAGES.map((l) => (
@@ -1016,7 +987,6 @@ export default function ArtisanChatbot({ onSelectProduct }) {
                           : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
                       }`}
                     >
-                      <div className="text-base">{l.flag}</div>
                       <div className="text-[11px] font-bold mt-0.5">{l.label}</div>
                       <div className="text-[9px] text-white/50">{l.tag}</div>
                     </button>
@@ -1028,7 +998,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
               <div className="mt-3">
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="text-[10px] font-bold uppercase tracking-wider text-white/70">
-                    ⚡ Human Conversational Speaking Speed:
+                    Human Conversational Speaking Speed:
                   </label>
                   <span className="text-saffron font-bold text-[11px]">{selectedSpeed}x</span>
                 </div>
@@ -1054,7 +1024,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
               {/* 3. Persona Selector */}
               <div className="mt-3">
                 <label className="text-[10px] font-bold uppercase tracking-wider text-white/70 block mb-1.5">
-                  🌸 Voice Persona / Tone:
+                  Voice Persona / Tone:
                 </label>
                 <div className="grid grid-cols-2 gap-1.5">
                   {VOICE_PERSONAS.map((p) => (
@@ -1081,7 +1051,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
               {activeVoiceName && (
                 <div className="mt-3 pt-2 border-t border-white/10 flex items-center justify-between text-[10px] text-white/60">
                   <span className="truncate">Synthesizer: {activeVoiceName}</span>
-                  <span className="shrink-0 text-emerald-400 font-semibold">✓ Ready</span>
+                  <span className="shrink-0 text-emerald-400 font-semibold">Ready</span>
                 </div>
               )}
             </div>
@@ -1098,7 +1068,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
                 </div>
                 <div className="truncate">
                   <span className="font-bold text-saffron text-[11px]">
-                    {currentLangObj.flag} {currentPersonaObj.name}
+                    {currentPersonaObj.name}
                   </span>
                   <span className="text-[10px] text-white/70 ml-1.5">
                     ({selectedSpeed}x {isPaused ? '· Paused' : '· Speaking'} {totalSentences > 0 ? `${speakingSentenceIndex}/${totalSentences}` : ''})
@@ -1111,7 +1081,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
                 <button
                   type="button"
                   onClick={() => {
-                    const nextSpeed = selectedSpeed === 1.1 ? 1.28 : selectedSpeed === 1.28 ? 1.45 : selectedSpeed === 1.45 ? 1.65 : 1.1
+                    const nextSpeed = selectedSpeed === 1.1 ? 1.28 : selectedSpeed === 1.28 ? 1.45 : selectedSpeed === 1.65 ? 1.1 : 1.28
                     handleSpeedChange(nextSpeed)
                   }}
                   className="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-[10px] font-bold text-saffron transition-colors"
@@ -1175,7 +1145,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
                           : 'bg-white text-ink/90 border border-ink/10 rounded-tl-none'
                       }`}
                     >
-                      {/* Markdown rendering simulation with bold/bullets */}
+                      {/* Markdown rendering simulation */}
                       <div className="space-y-2.5">
                         {displayText.split('\n\n').map((para, idx) => {
                           if (para.startsWith('• ') || para.includes('\n• ')) {
@@ -1300,7 +1270,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
                               )}
                             </button>
 
-                            {/* Voice Speak button (Fast Natural Voice) */}
+                            {/* Voice Speak button */}
                             <button
                               type="button"
                               onClick={() => handleSpeakText(msg.id, msg.text)}
@@ -1446,7 +1416,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
 
             <div className="mt-2 flex items-center justify-between text-[10px] text-ink/40 px-1">
               <span className="flex items-center gap-1.5">
-                <span>✦ {currentLangObj.flag} {currentLangObj.label} · {selectedSpeed}x Speed</span>
+                <span>{currentLangObj.label} · {selectedSpeed}x Speed</span>
                 <span className="text-rose font-semibold cursor-pointer hover:underline" onClick={() => setShowVoiceSettings(!showVoiceSettings)}>
                   · Settings
                 </span>
@@ -1466,7 +1436,6 @@ export default function ArtisanChatbot({ onSelectProduct }) {
   )
 }
 
-// Markdown helper to support bold (**text**), italics (*text*), and code
 function formatMarkdown(text) {
   if (!text) return ''
   return text
