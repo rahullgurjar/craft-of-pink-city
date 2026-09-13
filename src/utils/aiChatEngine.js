@@ -1,7 +1,7 @@
 import { products, whatsapp, whatsappNumber, email, faqs } from '../data/products.js'
 
 /**
- * Advanced AI Conversational Engine - "Gulabi 2.5 Pro"
+ * Advanced AI Conversational Engine - "Gulabi AI"
  * Trilingual Architecture: English, Hindi (हिंदी), and Hinglish (Jaipuri Conversational)
  * Zero-Emoji Professional Luxury Craft Edition
  */

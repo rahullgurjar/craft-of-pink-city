@@ -27,8 +27,6 @@ import {
   Square,
   SlidersHorizontal,
   Settings2,
-  Gauge,
-  Zap,
   RotateCcw,
   Languages,
   Globe
@@ -140,13 +138,8 @@ export const VOICE_PERSONAS = [
   }
 ]
 
-// Speed options centered around standard natural human conversational pacing (1.0x default)
-export const SPEED_OPTIONS = [
-  { value: 0.9, label: '0.9x', desc: 'Gentle & Clear' },
-  { value: 1.0, label: '1.0x', desc: 'Normal Human (Default)' },
-  { value: 1.15, label: '1.15x', desc: 'Lively & Crisp' },
-  { value: 1.3, label: '1.3x', desc: 'Fast' }
-]
+// Fixed standard 1.0x human speaking speed constant
+const STANDARD_HUMAN_SPEAKING_SPEED = 1.0
 
 /**
  * Intelligent Natural Voice Selector
@@ -364,13 +357,12 @@ export default function ArtisanChatbot({ onSelectProduct }) {
   // Language state: 'en', 'hi', 'hinglish'
   const [currentLanguage, setCurrentLanguage] = useState('en')
 
-  // Voice & Speech synthesis state
+  // Voice & Speech synthesis state (Locked to 1.0x standard human speed)
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
   const [speakingMessageId, setSpeakingMessageId] = useState(null)
   const [speakingSentenceIndex, setSpeakingSentenceIndex] = useState(0)
   const [totalSentences, setTotalSentences] = useState(0)
-  const [selectedSpeed, setSelectedSpeed] = useState(1.0) // Normal natural human conversational speed
   const [selectedPersona, setSelectedPersona] = useState('jaipur')
   const [showVoiceSettings, setShowVoiceSettings] = useState(false)
   const [activeVoiceName, setActiveVoiceName] = useState('')
@@ -508,8 +500,8 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     }
   }
 
-  // Sequential sentence player for natural continuous speech
-  const playNextSpeechChunk = useCallback((messageId, rate = selectedSpeed, persona = selectedPersona, lang = currentLanguage) => {
+  // Sequential sentence player for natural continuous 1x speech
+  const playNextSpeechChunk = useCallback((messageId, persona = selectedPersona, lang = currentLanguage) => {
     if (isCancelledRef.current) return
     if (currentChunkIndexRef.current >= speechQueueRef.current.length) {
       setIsSpeaking(false)
@@ -537,7 +529,8 @@ export default function ArtisanChatbot({ onSelectProduct }) {
       utterance.lang = lang === 'hi' ? 'hi-IN' : 'en-IN'
     }
 
-    utterance.rate = rate
+    // Locked to 1.0x normal natural human speaking speed
+    utterance.rate = STANDARD_HUMAN_SPEAKING_SPEED
     utterance.pitch = 1.0
     utterance.volume = 1.0
 
@@ -550,31 +543,30 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     utterance.onend = () => {
       if (isCancelledRef.current) return
       currentChunkIndexRef.current += 1
-      playNextSpeechChunk(messageId, rate, persona, lang)
+      playNextSpeechChunk(messageId, persona, lang)
     }
 
     utterance.onerror = (e) => {
       if (e.error === 'interrupted' || e.error === 'canceled') return
       currentChunkIndexRef.current += 1
-      playNextSpeechChunk(messageId, rate, persona, lang)
+      playNextSpeechChunk(messageId, persona, lang)
     }
 
     window.speechSynthesis.speak(utterance)
-  }, [availableVoices, selectedSpeed, selectedPersona, currentLanguage])
+  }, [availableVoices, selectedPersona, currentLanguage])
 
-  // Voice synthesis with Natural Human Voice
-  const handleSpeakText = (messageId, rawText, overrideSpeed = null, overridePersona = null, overrideLang = null) => {
+  // Voice synthesis with Natural Human Voice at 1.0x
+  const handleSpeakText = (messageId, rawText, overridePersona = null, overrideLang = null) => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
       alert('Text-to-speech is not supported in this browser.')
       return
     }
 
-    if (isSpeaking && speakingMessageId === messageId && !overrideSpeed && !overridePersona && !overrideLang) {
+    if (isSpeaking && speakingMessageId === messageId && !overridePersona && !overrideLang) {
       stopSpeaking()
       return
     }
 
-    const speed = overrideSpeed || selectedSpeed
     const persona = overridePersona || selectedPersona
     const lang = overrideLang || currentLanguage
 
@@ -595,18 +587,8 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     setIsPaused(false)
 
     setTimeout(() => {
-      playNextSpeechChunk(messageId, speed, persona, lang)
+      playNextSpeechChunk(messageId, persona, lang)
     }, 40)
-  }
-
-  const handleSpeedChange = (newSpeed) => {
-    setSelectedSpeed(newSpeed)
-    if (isSpeaking && speakingMessageId) {
-      const activeMsg = messages.find((m) => m.id === speakingMessageId)
-      if (activeMsg) {
-        handleSpeakText(speakingMessageId, activeMsg.text, newSpeed, selectedPersona, currentLanguage)
-      }
-    }
   }
 
   const handlePersonaChange = (newPersona) => {
@@ -618,7 +600,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     if (isSpeaking && speakingMessageId) {
       const activeMsg = messages.find((m) => m.id === speakingMessageId)
       if (activeMsg) {
-        handleSpeakText(speakingMessageId, activeMsg.text, selectedSpeed, newPersona, currentLanguage)
+        handleSpeakText(speakingMessageId, activeMsg.text, newPersona, currentLanguage)
       }
     }
   }
@@ -632,7 +614,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     if (isSpeaking && speakingMessageId) {
       const activeMsg = messages.find((m) => m.id === speakingMessageId)
       if (activeMsg) {
-        handleSpeakText(speakingMessageId, activeMsg.text, selectedSpeed, selectedPersona, newLang)
+        handleSpeakText(speakingMessageId, activeMsg.text, selectedPersona, newLang)
       }
     }
   }
@@ -786,7 +768,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
 
   return (
     <>
-      {/* Floating Meta/Gemini Aura Launcher */}
+      {/* Floating Aura Launcher */}
       <div className="fixed bottom-6 right-6 z-40 flex items-center gap-3">
         {!isOpen && (
           <button
@@ -879,13 +861,13 @@ export default function ArtisanChatbot({ onSelectProduct }) {
                   const lastBot = [...messages].reverse().find((m) => m.sender === 'bot')
                   if (lastBot) handleSpeakText(lastBot.id, lastBot.text)
                 }}
-                className={`relative flex items-center gap-1 rounded-xl px-2 py-1.5 text-xs font-semibold transition-colors ${
+                className={`relative flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-semibold transition-colors ${
                   isSpeaking
                     ? 'bg-rose text-white shadow-sm'
                     : 'text-white/75 hover:bg-white/10 hover:text-white'
                 }`}
-                title={isSpeaking ? 'Stop speaking' : `Listen (${selectedSpeed}x Voice)`}
-                aria-label="Listen with Fast Human Voice"
+                title={isSpeaking ? 'Stop speaking' : 'Listen with Natural Voice'}
+                aria-label="Listen with Natural Voice"
               >
                 {isSpeaking ? (
                   <>
@@ -899,7 +881,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
                 ) : (
                   <>
                     <Volume2 size={15} />
-                    <span className="hidden sm:inline text-[11px]">{selectedSpeed}x</span>
+                    <span className="hidden sm:inline text-[11px]">Voice</span>
                   </>
                 )}
               </button>
@@ -913,7 +895,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
                     ? 'bg-saffron text-ink font-bold shadow'
                     : 'text-white/75 hover:bg-white/10 hover:text-white'
                 }`}
-                title="Voice, Speed and Language Settings"
+                title="Voice Persona & Language Settings"
                 aria-label="Voice settings"
               >
                 <SlidersHorizontal size={14} />
@@ -959,7 +941,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
               <div className="flex items-center justify-between pb-2 border-b border-white/10">
                 <div className="flex items-center gap-1.5 font-bold text-saffron">
                   <AudioWaveform size={14} />
-                  <span>Human Voice, Speed and Language Studio</span>
+                  <span>Voice & Language Studio</span>
                 </div>
                 <button
                   type="button"
@@ -994,34 +976,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
                 </div>
               </div>
 
-              {/* 2. Conversational Speaking Speed */}
-              <div className="mt-3">
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-white/70">
-                    Human Conversational Speaking Speed:
-                  </label>
-                  <span className="text-saffron font-bold text-[11px]">{selectedSpeed}x</span>
-                </div>
-                <div className="grid grid-cols-4 gap-1.5">
-                  {SPEED_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => handleSpeedChange(opt.value)}
-                      className={`py-1.5 px-2 rounded-lg border text-center font-bold text-[11px] transition-all ${
-                        selectedSpeed === opt.value
-                          ? 'border-rose bg-rose text-white shadow-sm'
-                          : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
-                      }`}
-                      title={opt.desc}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* 3. Persona Selector */}
+              {/* 2. Persona Selector */}
               <div className="mt-3">
                 <label className="text-[10px] font-bold uppercase tracking-wider text-white/70 block mb-1.5">
                   Voice Persona / Tone:
@@ -1071,25 +1026,12 @@ export default function ArtisanChatbot({ onSelectProduct }) {
                     {currentPersonaObj.name}
                   </span>
                   <span className="text-[10px] text-white/70 ml-1.5">
-                    ({selectedSpeed}x {isPaused ? '· Paused' : '· Speaking'} {totalSentences > 0 ? `${speakingSentenceIndex}/${totalSentences}` : ''})
+                    ({isPaused ? 'Paused' : 'Speaking'} {totalSentences > 0 ? `${speakingSentenceIndex}/${totalSentences}` : ''})
                   </span>
                 </div>
               </div>
 
               <div className="flex items-center gap-1.5 shrink-0">
-                {/* Speed cycle button */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    const nextSpeed = selectedSpeed === 0.9 ? 1.0 : selectedSpeed === 1.0 ? 1.15 : selectedSpeed === 1.15 ? 1.3 : 1.0
-                    handleSpeedChange(nextSpeed)
-                  }}
-                  className="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-[10px] font-bold text-saffron transition-colors"
-                  title="Cycle reading speed"
-                >
-                  {selectedSpeed}x
-                </button>
-
                 {/* Pause/Resume button */}
                 <button
                   type="button"
@@ -1279,7 +1221,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
                                   ? 'bg-rose/15 text-rose font-bold'
                                   : 'hover:text-rose hover:bg-ink/5'
                               }`}
-                              title={isThisMessageSpeaking ? 'Stop speaking' : `Listen (${selectedSpeed}x ${currentLangObj.label} Voice)`}
+                              title={isThisMessageSpeaking ? 'Stop speaking' : 'Listen with Natural Voice'}
                               aria-label="Listen with Natural Voice"
                             >
                               {isThisMessageSpeaking ? (
@@ -1294,7 +1236,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
                               ) : (
                                 <>
                                   <Volume2 size={13} />
-                                  <span className="text-[10px] font-medium text-ink/60">{selectedSpeed}x</span>
+                                  <span className="text-[10px] font-medium text-ink/60">Voice</span>
                                 </>
                               )}
                             </button>
@@ -1416,7 +1358,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
 
             <div className="mt-2 flex items-center justify-between text-[10px] text-ink/40 px-1">
               <span className="flex items-center gap-1.5">
-                <span>{currentLangObj.label} · {selectedSpeed}x Speed</span>
+                <span>{currentLangObj.label} · Natural Voice</span>
                 <span className="text-rose font-semibold cursor-pointer hover:underline" onClick={() => setShowVoiceSettings(!showVoiceSettings)}>
                   · Settings
                 </span>
