@@ -421,7 +421,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     {
       id: 1,
       sender: 'bot',
-      text: `Namaste. I'm **Gulabi 2.5**, your Jaipur Shopping & Craft Concierge for *Craft of Pink City*.\n\n**Language:** You can chat with me in **English**, **Hindi**, or **Hinglish**.\n\nAsk me anything about:\n• **Quilted Travel Duffles & Tote Bags**\n• **Wholesale & Bulk Orders (MOQ 25 pcs)** with custom brand tags\n• **Bag Sizing & Laptop Fit (13"–16")**\n• **Authentic Jaipuri Fabric Care**`,
+      text: `Namaste. I'm **Gulabi**, your Jaipur Shopping & Craft Concierge for *Craft of Pink City*.\n\n**Language:** You can chat with me in **English**, **Hindi**, or **Hinglish**.\n\nAsk me anything about:\n• **Quilted Travel Duffles & Tote Bags**\n• **Wholesale & Bulk Orders (MOQ 25 pcs)** with custom brand tags\n• **Bag Sizing & Laptop Fit (13"–16")**\n• **Authentic Jaipuri Fabric Care**`,
       quickReplies: [
         'Show Bestsellers',
         'Quilted Travel Duffles',
@@ -760,10 +760,10 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     if (streamTimerRef.current) clearInterval(streamTimerRef.current)
     stopSpeaking()
     const welcome = currentLanguage === 'hi'
-      ? `चैट सत्र रीसेट हो गया। मैं **गुलाबी 2.5 प्रो** हूँ। आज आपके लिए क्या जयपुरी बैग्स या थोक कोटेशन तैयार करूँ?`
+      ? `चैट सत्र रीसेट हो गया। मैं **गुलाबी** हूँ। आज आपके लिए क्या जयपुरी बैग्स या थोक कोटेशन तैयार करूँ?`
       : currentLanguage === 'hinglish'
-      ? `Chat session reset. Main **Gulabi 2.5 Pro** hoon. Bataiye aaj handcrafted styles ya wholesale bulk quotes me kya share karoon?`
-      : `Chat session reset. I'm **Gulabi 2.5 Pro**. What handcrafted styles or wholesale quotes can I prepare for you?`
+      ? `Chat session reset. Main **Gulabi** hoon. Bataiye aaj handcrafted styles ya wholesale bulk quotes me kya share karoon?`
+      : `Chat session reset. I'm **Gulabi**. What handcrafted styles or wholesale quotes can I prepare for you?`
 
     setMessages([
       {
@@ -808,7 +808,7 @@ export default function ArtisanChatbot({ onSelectProduct }) {
               <div className="text-left">
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs font-bold tracking-wide text-white">Ask Gulabi AI</span>
-                  <span className="rounded bg-rose/30 px-1 py-0.2 text-[9px] font-semibold uppercase text-rose-200">2.5 Pro</span>
+                  <span className="rounded bg-rose/30 px-1 py-0.2 text-[9px] font-semibold uppercase text-rose-200">Pro</span>
                 </div>
                 <p className="text-[10px] text-white/70">English · Hindi · Hinglish</p>
               </div>
