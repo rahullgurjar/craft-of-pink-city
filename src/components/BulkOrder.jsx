@@ -191,24 +191,25 @@ export default function BulkOrder() {
                   Fill in your approximate requirements below. Our workshop team in Jaipur will prepare a tailored catalog with discounted tier pricing, available print swatches, and timeline estimates.
                 </p>
 
-                <div className="mt-8 space-y-4">
+                <div className="mt-8 space-y-3.5">
                   <div className="flex items-start gap-3">
                     <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-leaf" />
-                    <p className="text-xs text-ink/80"><strong>Custom Tagging & Packaging:</strong> Brand tags, custom monograms & festive ribbons.</p>
+                    <p className="text-xs text-ink/80"><strong>Sample First Approval:</strong> We send a sample piece first. Bulk batch production starts only after your sample confirmation and approval. (Sample orders are separate from bulk orders depending on product).</p>
                   </div>
                   <div className="flex items-start gap-3">
                     <ShieldCheck size={18} className="mt-0.5 shrink-0 text-leaf" />
-                    <p className="text-xs text-ink/80"><strong>Transparent Payment Terms:</strong> 60% advance to confirm order & begin artisan crafting; remaining 40% before dispatch after video proof of ready batch.</p>
+                    <p className="text-xs text-ink/80"><strong>60% Advance Payment:</strong> 60% advance to confirm order & start artisan crafting; remaining 40% before courier dispatch after video inspection of finished batch.</p>
                   </div>
                   <div className="flex items-start gap-3">
                     <ShieldCheck size={18} className="mt-0.5 shrink-0 text-leaf" />
-                    <p className="text-xs text-ink/80"><strong>100% Artisan Guaranteed:</strong> Pure cotton quilted fabric printed with traditional wooden blocks.</p>
+                    <p className="text-xs text-ink/80"><strong>Bulk Quality & Policy:</strong> Strictly no returns or refunds on bulk orders (as work starts after sample approval). Any transit/manufacturing defective piece is replaced promptly.</p>
                   </div>
                   <div className="flex items-start gap-3">
                     <Clock size={18} className="mt-0.5 shrink-0 text-leaf" />
-                    <p className="text-xs text-ink/80"><strong>Order-Based Schedule:</strong> Production and dispatch timelines decided based on your total order quantity.</p>
+                    <p className="text-xs text-ink/80"><strong>Custom Tags & Packaging:</strong> Brand logo tags, custom monograms & order-based tailored delivery schedules.</p>
                   </div>
                 </div>
+
               </div>
 
               {/* Direct Call / Contact Box */}

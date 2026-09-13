@@ -152,55 +152,89 @@ export default function PolicyModal({ isOpen, initialTab = 'privacy', onClose })
 function PrivacyPolicyContent() {
   return (
     <div className="space-y-6 animate-fadeIn">
-      <div className="rounded-2xl border border-rose/20 bg-rose/5 p-4 flex items-start gap-3">
+      {/* Important Store Policy Notice Banner */}
+      <div className="rounded-2xl border-2 border-rose/30 bg-rose/5 p-5 space-y-3 shadow-sm">
+        <div className="flex items-center gap-2.5 text-rose font-bold text-sm">
+          <ShieldCheck size={20} className="text-rose shrink-0" />
+          <span>Essential Store & Bulk Order Policies</span>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 text-xs text-ink/85">
+          <div className="rounded-xl bg-white/80 p-3 border border-rose/15 space-y-1">
+            <p className="font-bold text-ink">💰 60% Advance Payment Policy</p>
+            <p className="text-ink/75">
+              A <strong>60% advance payment</strong> is mandatory to confirm your order and initiate custom artisan crafting/batch production. The remaining <strong>40% balance</strong> is payable prior to dispatch after we share video proof of the finished batch.
+            </p>
+          </div>
+          <div className="rounded-xl bg-white/80 p-3 border border-rose/15 space-y-1">
+            <p className="font-bold text-ink">📦 Sample First Approval Process</p>
+            <p className="text-ink/75">
+              For bulk orders, we send you a <strong>sample piece first</strong>. Only once you inspect and <strong>confirm/approve the sample</strong> do our artisans start manufacturing your full order.
+            </p>
+          </div>
+          <div className="rounded-xl bg-white/80 p-3 border border-rose/15 space-y-1">
+            <p className="font-bold text-ink">⚖️ Sample vs. Bulk Orders</p>
+            <p className="text-ink/75">
+              Sample orders are <strong>not the same as bulk orders</strong>. Pricing, production timelines, and customization specifications depend on the specific product category.
+            </p>
+          </div>
+          <div className="rounded-xl bg-white/80 p-3 border border-rose/15 space-y-1">
+            <p className="font-bold text-ink">🚫 Bulk Return & Refund Policy</p>
+            <p className="text-ink/75">
+              Strictly <strong>NO returns or refunds on bulk orders</strong> because production starts only after sample approval. However, if any piece is verified to be <strong>defective or damaged</strong> upon delivery, we replace or credit it immediately.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-ink/10 bg-white p-4 flex items-start gap-3">
         <Lock size={20} className="text-rose shrink-0 mt-0.5" />
         <div className="text-xs text-ink/80 leading-relaxed">
-          <strong>Summary of Privacy Promise:</strong> We respect your privacy. We strictly collect only necessary details (name, delivery address, contact number) to fulfill your retail and wholesale bag orders. We never sell, rent, or trade your personal data to any third-party advertisers.
+          <strong>Privacy Commitment:</strong> Craft of Pink City values your privacy. We only collect necessary information (name, delivery address, phone/WhatsApp number) required to process, manufacture, and dispatch your orders. We never sell, rent, or trade your personal data.
         </div>
       </div>
 
       <section className="space-y-2">
         <h3 className="font-serif text-lg font-bold text-ink">1. Information We Collect</h3>
-        <p>When you interact with our website, place retail orders, or request wholesale quotations, we collect:</p>
+        <p>When you interact with our store, place retail orders, or request wholesale quotes, we collect:</p>
         <ul className="list-disc pl-5 space-y-1 text-ink/75">
           <li><strong>Contact Details:</strong> Your name, phone/WhatsApp number, and email address.</li>
-          <li><strong>Shipping Information:</strong> Delivery address, city, state, and postal PIN code for dispatch.</li>
-          <li><strong>Order Preferences:</strong> Products of interest, customized print selections, and wholesale quantity requirements.</li>
-          <li><strong>Technical Data:</strong> Browser type, approximate location, and device details used solely for site optimization and user experience.</li>
+          <li><strong>Shipping Information:</strong> Doorstep delivery address, city, state, and postal PIN code for courier dispatch.</li>
+          <li><strong>Order & Customization Details:</strong> Chosen bag designs, block print selections, custom logo branding tags, and bulk quantity requirements.</li>
+          <li><strong>Payment Confirmation Data:</strong> Transaction reference IDs and receipts (we do not store your bank passwords or card CVVs).</li>
         </ul>
       </section>
 
       <section className="space-y-2">
         <h3 className="font-serif text-lg font-bold text-ink">2. How We Use Your Information</h3>
-        <p>Your details are used strictly for legitimate business purposes, including:</p>
+        <p>Your details are used strictly for legitimate customer order processing, including:</p>
         <ul className="list-disc pl-5 space-y-1 text-ink/75">
-          <li>Processing, stitching, and delivering your handcrafted bags and accessories.</li>
-          <li>Sending live dispatch tracking links and courier updates via WhatsApp or SMS.</li>
-          <li>Providing personalized assistance and customer support via our direct artisan concierge.</li>
-          <li>Sending wholesale catalogues and volume quotation invoices when requested by you.</li>
+          <li>Handcrafting, stitching, and packaging your authentic Jaipur cotton bags and accessories.</li>
+          <li>Sending sample approval photos, batch production updates, and courier dispatch tracking links via WhatsApp/SMS.</li>
+          <li>Providing personalized customer support and concierge assistance directly from our artisan workshop.</li>
+          <li>Sharing wholesale catalog pricing slabs and tax invoices when requested.</li>
         </ul>
       </section>
 
       <section className="space-y-2">
         <h3 className="font-serif text-lg font-bold text-ink">3. Payment & Transaction Security</h3>
         <p>
-          Craft of Pink City operates with utmost transaction safety. Direct retail and wholesale payments are handled through verified payment channels (UPI, Bank Transfer NEFT/IMPS, Cash on Delivery, and trusted payment gateways). We do not store any credit card numbers or banking passwords on our servers.
+          All retail and bulk order transactions are conducted through verified and secure payment channels including UPI, NEFT/IMPS Bank Transfer, and secure payment gateways. Our 60% advance and 40% pre-dispatch milestone terms are executed transparently with digital invoices.
         </p>
       </section>
 
       <section className="space-y-2">
-        <h3 className="font-serif text-lg font-bold text-ink">4. Third-Party Sharing</h3>
+        <h3 className="font-serif text-lg font-bold text-ink">4. Third-Party Courier Logistics</h3>
         <p>We only share essential shipping details with our trusted courier logistics partners:</p>
         <ul className="list-disc pl-5 space-y-1 text-ink/75">
           <li><strong>Delivery Couriers:</strong> Bluedart, Delhivery, DTDC, India Post, and verified international freight forwarders for global shipments.</li>
-          <li><strong>Legal Authorities:</strong> Only when strictly required by applicable Indian laws or statutory obligations.</li>
+          <li><strong>Legal Authorities:</strong> Only when strictly required under applicable Indian statutory laws.</li>
         </ul>
       </section>
 
       <section className="space-y-2">
         <h3 className="font-serif text-lg font-bold text-ink">5. Your Data Rights & Contact</h3>
         <p>
-          You have the right to request access, correction, or deletion of your contact data from our broadcast list at any time. For any privacy-related queries, email us at <a href={`mailto:${email}`} className="text-rose font-bold underline">{email}</a> or WhatsApp us at <a href={`https://wa.me/${whatsappNumber}`} className="text-rose font-bold underline">+91 93512 91471</a>.
+          You have the right to request access, correction, or removal of your contact details from our database at any time. For questions regarding our privacy or store policies, email us at <a href={`mailto:${email}`} className="text-rose font-bold underline">{email}</a> or WhatsApp us at <a href={`https://wa.me/${whatsappNumber}`} className="text-rose font-bold underline">+91 93512 91471</a>.
         </p>
       </section>
     </div>
@@ -211,7 +245,7 @@ function TermsContent() {
   return (
     <div className="space-y-6 animate-fadeIn">
       <div className="rounded-2xl border border-ink/10 bg-white p-4 text-xs text-ink/80 leading-relaxed">
-        <strong>Welcome to Craft of Pink City:</strong> By browsing our website, placing an order, or communicating with our workshop team, you agree to the following terms and artisan craft specifications.
+        <strong>Terms of Service:</strong> By browsing our website, placing an order, requesting samples, or engaging with our Jaipur workshop team, you agree to the following terms, milestone payment structures, and artisan craft specifications.
       </div>
 
       <section className="space-y-2">
@@ -225,41 +259,60 @@ function TermsContent() {
       </section>
 
       <section className="space-y-2">
-        <h3 className="font-serif text-lg font-bold text-ink">2. Retail & Wholesale Order Terms</h3>
-        <ul className="list-disc pl-5 space-y-1 text-ink/75">
-          <li><strong>Retail Purchases:</strong> Direct cart checkout with doorstep express delivery.</li>
-          <li><strong>Wholesale & Bulk Orders:</strong> Minimum Order Quantity (MOQ) starts at 25 units per category with tiered volume discounts.</li>
-        </ul>
-      </section>
-
-      <section className="space-y-2">
-        <h3 className="font-serif text-lg font-bold text-ink">3. Wholesale Payment Milestones (60% / 40% Policy)</h3>
-        <div className="rounded-2xl border border-saffron/40 bg-saffron/10 p-4 text-xs text-ink/90 leading-relaxed space-y-2">
+        <h3 className="font-serif text-lg font-bold text-ink">2. 60% Advance Payment Policy (Mandatory for Orders)</h3>
+        <div className="rounded-2xl border-2 border-saffron/40 bg-saffron/10 p-4 text-xs text-ink/90 leading-relaxed space-y-2">
           <p className="font-bold text-ink text-sm">
-            Strict Milestone Structure for Wholesale & Bulk Orders:
+            Milestone Structure for Orders & Production:
           </p>
           <ul className="list-disc pl-5 space-y-1.5">
             <li>
-              <strong>60% Advance Payment (Mandatory to Confirm Order):</strong> A 60% advance payment is strictly required to confirm the wholesale order, lock fabric print selections, procure pure cotton/dyes, and schedule artisan workshop batch stitching.
+              <strong>60% Advance Payment (Mandatory to Confirm Order):</strong> A 60% advance payment is strictly required to confirm the order, lock fabric print selections, procure pure cotton fabric and natural dyes, and schedule artisan workshop batch stitching.
             </li>
             <li>
-              <strong>Remaining 40% Balance (Payable Prior to Dispatch):</strong> Once your complete batch is stitched, quilted, and packaged, our workshop team shares high-definition photos and video footage of your ready stock on WhatsApp for your inspection. The remaining 40% balance is payable prior to courier handover.
+              <strong>Remaining 40% Balance (Payable Prior to Dispatch):</strong> Once your complete batch is stitched, diamond-quilted, quality-checked, and packaged, our workshop team shares high-definition photos and video footage of your ready stock on WhatsApp for your inspection. The remaining 40% balance is payable prior to courier handover.
             </li>
           </ul>
         </div>
       </section>
 
       <section className="space-y-2">
-        <h3 className="font-serif text-lg font-bold text-ink">4. Pricing & Taxes</h3>
-        <p>
-          All retail product prices displayed on the website are in Indian Rupees (INR) and inclusive of applicable taxes unless stated otherwise. Wholesale prices are offered at tiered volume discounts. We reserve the right to revise catalog prices without prior notice based on raw cotton and fabric yarn market fluctuations.
+        <h3 className="font-serif text-lg font-bold text-ink">3. Sample First Approval Workflow for Bulk Orders</h3>
+        <div className="rounded-2xl border border-ink/15 bg-white p-4 text-xs text-ink/85 leading-relaxed space-y-2">
+          <p className="font-bold text-ink text-sm">
+            Sample Approval & Production Agreement:
+          </p>
+          <ul className="list-disc pl-5 space-y-1.5 text-ink/75">
+            <li>
+              <strong>Sample Sent First:</strong> For all wholesale and bulk orders, we send a physical sample piece first to ensure you are 100% satisfied with the fabric quality, print design, dimensions, and stitching.
+            </li>
+            <li>
+              <strong>Batch Production upon Sample Confirmation:</strong> Our artisan workshop starts working on your full bulk batch only after you inspect, confirm, and give explicit approval of the sample.
+            </li>
+            <li>
+              <strong>Sample Orders vs. Bulk Orders:</strong> Please note that sample orders are not the same as bulk orders. Unit pricing, production timelines, customization options, and freight terms depend on the specific product and quantity.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section className="space-y-2">
+        <h3 className="font-serif text-lg font-bold text-ink">4. Bulk Orders No Return / No Refund Policy</h3>
+        <p className="text-ink/80 text-xs">
+          Because wholesale and bulk orders are custom manufactured in volume strictly after sample approval, <strong>bulk orders cannot be returned or refunded</strong> once dispatched, unless an individual piece is verified to be defective upon arrival. See the Returns & Refunds section for defect replacement terms.
         </p>
       </section>
 
       <section className="space-y-2">
-        <h3 className="font-serif text-lg font-bold text-ink">5. Intellectual Property</h3>
+        <h3 className="font-serif text-lg font-bold text-ink">5. Pricing & Taxes</h3>
         <p>
-          All photographs, product descriptions, brand identity, logo, and artwork on this website are the intellectual property of <strong>Craft of Pink City</strong>. Reproduction, scraping, or commercial resale without written authorization is strictly prohibited.
+          Retail prices on the website are in Indian Rupees (INR) and inclusive of applicable taxes. Wholesale prices are offered at tiered volume discounts. Catalog prices may adjust periodically based on pure cotton fabric and natural dye raw material market fluctuations.
+        </p>
+      </section>
+
+      <section className="space-y-2">
+        <h3 className="font-serif text-lg font-bold text-ink">6. Intellectual Property</h3>
+        <p>
+          All photographs, product descriptions, brand identity, logo, and artwork on this website are the intellectual property of <strong>Craft of Pink City</strong>. Reproduction, scraping, or commercial resale of media assets without written authorization is strictly prohibited.
         </p>
       </section>
     </div>
@@ -281,11 +334,11 @@ function ShippingContent() {
         <div className="grid gap-3 sm:grid-cols-2 text-xs">
           <div className="rounded-xl border border-ink/10 bg-white p-3.5">
             <p className="font-bold text-ink uppercase tracking-wider">Ready Stock Retail Orders</p>
-            <p className="mt-1 text-ink/70">Dispatched within 24–48 hours from Jaipur. Delivery takes 3–5 business days depending on city destination.</p>
+            <p className="mt-1 text-ink/70">Dispatched within 24–48 hours from Jaipur. Delivery takes 3–5 business days depending on destination.</p>
           </div>
           <div className="rounded-xl border border-ink/10 bg-white p-3.5">
             <p className="font-bold text-ink uppercase tracking-wider">Wholesale & Custom Orders</p>
-            <p className="mt-1 text-ink/70">Production and dispatch timelines are tailored based on quantity and confirmed on WhatsApp prior to order finalization.</p>
+            <p className="mt-1 text-ink/70">Production and dispatch schedules depend on order volume and are confirmed directly on WhatsApp prior to order finalization.</p>
           </div>
         </div>
       </section>
@@ -310,38 +363,55 @@ function ShippingContent() {
 function RefundContent() {
   return (
     <div className="space-y-6 animate-fadeIn">
+      {/* Highlight Box for Wholesale / Bulk Return Policy */}
+      <div className="rounded-2xl border-2 border-rose/30 bg-rose/5 p-5 space-y-3">
+        <div className="flex items-center gap-2 text-rose font-bold text-sm">
+          <RotateCcw size={18} />
+          <span>Wholesale & Bulk Orders: No Return & No Refund Policy</span>
+        </div>
+        <div className="text-xs text-ink/85 space-y-2 leading-relaxed">
+          <p>
+            <strong>Strict Policy on Bulk / Wholesale Orders:</strong> Because every bulk order is custom manufactured after a physical sample is sent and confirmed by you, we operate on a strict <strong>NO RETURN and NO REFUND policy on bulk orders</strong>.
+          </p>
+          <p>
+            <strong>Exception for Defective Pieces:</strong> If any individual piece in your bulk batch is found to have a manufacturing defect or transit damage, we will promptly replace that piece or provide a credit adjustment upon receiving verification.
+          </p>
+        </div>
+      </div>
+
       <section className="space-y-2">
-        <h3 className="font-serif text-lg font-bold text-ink">1. Artisan Quality Guarantee</h3>
-        <p>
-          Every item undergoes a stringent 3-point quality check (fabric inspection, diamond quilting alignment, and zipper endurance) before being packed at our Jaipur workshop.
+        <h3 className="font-serif text-lg font-bold text-ink">1. Sample Approval Safeguard</h3>
+        <p className="text-ink/80 text-xs">
+          To prevent discrepancies, we send a physical sample piece prior to beginning bulk manufacturing. Once you inspect and approve the sample, batch production commences. Sample orders are independent of bulk orders (pricing and timelines depend on the specific product).
         </p>
       </section>
 
       <section className="space-y-2">
-        <h3 className="font-serif text-lg font-bold text-ink">2. Damaged or Defective Items</h3>
+        <h3 className="font-serif text-lg font-bold text-ink">2. Defective or Damaged Item Reporting (48-Hour Policy)</h3>
         <p>
-          In the rare event that you receive a defective item or package damaged during transit:
+          In the rare event that you receive a defective item or an item damaged during transit:
         </p>
         <ul className="list-disc pl-5 space-y-1 text-ink/75">
-          <li>Please notify us within <strong>48 hours of delivery</strong> by sending an unboxing photo/video to our WhatsApp support team at <strong>+91 93512 91471</strong>.</li>
-          <li>Upon verification, we will arrange a complimentary replacement or full refund to your original payment method.</li>
+          <li>Please notify us within <strong>48 hours of delivery</strong> by sending an unboxing photo/video and invoice details to our WhatsApp support team at <strong>+91 93512 91471</strong>.</li>
+          <li>Upon verification of the defect, we will arrange a complimentary replacement piece or process a refund/credit for that piece.</li>
         </ul>
       </section>
 
       <section className="space-y-2">
-        <h3 className="font-serif text-lg font-bold text-ink">3. Cancellations</h3>
+        <h3 className="font-serif text-lg font-bold text-ink">3. Cancellations & Order Modifications</h3>
         <ul className="list-disc pl-5 space-y-1 text-ink/75">
           <li><strong>Retail Orders:</strong> Cancellations are accepted prior to parcel dispatch from our workshop.</li>
-          <li><strong>Custom Wholesale Orders:</strong> Once fabric block-printing or brand logo tag stitching has commenced, custom production runs cannot be cancelled.</li>
+          <li><strong>Bulk & Custom Orders:</strong> Once the 60% advance is paid, fabric is cut/printed, or brand tags are stitched, production is committed and custom orders cannot be cancelled.</li>
         </ul>
       </section>
 
       <section className="space-y-2">
         <h3 className="font-serif text-lg font-bold text-ink">4. Refund Processing Time</h3>
         <p>
-          Approved refunds are initiated within <strong>24–48 hours</strong> and credited back to your original payment mode or UPI within 3–5 working days.
+          Approved refunds for verified defective pieces are initiated within <strong>24–48 hours</strong> and credited back to your original payment mode or UPI within 3–5 working days.
         </p>
       </section>
     </div>
   )
 }
+

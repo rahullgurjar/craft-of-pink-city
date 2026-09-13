@@ -285,6 +285,56 @@ function synthesizeDynamicResponse(query, cartContext, lang = 'en') {
     }
   }
 
+  // --- PAYMENT & STORE POLICIES (60% ADVANCE & SAMPLE APPROVAL) ---
+  if (hasWord(q, ['payment', 'advance', '60%', '40%', 'policy', 'policies', 'sample', 'terms', 'condition', 'conditions', 'niti', 'shartein', 'bhejo', 'paise'])) {
+    if (lang === 'hi') {
+      return {
+        text: `**ऑर्डर, भुगतान और सैंपल नीतियां (क्राफ्ट ऑफ पिंक सिटी):**\n\n• **60% एडवांस भुगतान नीति:** ऑर्डर कन्फर्म करने और जयपुरी कारीगरी शुरू करने के लिए **60% अग्रिम भुगतान** अनिवार्य है। शेष **40% बैलेंस** डिस्पैच से पहले (व्हाट्सएप पर तैयार बैच का वीडियो देखने के बाद) देय होता है।\n• **सैंपल अप्रूवल प्रक्रिया:** थोक ऑर्डर्स के लिए हम **पहले सैंपल पीस भेजते हैं**। जब आप सैंपल देखकर **कन्फर्म/अप्रूव** कर देते हैं, तभी आपके पूरे बल्क ऑर्डर का निर्माण शुरू होता है।\n• **सैंपल बनाम बल्क ऑर्डर:** सैंपल ऑर्डर और बल्क ऑर्डर अलग-अलग होते हैं (उत्पाद के आधार पर मूल्य और समय निर्भर करता है)।\n• **बल्क नो-रिटर्न पॉलिसी:** थोक ऑर्डर्स पर **कोई रिटर्न या रिफंड नहीं** है क्योंकि काम सैंपल अप्रूवल के बाद ही शुरू होता है। केवल डिलीवरी के समय **डिफेक्टिव/क्षतिग्रस्त पीस** पाए जाने पर (48 घंटे में अनबॉक्सिंग वीडियो देने पर) उसे तुरंत बदला जाता है।`,
+        action: {
+          type: 'LINK',
+          label: 'व्हाट्सएप पर स्टोर टीम से बात करें',
+          url: `https://wa.me/${whatsappNumber}?text=${encodeURIComponent('नमस्ते Craft of Pink City, मुझे आपके 60% भुगतान, सैंपल प्रक्रिया और स्टोर पॉलिसी के बारे में जानना है।')}`,
+          internalAnchor: '#bulk-orders'
+        },
+        quickReplies: ['थोक कैटलॉग (MOQ 25)', 'सैंपल मंगाएं', 'कलेक्शन देखें']
+      }
+    }
+    return {
+      text: `**Order, Payment & Store Policies (Craft of Pink City):**\n\n• **60% Advance Payment Policy:** A **60% advance payment** is mandatory to confirm the order and begin artisan workshop batch crafting. The remaining **40% balance** is payable prior to courier dispatch after we share video proof of the finished batch on WhatsApp.\n• **Sample First Approval Workflow:** For bulk orders, we send a **physical sample piece first**. Full batch production starts strictly after you inspect, **confirm, and approve the sample**.\n• **Sample vs. Bulk Orders:** Sample orders are **not the same as bulk orders** (pricing, lead times, and customization depend on the specific product).\n• **Bulk No-Return / No-Refund Policy:** Strictly **NO returns or refunds on bulk orders** once dispatched (since manufacturing commences only post-sample approval). Any verified **defective/damaged piece** reported with an unboxing video within 48 hours is replaced or credited promptly.`,
+      action: {
+        type: 'LINK',
+        label: 'Chat with Workshop on WhatsApp',
+        url: `https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Hello Craft of Pink City, I would like more information on your 60% advance payment and sample approval policies.')}`,
+        internalAnchor: '#bulk-orders'
+      },
+      quickReplies: ['Wholesale Catalog (MOQ 25)', 'Request Sample Piece', 'Browse Collection']
+    }
+  }
+
+  // --- RETURNS & REFUND POLICY ---
+  if (hasWord(q, ['return', 'refund', 'replace', 'replacement', 'exchange', 'defect', 'defective', 'damaged', 'broken', 'wapsi', 'badalna', 'kharab', 'tuta'])) {
+    if (lang === 'hi') {
+      return {
+        text: `**रिटर्न व रिफंड नीति (क्राफ्ट ऑफ पिंक सिटी):**\n\n• **थोक / बल्क ऑर्डर्स:** थोक ऑर्डर्स पर **कोई रिटर्न या रिफंड नहीं** है, क्योंकि संपूर्ण उत्पादन आपके द्वारा **सैंपल पीस कन्फर्म व अप्रूव करने के बाद** ही शुरू किया जाता है।\n• **डिफेक्टिव पीस का समाधान:** यदि पार्सल मिलने पर कोई पीस डिफेक्टिव या डैमेज निकलता है, तो डिलीवरी के **48 घंटे के भीतर** अनबॉक्सिंग वीडियो हमारे व्हाट्सएप पर भेजें। हम उस पीस को तुरंत बदल देंगे या क्रेडिट देंगे।\n• **रिटेल ऑर्डर्स:** यदि रिटेल पार्सल में कोई त्रुटि हो, तो 48 घंटे के भीतर व्हाट्सएप सपोर्ट पर संपर्क करें।`,
+        action: {
+          type: 'LINK',
+          label: 'व्हाट्सएप सपोर्ट से संपर्क करें',
+          url: `https://wa.me/${whatsappNumber}?text=${encodeURIComponent('नमस्ते Craft of Pink City, मुझे रिटर्न/रिफंड और डिफेक्टिव पीस पॉलिसी के बारे में सहायता चाहिए।')}`
+        },
+        quickReplies: ['थोक नीतियां', 'कलेक्शन देखें', 'व्हाट्सएप चैट']
+      }
+    }
+    return {
+      text: `**Returns & Refunds Policy (Craft of Pink City):**\n\n• **Wholesale & Bulk Orders:** Strictly **NO returns or refunds on bulk orders**, as manufacturing begins only after you inspect and **approve a physical sample piece**.\n• **Defective Piece Guarantee:** If any piece is verified to have a manufacturing or transit defect, simply share an unboxing video within **48 hours of delivery** on WhatsApp (+91 93512 91471). We will immediately arrange a free replacement or credit.\n• **Retail Orders:** 48-hour reporting for damaged transit items with prompt replacement.\n• **Payment Terms:** 60% advance to confirm order and 40% before dispatch.`,
+      action: {
+        type: 'LINK',
+        label: 'Contact Support on WhatsApp',
+        url: `https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Hello Craft of Pink City, I have a query regarding returns, refunds, or a defective piece.')}`
+      },
+      quickReplies: ['Wholesale Policies', 'Browse Collection', 'WhatsApp Support']
+    }
+  }
+
   // --- DOMESTIC & INTERNATIONAL DELIVERY ---
   if (hasWord(q, ['deliver', 'delivery', 'reach', 'dispatch', 'ship', 'shipping', 'pincode', 'days', 'kab', 'pahuchenga', 'kaha'])) {
     if (lang === 'hi') {
@@ -308,6 +358,7 @@ function synthesizeDynamicResponse(query, cartContext, lang = 'en') {
       quickReplies: ['Payment Options', 'Browse Collection', 'WhatsApp Support']
     }
   }
+
 
   // --- MATCHED PRODUCTS FALLBACK ---
   const matchedProducts = findMatchingProducts(query, 3)
