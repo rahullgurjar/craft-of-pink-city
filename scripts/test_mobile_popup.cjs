@@ -5,14 +5,14 @@ const os = require('os');
 const path = require('path');
 
 const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-const userDataDir = path.join(os.tmpdir(), 'chrome_cdp_profile_' + Date.now());
+const userDataDir = path.join(os.tmpdir(), 'chrome_cdp_mobile_' + Date.now());
 
 const chrome = spawn(chromePath, [
   '--headless=new',
-  '--remote-debugging-port=9224',
+  '--remote-debugging-port=9226',
   '--disable-gpu',
   '--no-sandbox',
-  '--window-size=1280,1000',
+  '--window-size=390,844',
   `--user-data-dir=${userDataDir}`
 ]);
 
@@ -20,8 +20,8 @@ setTimeout(() => {
   const req = http.request(
     {
       host: '127.0.0.1',
-      port: 9224,
-      path: '/json/new?https://craftofpinkcity.shop/',
+      port: 9226,
+      path: '/json/new?http://localhost:5173/',
       method: 'PUT'
     },
     (res) => {
@@ -30,16 +30,23 @@ setTimeout(() => {
       res.on('end', () => {
         try {
           const page = JSON.parse(raw);
-          console.log('Live page created, WebSocket URL:', page.webSocketDebuggerUrl);
-
           const ws = new WebSocket(page.webSocketDebuggerUrl);
 
           ws.addEventListener('open', () => {
-            console.log('DevTools connected to live website!');
             ws.send(JSON.stringify({ id: 1, method: 'Runtime.enable' }));
             ws.send(JSON.stringify({ id: 2, method: 'Page.enable' }));
+            ws.send(JSON.stringify({
+              id: 3,
+              method: 'Emulation.setDeviceMetricsOverride',
+              params: {
+                width: 390,
+                height: 844,
+                deviceScaleFactor: 2,
+                mobile: true
+              }
+            }));
 
-            // Wait 2.5 seconds to inspect live DOM (initial delay is 1.2s)
+            // Wait 2.2 seconds for Sales Popup to emerge
             setTimeout(() => {
               ws.send(JSON.stringify({
                 id: 10,
@@ -47,29 +54,30 @@ setTimeout(() => {
                 params: {
                   expression: `(() => {
                     const aside = document.querySelector('aside[aria-label*="order"]');
-                    if (!aside) return { found: false, htmlLen: document.body.innerHTML.length };
-                    
+                    if (!aside) return { found: false };
+                    const card = aside.querySelector('.group');
+                    const rect = card.getBoundingClientRect();
                     return {
                       found: true,
-                      className: aside.className,
-                      isVisible: aside.className.includes('translate-y-0') || aside.className.includes('opacity-100'),
-                      text: aside.innerText,
-                      rect: aside.getBoundingClientRect()
+                      height: Math.round(rect.height),
+                      width: Math.round(rect.width),
+                      bottom: Math.round(rect.bottom),
+                      text: aside.innerText
                     };
                   })()`,
                   returnByValue: true
                 }
               }));
-            }, 5000);
+            }, 2200);
           });
 
           ws.addEventListener('message', (event) => {
             const resp = JSON.parse(event.data);
             
             if (resp.id === 10) {
-              console.log('LIVE DOM RESULT:', JSON.stringify(resp.result?.result?.value, null, 2));
+              console.log('MOBILE POPUP METRICS:', JSON.stringify(resp.result?.result?.value, null, 2));
 
-              // Take screenshot of live site
+              // Take mobile screenshot
               ws.send(JSON.stringify({
                 id: 11,
                 method: 'Page.captureScreenshot',
@@ -79,15 +87,15 @@ setTimeout(() => {
 
             if (resp.id === 11 && resp.result?.data) {
               const artifactDir = 'C:\\Users\\madan\\.gemini\\antigravity-ide\\brain\\aaa20af3-8b25-4326-9d59-7fe1632d72ec';
-              fs.writeFileSync(path.join(artifactDir, 'live_website_check.png'), Buffer.from(resp.result.data, 'base64'));
-              console.log('Saved live screenshot to live_website_check.png');
+              fs.writeFileSync(path.join(artifactDir, 'mobile_popup_screenshot.png'), Buffer.from(resp.result.data, 'base64'));
+              console.log('Saved screenshot to mobile_popup_screenshot.png');
               ws.close();
               chrome.kill();
               process.exit(0);
             }
           });
         } catch (e) {
-          console.error('Error:', e);
+          console.error(e);
           chrome.kill();
           process.exit(1);
         }

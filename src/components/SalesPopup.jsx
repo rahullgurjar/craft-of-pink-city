@@ -298,7 +298,7 @@ export default function SalesPopup() {
       aria-live="polite"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`fixed bottom-4 left-4 z-[70] max-w-[340px] sm:max-w-[390px] w-[calc(100vw-2rem)] sm:w-auto transition-all duration-500 ease-out transform ${
+      className={`fixed bottom-20 left-3 sm:bottom-4 sm:left-4 z-[70] max-w-[280px] sm:max-w-[390px] w-auto transition-all duration-500 ease-out transform ${
         isVisible
           ? 'translate-y-0 opacity-100 scale-100 pointer-events-auto'
           : 'translate-y-8 opacity-0 scale-95 pointer-events-none'
@@ -306,36 +306,37 @@ export default function SalesPopup() {
     >
       <div
         onClick={handleOpenProduct}
-        className="group relative cursor-pointer overflow-hidden rounded-2xl border border-ink/15 bg-white/95 backdrop-blur-md p-3.5 shadow-2xl shadow-ink/20 transition-all duration-300 hover:border-rose/50 hover:shadow-rose/20 hover:-translate-y-0.5"
+        className="group relative cursor-pointer overflow-hidden rounded-xl sm:rounded-2xl border border-ink/15 bg-white/95 backdrop-blur-md p-2 sm:p-3.5 shadow-xl sm:shadow-2xl shadow-ink/20 transition-all duration-300 hover:border-rose/50 hover:shadow-rose/20 hover:-translate-y-0.5"
       >
         {/* Top Gradient Accent Line */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose via-saffron to-terracotta" />
+        <div className="absolute top-0 left-0 right-0 h-0.5 sm:h-1 bg-gradient-to-r from-rose via-saffron to-terracotta" />
 
         {/* Close Button */}
         <button
           type="button"
           onClick={handleDismiss}
-          className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-ink/5 text-ink/40 transition-colors hover:bg-rose/10 hover:text-rose"
+          className="absolute top-1 right-1 sm:top-2 sm:right-2 flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-ink/5 text-ink/40 transition-colors hover:bg-rose/10 hover:text-rose"
           aria-label="Dismiss order notification"
           title="Dismiss notification"
         >
-          <X size={13} />
+          <X size={11} />
         </button>
 
         {/* Header Ribbon: Bulk Order Placed Badge */}
-        <div className="flex items-center gap-1.5 mb-2 pr-6">
-          <span className="inline-flex items-center gap-1 rounded-full bg-rose/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-rose border border-rose/20">
-            <PackageCheck size={11} className="text-rose" />
-            {badge}
+        <div className="flex items-center gap-1 mb-1 sm:mb-2 pr-4 sm:pr-5">
+          <span className="inline-flex items-center gap-0.5 sm:gap-1 rounded-full bg-rose/10 px-1.5 py-0.5 text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-rose border border-rose/20 shrink-0">
+            <PackageCheck size={9} className="text-rose shrink-0" />
+            <span className="hidden sm:inline">{badge}</span>
+            <span className="sm:hidden">Bulk Order</span>
           </span>
-          <span className="inline-flex items-center rounded-full bg-saffron/10 px-2 py-0.5 text-[9px] font-semibold text-terracotta truncate">
+          <span className="inline-flex items-center rounded-full bg-saffron/10 px-1.5 py-0.5 text-[8px] sm:text-[9px] font-semibold text-terracotta truncate">
             {tag}
           </span>
         </div>
 
-        <div className="flex items-center gap-3.5 pr-2">
+        <div className="flex items-center gap-2 sm:gap-3.5 pr-1 sm:pr-2">
           {/* Product Thumbnail with Live Pulse */}
-          <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-ink/10 bg-[#faf6ef]">
+          <div className="relative h-10 w-10 sm:h-16 sm:w-16 shrink-0 overflow-hidden rounded-lg sm:rounded-xl border border-ink/10 bg-[#faf6ef]">
             <img
               src={productImage}
               alt={product.name}
@@ -344,52 +345,49 @@ export default function SalesPopup() {
               decoding="async"
             />
             {/* Live Indicator Dot */}
-            <span className="absolute bottom-1 right-1 flex h-2.5 w-2.5">
+            <span className="absolute bottom-0.5 right-0.5 sm:bottom-1 sm:right-1 flex h-1.5 w-1.5 sm:h-2.5 sm:w-2.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500 border border-white" />
+              <span className="relative inline-flex h-1.5 w-1.5 sm:h-2.5 sm:w-2.5 rounded-full bg-emerald-500 border border-white" />
             </span>
           </div>
 
           {/* Bulk Order Details */}
           <div className="min-w-0 flex-1">
             {/* Buyer & Location */}
-            <div className="flex items-center gap-1 text-[11px] text-ink/70 truncate">
+            <div className="flex items-center gap-1 text-[9px] sm:text-[11px] text-ink/70 truncate">
               <span className="font-bold text-ink truncate">{buyerName}</span>
               <span className="text-ink/40">•</span>
               <span className="text-terracotta font-medium flex items-center gap-0.5 shrink-0">
-                <MapPin size={10} className="text-rose shrink-0" />
+                <MapPin size={8} className="text-rose shrink-0" />
                 {city}
               </span>
             </div>
 
             {/* Order Placed Statement */}
-            <p className="mt-0.5 text-xs text-ink/90 font-medium line-clamp-1">
-              Order Placed: <strong className="text-rose font-bold">{quantity}</strong>
+            <p className="mt-0.5 text-[10px] sm:text-xs text-ink/90 font-medium line-clamp-1">
+              Order: <strong className="text-rose font-bold">{quantity}</strong>
             </p>
 
             {/* Product Name */}
-            <h4 className="text-xs font-bold text-ink truncate group-hover:text-rose transition-colors">
+            <h4 className="text-[10px] sm:text-xs font-bold text-ink truncate group-hover:text-rose transition-colors leading-tight">
               {product.name}
             </h4>
 
-            {/* Footer / Meta: Time ago + Verified Bulk Badge */}
-            <div className="mt-1.5 flex items-center justify-between gap-2 text-[10px] text-ink/50">
-              <div className="flex items-center gap-1">
-                <span className="text-ink/60">{timeAgo}</span>
-                <span>•</span>
-                <span className="font-bold text-terracotta">Wholesale Tier</span>
-              </div>
+            {/* Footer / Meta (Hidden or ultra-compact on mobile) */}
+            <div className="mt-0.5 sm:mt-1.5 flex items-center justify-between gap-1 text-[8px] sm:text-[10px] text-ink/50">
+              <span className="text-ink/60 truncate">{timeAgo}</span>
 
-              <div className="flex items-center gap-1 text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-200">
-                <CheckCircle2 size={10} className="text-emerald-600 shrink-0" />
-                <span>Verified Order</span>
+              <div className="flex items-center gap-0.5 text-emerald-700 font-semibold bg-emerald-50 px-1 py-0.2 rounded-full border border-emerald-200 text-[8px] sm:text-[9px] shrink-0">
+                <CheckCircle2 size={8} className="text-emerald-600 shrink-0" />
+                <span className="hidden sm:inline">Verified Order</span>
+                <span className="sm:hidden">Verified</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Hover / Click Prompt for Wholesale Quote */}
-        <div className="mt-2.5 pt-2 border-t border-ink/5 flex items-center justify-between text-[10px] text-rose font-semibold">
+        {/* Desktop Wholesale Prompt (Cleanly hidden on mobile) */}
+        <div className="hidden sm:flex mt-2.5 pt-2 border-t border-ink/5 items-center justify-between text-[10px] text-rose font-semibold">
           <span className="flex items-center gap-1 text-ink/60 font-normal truncate">
             <Sparkles size={11} className="text-saffron shrink-0" />
             Tap to View Product & Bulk Quotes
