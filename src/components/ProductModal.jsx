@@ -20,6 +20,7 @@ import {
 import { whatsapp, whatsappNumber } from '../data/products'
 import WhatsAppIcon from './WhatsAppIcon'
 import { useCart } from '../context/CartContext'
+import { useCurrency } from '../context/CurrencyContext'
 
 export default function ProductModal({
   product,
@@ -32,6 +33,7 @@ export default function ProductModal({
   const [copied, setCopied] = useState(false)
   const [activeTab, setActiveTab] = useState('details') // 'details' | 'specs' | 'craft'
   const { addToCart } = useCart()
+  const { formatPrice } = useCurrency()
 
   // Keyboard navigation & scroll lock
   useEffect(() => {
@@ -306,7 +308,7 @@ export default function ProductModal({
                 {/* Price Section */}
                 <div className="mt-4 flex items-baseline gap-3">
                   <span className="font-serif text-3xl font-bold text-rose">
-                    {product.price}
+                    {formatPrice(product.price)}
                   </span>
                   <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-0.5">
                     ● Ready to Dispatch
@@ -325,11 +327,11 @@ export default function ProductModal({
                   <span className="text-xs font-bold uppercase tracking-wider text-ink/80">
                     Quantity
                   </span>
-                  {totalPrice && (
+                  {unitPrice > 0 && (
                     <span className="text-xs font-semibold text-ink/70">
                       Total:{' '}
                       <strong className="font-serif text-base text-rose font-bold">
-                        ₹{totalPrice}
+                        {formatPrice(unitPrice * quantity)}
                       </strong>
                     </span>
                   )}

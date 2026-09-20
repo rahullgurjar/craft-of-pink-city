@@ -3,6 +3,7 @@ import { ArrowUpRight, Package, Eye, Sparkles, Search, X, SlidersHorizontal, Sho
 import { products, whatsapp } from '../data/products'
 import ProductModal from './ProductModal'
 import { useCart } from '../context/CartContext'
+import { useCurrency } from '../context/CurrencyContext'
 
 const categories = ['All', ...new Set(products.map((product) => product.category))]
 const newImages = import.meta.glob('../assets/products-new/*', { eager: true, import: 'default' })
@@ -21,6 +22,7 @@ export default function Products() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedProduct, setSelectedProduct] = useState(null)
   const { addToCart } = useCart()
+  const { formatPrice } = useCurrency()
 
   // Deep-link check: auto-open modal if ?product=id or #product-id in URL or via custom event
   useEffect(() => {
@@ -244,7 +246,7 @@ export default function Products() {
                     </p>
                   </div>
                   <span className="shrink-0 font-serif text-xl font-semibold text-rose">
-                    {product.price}
+                    {formatPrice(product.price)}
                   </span>
                 </div>
               </div>

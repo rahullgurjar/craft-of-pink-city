@@ -11,6 +11,7 @@ const links = [
   ['About', 'about'],
   ['Our Craft', 'craft'],
   ['Products', 'products'],
+  ['Curated Sets', 'bundles'],
   ['Bulk Orders', 'bulk-orders'],
   ['Reviews', 'reviews'],
   ['FAQs', 'faq'],
@@ -31,7 +32,7 @@ export default function Navbar() {
       }
 
       // Active Section Spy for smooth navigation highlights
-      const sectionIds = ['home', 'about', 'craft', 'products', 'bulk-orders', 'reviews', 'faq'];
+      const sectionIds = ['home', 'about', 'craft', 'fabric-explorer', 'products', 'bundles', 'bulk-orders', 'reviews', 'faq'];
       const scrollPosition = window.scrollY + 130;
 
       for (let i = sectionIds.length - 1; i >= 0; i--) {

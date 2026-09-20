@@ -1,5 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import Navbar from './components/Navbar';
+import AnnouncementBar from './components/AnnouncementBar';
 import Hero from './components/Hero';
 import About from './components/About';
 import CraftProcess from './components/CraftProcess';
@@ -7,9 +8,12 @@ import Products from './components/Products';
 import Footer from './components/Footer';
 import FloatingWhatsApp from './components/FloatingWhatsApp';
 import { CartProvider } from './context/CartContext';
+import { CurrencyProvider } from './context/CurrencyContext';
 import ErrorBoundary from './components/ErrorBoundary';
 
 // Dynamic code-splitting for below-the-fold and heavy modal components
+const FabricExplorer = lazy(() => import('./components/FabricExplorer'));
+const BundleSave = lazy(() => import('./components/BundleSave'));
 const Reviews = lazy(() => import('./components/Reviews'));
 const BulkOrder = lazy(() => import('./components/BulkOrder'));
 const WhyChooseUs = lazy(() => import('./components/WhyChooseUs'));
@@ -47,59 +51,68 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <CartProvider>
-        <a className="skip-link" href="#main">
-          Skip to content
-        </a>
-        <ErrorBoundary><Navbar /></ErrorBoundary>
-        <main id="main">
-          <ErrorBoundary><Hero /></ErrorBoundary>
-          <ErrorBoundary><About /></ErrorBoundary>
-          <ErrorBoundary><CraftProcess /></ErrorBoundary>
-          <ErrorBoundary><Products /></ErrorBoundary>
-          <Suspense fallback={<div className="min-h-[300px] flex items-center justify-center text-ink/40 text-xs">Loading reviews...</div>}>
-            <ErrorBoundary><Reviews /></ErrorBoundary>
+      <CurrencyProvider>
+        <CartProvider>
+          <a className="skip-link" href="#main">
+            Skip to content
+          </a>
+          <ErrorBoundary><AnnouncementBar /></ErrorBoundary>
+          <ErrorBoundary><Navbar /></ErrorBoundary>
+          <main id="main">
+            <ErrorBoundary><Hero /></ErrorBoundary>
+            <ErrorBoundary><About /></ErrorBoundary>
+            <ErrorBoundary><CraftProcess /></ErrorBoundary>
+            <Suspense fallback={null}>
+              <ErrorBoundary><FabricExplorer /></ErrorBoundary>
+            </Suspense>
+            <ErrorBoundary><Products /></ErrorBoundary>
+            <Suspense fallback={null}>
+              <ErrorBoundary><BundleSave /></ErrorBoundary>
+            </Suspense>
+            <Suspense fallback={<div className="min-h-[300px] flex items-center justify-center text-ink/40 text-xs">Loading reviews...</div>}>
+              <ErrorBoundary><Reviews /></ErrorBoundary>
+            </Suspense>
+            <Suspense fallback={null}>
+              <ErrorBoundary><BulkOrder /></ErrorBoundary>
+            </Suspense>
+            <Suspense fallback={null}>
+              <ErrorBoundary><WhyChooseUs /></ErrorBoundary>
+            </Suspense>
+            <Suspense fallback={null}>
+              <ErrorBoundary><FAQ /></ErrorBoundary>
+            </Suspense>
+            <Suspense fallback={null}>
+              <ErrorBoundary><InstagramCTA /></ErrorBoundary>
+            </Suspense>
+          </main>
+          <ErrorBoundary><Footer onOpenPolicy={openPolicy} /></ErrorBoundary>
+          <ErrorBoundary><FloatingWhatsApp /></ErrorBoundary>
+          <Suspense fallback={null}>
+            <ErrorBoundary><ArtisanChatbot /></ErrorBoundary>
           </Suspense>
           <Suspense fallback={null}>
-            <ErrorBoundary><BulkOrder /></ErrorBoundary>
+            <ErrorBoundary><CartDrawer /></ErrorBoundary>
           </Suspense>
           <Suspense fallback={null}>
-            <ErrorBoundary><WhyChooseUs /></ErrorBoundary>
+            <ErrorBoundary><SalesPopup /></ErrorBoundary>
           </Suspense>
           <Suspense fallback={null}>
-            <ErrorBoundary><FAQ /></ErrorBoundary>
+            <ErrorBoundary>
+              <PolicyModal
+                isOpen={isPolicyOpen}
+                initialTab={policyTab}
+                onClose={() => {
+                  setIsPolicyOpen(false);
+                  // Clean hash if it was a policy hash
+                  if (['#privacy', '#terms', '#shipping', '#refunds', '#policies'].includes(window.location.hash)) {
+                    history.replaceState(null, '', window.location.pathname + window.location.search);
+                  }
+                }}
+              />
+            </ErrorBoundary>
           </Suspense>
-          <Suspense fallback={null}>
-            <ErrorBoundary><InstagramCTA /></ErrorBoundary>
-          </Suspense>
-        </main>
-        <ErrorBoundary><Footer onOpenPolicy={openPolicy} /></ErrorBoundary>
-        <ErrorBoundary><FloatingWhatsApp /></ErrorBoundary>
-        <Suspense fallback={null}>
-          <ErrorBoundary><ArtisanChatbot /></ErrorBoundary>
-        </Suspense>
-        <Suspense fallback={null}>
-          <ErrorBoundary><CartDrawer /></ErrorBoundary>
-        </Suspense>
-        <Suspense fallback={null}>
-          <ErrorBoundary><SalesPopup /></ErrorBoundary>
-        </Suspense>
-        <Suspense fallback={null}>
-          <ErrorBoundary>
-            <PolicyModal
-              isOpen={isPolicyOpen}
-              initialTab={policyTab}
-              onClose={() => {
-                setIsPolicyOpen(false);
-                // Clean hash if it was a policy hash
-                if (['#privacy', '#terms', '#shipping', '#refunds', '#policies'].includes(window.location.hash)) {
-                  history.replaceState(null, '', window.location.pathname + window.location.search);
-                }
-              }}
-            />
-          </ErrorBoundary>
-        </Suspense>
-      </CartProvider>
+        </CartProvider>
+      </CurrencyProvider>
     </ErrorBoundary>
   );
 }
