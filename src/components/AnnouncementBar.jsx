@@ -41,7 +41,7 @@ export default function AnnouncementBar() {
   const Icon = currentMsg.icon
 
   return (
-    <div className="relative z-50 bg-[#1e121d] text-white text-[11px] sm:text-xs font-medium border-b border-white/10">
+    <div className="relative z-[60] bg-[#1e121d] text-white text-[11px] sm:text-xs font-medium border-b border-white/10">
       <div className="mx-auto flex h-9 max-w-7xl items-center justify-between px-3 sm:px-6 lg:px-8">
         {/* Left: Trust Seal */}
         <div className="hidden md:flex items-center gap-2 text-white/70">
@@ -72,18 +72,18 @@ export default function AnnouncementBar() {
           >
             <span>{activeCurrency.flag}</span>
             <span>{activeCurrency.code}</span>
-            <ChevronDown size={11} className={`text-white/70 transition-transform ${showCurrencyDropdown ? 'rotate-180' : ''}`} />
+            <ChevronDown size={11} className={`text-white/70 transition-transform duration-200 ${showCurrencyDropdown ? 'rotate-180' : ''}`} />
           </button>
 
           {/* Currency Dropdown Menu */}
           {showCurrencyDropdown && (
             <>
               <div
-                className="fixed inset-0 z-40"
+                className="fixed inset-0 z-[65]"
                 onClick={() => setShowCurrencyDropdown(false)}
               />
-              <div className="absolute right-0 top-full mt-1.5 z-50 w-44 rounded-xl border border-ink/15 bg-white p-1.5 shadow-2xl animate-scaleIn text-ink">
-                <div className="px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-ink/40 border-b border-ink/5 mb-1">
+              <div className="absolute right-0 top-full mt-2 z-[70] w-48 rounded-2xl border border-ink/15 bg-white p-1.5 shadow-2xl animate-scaleIn text-ink">
+                <div className="px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-ink/40 border-b border-ink/5 mb-1">
                   Select Currency
                 </div>
                 {Object.values(CURRENCIES).map((c) => {
@@ -96,7 +96,7 @@ export default function AnnouncementBar() {
                         setCurrency(c.code)
                         setShowCurrencyDropdown(false)
                       }}
-                      className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-semibold transition ${
+                      className={`flex w-full items-center justify-between rounded-xl px-2.5 py-2 text-xs font-semibold transition ${
                         isSelected
                           ? 'bg-rose/10 text-rose font-bold'
                           : 'text-ink/80 hover:bg-ink/5 hover:text-ink'

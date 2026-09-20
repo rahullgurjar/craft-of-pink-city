@@ -68,7 +68,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-ink/10 bg-ivory/95 backdrop-blur-md transition-shadow duration-300">
+    <header className="sticky top-0 z-40 border-b border-ink/10 bg-ivory/95 backdrop-blur-md transition-shadow duration-300">
       {/* Top Page Scroll Progress Bar */}
       <div
         className="fixed top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-rose via-saffron to-rose z-[100] origin-left transition-transform duration-75 ease-out pointer-events-none shadow-sm"
