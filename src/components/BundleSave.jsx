@@ -157,7 +157,9 @@ export default function BundleSave() {
                       <img
                         src={resolveProductImage(prod.image)}
                         alt={prod.name}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${
+                          prod.image?.includes('coral-paisley') ? 'object-bottom' : 'object-center'
+                        }`}
                         loading="lazy"
                         decoding="async"
                       />
