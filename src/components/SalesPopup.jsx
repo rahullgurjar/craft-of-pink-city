@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { CheckCircle2, X, Sparkles, MapPin, ArrowUpRight } from 'lucide-react'
+import { CheckCircle2, X, Sparkles, MapPin, ArrowUpRight, PackageCheck, Layers } from 'lucide-react'
 import { products } from '../data/products'
 
 // Resolve image assets dynamically
@@ -14,50 +14,165 @@ const resolveProductImage = (image) => {
   )
 }
 
-// Curated buyers with authentic Indian & international locations
-const BUYER_PROFILES = [
-  { name: 'Pooja S.', city: 'Mumbai', state: 'Maharashtra', qty: '2 units', action: 'purchased' },
-  { name: 'Ananya R.', city: 'Bengaluru', state: 'Karnataka', qty: '1 unit', action: 'ordered' },
-  { name: 'Sneha K.', city: 'Jaipur', state: 'Rajasthan', qty: '1x Set of 3', action: 'purchased' },
-  { name: 'Rohit M.', city: 'New Delhi', state: 'Delhi NCR', qty: '3 units (Gift Set)', action: 'purchased' },
-  { name: 'Meera D.', city: 'Hyderabad', state: 'Telangana', qty: '2 units', action: 'ordered' },
-  { name: 'Vikram J.', city: 'Pune', state: 'Maharashtra', qty: '1 unit', action: 'purchased' },
-  { name: 'Divya N.', city: 'Kolkata', state: 'West Bengal', qty: '2 units', action: 'ordered' },
-  { name: 'Tanvi G.', city: 'Chandigarh', state: 'Punjab', qty: '1 unit', action: 'purchased' },
-  { name: 'Aarav P.', city: 'Ahmedabad', state: 'Gujarat', qty: '4 units (Bulk Order)', action: 'ordered' },
-  { name: 'Rhea B.', city: 'Gurugram', state: 'Haryana', qty: '2 units', action: 'purchased' },
-  { name: 'Sarah T.', city: 'London', state: 'United Kingdom', qty: '3 units', action: 'ordered' },
-  { name: 'Kavita M.', city: 'Chennai', state: 'Tamil Nadu', qty: '1 unit', action: 'purchased' },
-  { name: 'Priya V.', city: 'Kochi', state: 'Kerala', qty: '2 units', action: 'purchased' },
-  { name: 'Nisha B.', city: 'Lucknow', state: 'Uttar Pradesh', qty: '1x Set of 3', action: 'ordered' },
+// Curated bulk & wholesale order profiles with authentic occasions and locations
+const BULK_ORDER_PROFILES = [
+  {
+    name: 'Radhika S.',
+    role: 'Wedding Planner',
+    city: 'Udaipur',
+    state: 'Rajasthan',
+    qty: '50 pieces',
+    tag: 'Wedding Favors',
+    badge: 'Bulk Order Placed'
+  },
+  {
+    name: 'Pooja S.',
+    role: 'Boutique Curator',
+    city: 'Mumbai',
+    state: 'Maharashtra',
+    qty: '75 units',
+    tag: 'Boutique Wholesale',
+    badge: 'Bulk Order Placed'
+  },
+  {
+    name: 'Aditi M.',
+    role: 'Corporate Gifting Lead',
+    city: 'Bengaluru',
+    state: 'Karnataka',
+    qty: '100 units',
+    tag: 'Corporate Hampers',
+    badge: 'Bulk Order Placed'
+  },
+  {
+    name: 'Kunal V.',
+    role: 'Event Designer',
+    city: 'New Delhi',
+    state: 'Delhi NCR',
+    qty: '60 pieces',
+    tag: 'Mehendi Giveaways',
+    badge: 'Bulk Order Placed'
+  },
+  {
+    name: 'Meera D.',
+    role: 'Resort Store Buyer',
+    city: 'Goa',
+    state: 'Goa',
+    qty: '80 units',
+    tag: 'Resort Gift Shop',
+    badge: 'Bulk Order Placed'
+  },
+  {
+    name: 'Siddharth J.',
+    role: 'Textile Wholesale Buyer',
+    city: 'Ahmedabad',
+    state: 'Gujarat',
+    qty: '150 units',
+    tag: 'Custom Batch Print',
+    badge: 'Bulk Order Placed'
+  },
+  {
+    name: 'Sarah T.',
+    role: 'Boutique Importer',
+    city: 'London',
+    state: 'United Kingdom',
+    qty: '200 pieces',
+    tag: 'Export Shipment',
+    badge: 'Bulk Order Placed'
+  },
+  {
+    name: 'Neha & Varun',
+    role: 'Bride & Groom',
+    city: 'Jaipur',
+    state: 'Rajasthan',
+    qty: '45 pieces',
+    tag: 'Wedding Welcome Bags',
+    badge: 'Bulk Order Placed'
+  },
+  {
+    name: 'Divya N.',
+    role: 'Handloom Studio',
+    city: 'Kolkata',
+    state: 'West Bengal',
+    qty: '90 units',
+    tag: 'Festive Collection Lot',
+    badge: 'Bulk Order Placed'
+  },
+  {
+    name: 'Rhea B.',
+    role: 'Merchandising Head',
+    city: 'Gurugram',
+    state: 'Haryana',
+    qty: '120 units',
+    tag: 'Client Appreciation Kit',
+    badge: 'Bulk Order Placed'
+  },
+  {
+    name: 'Ananya R.',
+    role: 'Concept Store',
+    city: 'Hyderabad',
+    state: 'Telangana',
+    qty: '40 units',
+    tag: 'Boutique Restock',
+    badge: 'Bulk Order Placed'
+  },
+  {
+    name: 'Tanya K.',
+    role: 'Luxury Gifting',
+    city: 'Chandigarh',
+    state: 'Punjab',
+    qty: '35 pieces',
+    tag: 'Custom Monogram Favors',
+    badge: 'Bulk Order Placed'
+  },
+  {
+    name: 'Farhan K.',
+    role: 'Souvenir Buyer',
+    city: 'Dubai',
+    state: 'UAE',
+    qty: '180 pieces',
+    tag: 'International Wholesale',
+    badge: 'Bulk Order Placed'
+  },
+  {
+    name: 'Kavita M.',
+    role: 'Family Host',
+    city: 'Chennai',
+    state: 'Tamil Nadu',
+    qty: '30 units',
+    tag: 'Anniversary Return Gifts',
+    badge: 'Bulk Order Placed'
+  }
 ]
 
 const TIME_AGO_LIST = [
   'Just now',
   '2 minutes ago',
   '4 minutes ago',
-  '7 minutes ago',
-  '12 minutes ago',
+  '6 minutes ago',
+  '11 minutes ago',
   '18 minutes ago',
   '25 minutes ago',
-  '34 minutes ago',
+  '38 minutes ago',
 ]
 
 export default function SalesPopup() {
   const [currentSale, setCurrentSale] = useState(() => {
     if (!products || products.length === 0) return null
-    const buyer = BUYER_PROFILES[0]
+    const buyer = BULK_ORDER_PROFILES[0]
     const product = products[0]
     return {
       buyerName: buyer.name,
+      role: buyer.role,
       city: buyer.city,
       state: buyer.state,
       quantity: buyer.qty,
-      action: buyer.action,
+      tag: buyer.tag,
+      badge: buyer.badge,
       timeAgo: 'Just now',
       product,
     }
   })
+
   const [isVisible, setIsVisible] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
   const [isDismissed, setIsDismissed] = useState(false)
@@ -65,27 +180,22 @@ export default function SalesPopup() {
   const timerRef = useRef(null)
   const hideTimerRef = useRef(null)
 
-  // Generate a random sale record pairing a buyer with a real product from catalog
+  // Generate a random bulk sale record pairing buyer with a product
   const generateSaleRecord = useCallback(() => {
     if (!products || products.length === 0) return null
 
-    // Pick random buyer, product, time
-    const buyer = BUYER_PROFILES[Math.floor(Math.random() * BUYER_PROFILES.length)]
+    const buyer = BULK_ORDER_PROFILES[Math.floor(Math.random() * BULK_ORDER_PROFILES.length)]
     const product = products[Math.floor(Math.random() * products.length)]
     const timeAgo = TIME_AGO_LIST[Math.floor(Math.random() * TIME_AGO_LIST.length)]
 
-    // Determine quantity text tailored to item category if set
-    let quantityText = buyer.qty
-    if (product.price && product.price.includes('Set of 3') && !quantityText.includes('Set')) {
-      quantityText = '1x Set of 3'
-    }
-
     return {
       buyerName: buyer.name,
+      role: buyer.role,
       city: buyer.city,
       state: buyer.state,
-      quantity: quantityText,
-      action: buyer.action,
+      quantity: buyer.qty,
+      tag: buyer.tag,
+      badge: buyer.badge,
       timeAgo,
       product,
     }
@@ -145,7 +255,6 @@ export default function SalesPopup() {
   const handleMouseLeave = () => {
     setIsPaused(false)
     if (isVisible && !isDismissed) {
-      // Resume hide timer for 4 more seconds
       hideTimerRef.current = setTimeout(() => {
         setIsVisible(false)
         scheduleNextSale()
@@ -180,16 +289,16 @@ export default function SalesPopup() {
 
   if (!currentSale || !currentSale.product) return null
 
-  const { buyerName, city, quantity, timeAgo, product } = currentSale
+  const { buyerName, role, city, quantity, tag, badge, timeAgo, product } = currentSale
   const productImage = resolveProductImage(product.image)
 
   return (
     <aside
-      aria-label="Recent customer purchase notification"
+      aria-label="Recent bulk order placed notification"
       aria-live="polite"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`fixed bottom-4 left-4 z-[70] max-w-[340px] sm:max-w-[380px] w-[calc(100vw-2rem)] sm:w-auto transition-all duration-500 ease-out transform ${
+      className={`fixed bottom-4 left-4 z-[70] max-w-[340px] sm:max-w-[390px] w-[calc(100vw-2rem)] sm:w-auto transition-all duration-500 ease-out transform ${
         isVisible
           ? 'translate-y-0 opacity-100 scale-100 pointer-events-auto'
           : 'translate-y-8 opacity-0 scale-95 pointer-events-none'
@@ -199,7 +308,7 @@ export default function SalesPopup() {
         onClick={handleOpenProduct}
         className="group relative cursor-pointer overflow-hidden rounded-2xl border border-ink/15 bg-white/95 backdrop-blur-md p-3.5 shadow-2xl shadow-ink/20 transition-all duration-300 hover:border-rose/50 hover:shadow-rose/20 hover:-translate-y-0.5"
       >
-        {/* Top Accent Line */}
+        {/* Top Gradient Accent Line */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose via-saffron to-terracotta" />
 
         {/* Close Button */}
@@ -207,20 +316,32 @@ export default function SalesPopup() {
           type="button"
           onClick={handleDismiss}
           className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-ink/5 text-ink/40 transition-colors hover:bg-rose/10 hover:text-rose"
-          aria-label="Dismiss sales notification"
+          aria-label="Dismiss order notification"
           title="Dismiss notification"
         >
           <X size={13} />
         </button>
 
-        <div className="flex items-center gap-3.5 pr-4">
-          {/* Product Thumbnail with Badge */}
+        {/* Header Ribbon: Bulk Order Placed Badge */}
+        <div className="flex items-center gap-1.5 mb-2 pr-6">
+          <span className="inline-flex items-center gap-1 rounded-full bg-rose/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-rose border border-rose/20">
+            <PackageCheck size={11} className="text-rose" />
+            {badge}
+          </span>
+          <span className="inline-flex items-center rounded-full bg-saffron/10 px-2 py-0.5 text-[9px] font-semibold text-terracotta truncate">
+            {tag}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-3.5 pr-2">
+          {/* Product Thumbnail with Live Pulse */}
           <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-ink/10 bg-[#faf6ef]">
             <img
               src={productImage}
               alt={product.name}
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
               loading="lazy"
+              decoding="async"
             />
             {/* Live Indicator Dot */}
             <span className="absolute bottom-1 right-1 flex h-2.5 w-2.5">
@@ -229,21 +350,21 @@ export default function SalesPopup() {
             </span>
           </div>
 
-          {/* Sale Info Details */}
+          {/* Bulk Order Details */}
           <div className="min-w-0 flex-1">
-            {/* Buyer & Location header */}
-            <div className="flex items-center gap-1.5 text-[11px] text-ink/70">
-              <span className="font-bold text-ink">{buyerName}</span>
-              <span>from</span>
-              <span className="font-semibold text-terracotta flex items-center gap-0.5 truncate">
-                <MapPin size={10} className="shrink-0 text-rose" />
+            {/* Buyer & Location */}
+            <div className="flex items-center gap-1 text-[11px] text-ink/70 truncate">
+              <span className="font-bold text-ink truncate">{buyerName}</span>
+              <span className="text-ink/40">•</span>
+              <span className="text-terracotta font-medium flex items-center gap-0.5 shrink-0">
+                <MapPin size={10} className="text-rose shrink-0" />
                 {city}
               </span>
             </div>
 
-            {/* Quantity and Action */}
+            {/* Order Placed Statement */}
             <p className="mt-0.5 text-xs text-ink/90 font-medium line-clamp-1">
-              purchased <strong className="text-rose font-bold">{quantity}</strong> of
+              Order Placed: <strong className="text-rose font-bold">{quantity}</strong>
             </p>
 
             {/* Product Name */}
@@ -251,30 +372,30 @@ export default function SalesPopup() {
               {product.name}
             </h4>
 
-            {/* Footer / Meta: Time ago + Verified Buyer */}
+            {/* Footer / Meta: Time ago + Verified Bulk Badge */}
             <div className="mt-1.5 flex items-center justify-between gap-2 text-[10px] text-ink/50">
               <div className="flex items-center gap-1">
                 <span className="text-ink/60">{timeAgo}</span>
                 <span>•</span>
-                <span className="font-bold text-ink/80">{product.price}</span>
+                <span className="font-bold text-terracotta">Wholesale Tier</span>
               </div>
 
               <div className="flex items-center gap-1 text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-200">
                 <CheckCircle2 size={10} className="text-emerald-600 shrink-0" />
-                <span>Verified</span>
+                <span>Verified Order</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Hover / Click Prompt */}
+        {/* Hover / Click Prompt for Wholesale Quote */}
         <div className="mt-2.5 pt-2 border-t border-ink/5 flex items-center justify-between text-[10px] text-rose font-semibold">
-          <span className="flex items-center gap-1 text-ink/60 font-normal">
-            <Sparkles size={11} className="text-saffron" />
-            Tap to view product
+          <span className="flex items-center gap-1 text-ink/60 font-normal truncate">
+            <Sparkles size={11} className="text-saffron shrink-0" />
+            Tap to View Product & Bulk Quotes
           </span>
-          <span className="inline-flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
-            Quick View <ArrowUpRight size={11} />
+          <span className="inline-flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform shrink-0">
+            Wholesale Quote <ArrowUpRight size={11} />
           </span>
         </div>
 
