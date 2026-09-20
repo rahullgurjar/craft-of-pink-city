@@ -44,7 +44,20 @@ const TIME_AGO_LIST = [
 ]
 
 export default function SalesPopup() {
-  const [currentSale, setCurrentSale] = useState(null)
+  const [currentSale, setCurrentSale] = useState(() => {
+    if (!products || products.length === 0) return null
+    const buyer = BUYER_PROFILES[0]
+    const product = products[0]
+    return {
+      buyerName: buyer.name,
+      city: buyer.city,
+      state: buyer.state,
+      quantity: buyer.qty,
+      action: buyer.action,
+      timeAgo: 'Just now',
+      product,
+    }
+  })
   const [isVisible, setIsVisible] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
   const [isDismissed, setIsDismissed] = useState(false)
@@ -88,12 +101,12 @@ export default function SalesPopup() {
     setCurrentSale(sale)
     setIsVisible(true)
 
-    // Schedule auto-hide after 6 seconds (unless hovered)
+    // Schedule auto-hide after 6.5 seconds (unless hovered)
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
     hideTimerRef.current = setTimeout(() => {
       setIsVisible(false)
       scheduleNextSale()
-    }, 6000)
+    }, 6500)
   }, [generateSaleRecord, isDismissed])
 
   // Schedule next appearance
@@ -101,18 +114,18 @@ export default function SalesPopup() {
     if (isDismissed) return
     if (timerRef.current) clearTimeout(timerRef.current)
 
-    // Random interval between 9 to 16 seconds
-    const delay = Math.floor(Math.random() * 7000) + 9000
+    // Interval between 5 to 8 seconds
+    const delay = Math.floor(Math.random() * 3000) + 5000
     timerRef.current = setTimeout(() => {
       showNextSale()
     }, delay)
   }, [showNextSale, isDismissed])
 
-  // Initial startup after 3.5s
+  // Initial startup after 1.2s
   useEffect(() => {
     const initialDelay = setTimeout(() => {
       showNextSale()
-    }, 3500)
+    }, 1200)
 
     return () => {
       clearTimeout(initialDelay)
@@ -132,11 +145,11 @@ export default function SalesPopup() {
   const handleMouseLeave = () => {
     setIsPaused(false)
     if (isVisible && !isDismissed) {
-      // Resume hide timer for 3.5 more seconds
+      // Resume hide timer for 4 more seconds
       hideTimerRef.current = setTimeout(() => {
         setIsVisible(false)
         scheduleNextSale()
-      }, 3500)
+      }, 4000)
     }
   }
 
@@ -147,10 +160,10 @@ export default function SalesPopup() {
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
     if (timerRef.current) clearTimeout(timerRef.current)
 
-    // Snooze for 45 seconds before resuming
+    // Snooze for 30 seconds before resuming
     timerRef.current = setTimeout(() => {
       scheduleNextSale()
-    }, 45000)
+    }, 30000)
   }
 
   // Open product details modal
@@ -176,7 +189,7 @@ export default function SalesPopup() {
       aria-live="polite"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`fixed bottom-5 left-5 z-40 max-w-[340px] sm:max-w-[380px] w-[calc(100vw-2.5rem)] sm:w-auto transition-all duration-500 ease-out transform ${
+      className={`fixed bottom-4 left-4 z-[70] max-w-[340px] sm:max-w-[380px] w-[calc(100vw-2rem)] sm:w-auto transition-all duration-500 ease-out transform ${
         isVisible
           ? 'translate-y-0 opacity-100 scale-100 pointer-events-auto'
           : 'translate-y-8 opacity-0 scale-95 pointer-events-none'
