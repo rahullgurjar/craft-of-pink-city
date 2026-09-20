@@ -129,15 +129,27 @@ export default function Hero() {
           </div>
 
           <div className="hero-photo">
-            {/* Dynamic Sliding Images with Ken Burns Zoom */}
-            {HERO_SLIDES.map((slide, idx) => (
-              <img
-                key={slide.title}
-                src={slide.image}
-                alt={slide.alt}
-                className={`hero-slide-img ${idx === currentSlide ? 'active' : 'inactive'}`}
-              />
-            ))}
+            {/* Dynamic Sliding Images with Ken Burns Zoom & Prioritized LCP Loading */}
+            {HERO_SLIDES.map((slide, idx) => {
+              const isCurrent = idx === currentSlide;
+              const isNext = idx === (currentSlide + 1) % HERO_SLIDES.length;
+              // Eagerly load first slide; only load next slides when needed to conserve initial bandwidth
+              const shouldRender = isCurrent || isNext || idx === 0;
+
+              if (!shouldRender) return null;
+
+              return (
+                <img
+                  key={slide.title}
+                  src={slide.image}
+                  alt={slide.alt}
+                  loading={idx === 0 ? 'eager' : 'lazy'}
+                  fetchpriority={idx === 0 ? 'high' : 'low'}
+                  decoding="async"
+                  className={`hero-slide-img ${isCurrent ? 'active' : 'inactive'}`}
+                />
+              );
+            })}
 
             {/* Shimmer light sweep animation */}
             <div className="hero-shimmer" />

@@ -216,7 +216,7 @@ export default function Products() {
                     className="product-photo transition-transform duration-500 group-hover:scale-105"
                     src={resolveProductImage(product.image)}
                     alt={product.name}
-                    loading={index < 4 ? 'eager' : 'lazy'}
+                    loading="lazy"
                     decoding="async"
                   />
                   <span className="product-category rounded-lg">{product.category}</span>
