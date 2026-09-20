@@ -14,6 +14,7 @@ import FloatingWhatsApp from './components/FloatingWhatsApp';
 import ArtisanChatbot from './components/ArtisanChatbot';
 import CartDrawer from './components/CartDrawer';
 import PolicyModal from './components/PolicyModal';
+import SalesPopup from './components/SalesPopup';
 import { CartProvider } from './context/CartContext';
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -64,6 +65,7 @@ export default function App() {
         <ErrorBoundary><FloatingWhatsApp /></ErrorBoundary>
         <ErrorBoundary><ArtisanChatbot /></ErrorBoundary>
         <ErrorBoundary><CartDrawer /></ErrorBoundary>
+        <ErrorBoundary><SalesPopup /></ErrorBoundary>
         <ErrorBoundary>
           <PolicyModal
             isOpen={isPolicyOpen}

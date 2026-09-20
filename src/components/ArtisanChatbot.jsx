@@ -29,9 +29,18 @@ import {
   Settings2,
   RotateCcw,
   Languages,
-  Globe
+  Globe,
+  Radio,
+  Headphones
 } from 'lucide-react'
 import { processUserMessage, detectLanguage } from '../utils/aiChatEngine'
+import {
+  VOICE_PERSONAS,
+  SPEAKING_SPEEDS,
+  HumanVoicePlayer,
+  rankBrowserNeuralVoice,
+  naturalizeTextForSpeech
+} from '../utils/humanVoiceEngine'
 import { useCart } from '../context/CartContext'
 import { whatsapp, products } from '../data/products'
 import WhatsAppIcon from './WhatsAppIcon'
@@ -55,376 +64,6 @@ export const SUPPORTED_LANGUAGES = [
   { id: 'hi', label: 'हिंदी', code: 'HI', tag: 'Hindi' }
 ]
 
-/**
- * Curated Voice Personas with Human Natural Sounding Profiles (Zero-Emoji)
- */
-export const VOICE_PERSONAS = [
-  {
-    id: 'jaipur',
-    name: 'Gulabi (Jaipur Natural)',
-    badge: 'Artisan Native',
-    desc: 'Warm Indian English and Hindi natural intonation',
-    keywords: [
-      'neerja online',
-      'neerja',
-      'swara online',
-      'swara',
-      'google हिन्दी',
-      'google hindi',
-      'indian english',
-      'geeta',
-      'shruti',
-      'anjali',
-      'veena',
-      'kavya',
-      'priya',
-      'heera'
-    ]
-  },
-  {
-    id: 'hindi_native',
-    name: 'Swara (Hindi Natural)',
-    badge: 'Hindi HD',
-    desc: 'Pure authentic Hindi natural voice',
-    keywords: [
-      'swara online',
-      'swara',
-      'google हिन्दी',
-      'google hi',
-      'kalpana online',
-      'kalpana',
-      'hindi'
-    ]
-  },
-  {
-    id: 'studio_us',
-    name: 'Aria (Warm Studio US)',
-    badge: 'Neural HD',
-    desc: 'Crystal clear, friendly American studio tone',
-    keywords: [
-      'aria online',
-      'jenny online',
-      'google us english',
-      'samantha',
-      'victoria',
-      'michelle online',
-      'karen',
-      'allison',
-      'zira'
-    ]
-  },
-  {
-    id: 'british_uk',
-    name: 'Sonia (Sophisticated UK)',
-    badge: 'Neural HD',
-    desc: 'Polished, elegant British boutique concierge',
-    keywords: [
-      'sonia online',
-      'libby online',
-      'google uk english female',
-      'mia online',
-      'moira',
-      'fiona',
-      'tessa'
-    ]
-  },
-  {
-    id: 'auto',
-    name: 'Auto (Best Detected)',
-    badge: 'Adaptive',
-    desc: 'Automatically picks the most lifelike neural female voice',
-    keywords: ['natural', 'neural', 'online', 'google', 'premium', 'enhanced']
-  }
-]
-
-// Fixed standard 1.0x human speaking speed constant
-const STANDARD_HUMAN_SPEAKING_SPEED = 1.0
-
-/**
- * Intelligent Natural Voice Selector
- * Matches language (Hindi, English) and selects high quality Neural / Natural voices
- * Strictly penalizes and filters robotic legacy SAPI desktop voices.
- */
-function rankAndSelectNaturalVoice(voices, personaId = 'jaipur', targetLang = 'en') {
-  if (!voices || voices.length === 0) return null
-
-  const maleKeywords = [
-    'david', 'ravi', 'mark', 'george', 'rishi', 'james', 'guy', 'male',
-    'prabhat', 'ajay', 'rahul', 'stefan', 'daniel', 'oliver', 'alex', 'fred',
-    'bruce', 'junior', 'ralph', 'albert'
-  ]
-
-  const isLowQualityRobotic = (name) => {
-    const lower = name.toLowerCase()
-    return (
-      (lower.includes('desktop') && !lower.includes('natural')) ||
-      lower.includes('espeak') ||
-      lower.includes('compact')
-    )
-  }
-
-  const isMale = (name) => {
-    const lower = name.toLowerCase()
-    return maleKeywords.some((m) => lower.includes(m))
-  }
-
-  const isHighQualityNeural = (v) => {
-    const lower = (v.name + ' ' + (v.voiceURI || '')).toLowerCase()
-    return (
-      lower.includes('natural') ||
-      lower.includes('neural') ||
-      lower.includes('online (natural)') ||
-      lower.includes('google') ||
-      lower.includes('premium') ||
-      lower.includes('enhanced') ||
-      lower.includes('siri')
-    )
-  }
-
-  // Filter out male voices
-  const femaleVoices = voices.filter((v) => !isMale(v.name))
-
-  // If Target Language is Hindi, strictly prioritize authentic Hindi voices first
-  if (targetLang === 'hi') {
-    const hindiKeywords = ['swara', 'google हिन्दी', 'google hi', 'kalpana', 'geeta', 'shruti', 'hindi']
-    for (const kw of hindiKeywords) {
-      const match = femaleVoices.find((v) => (v.lang.startsWith('hi') || v.name.toLowerCase().includes(kw)) && isHighQualityNeural(v))
-      if (match) return match
-    }
-    for (const kw of hindiKeywords) {
-      const match = femaleVoices.find((v) => (v.lang.startsWith('hi') || v.name.toLowerCase().includes(kw)) && !isLowQualityRobotic(v.name))
-      if (match) return match
-    }
-    const anyHindi = femaleVoices.find((v) => v.lang.startsWith('hi'))
-    if (anyHindi) return anyHindi
-  }
-
-  const persona = VOICE_PERSONAS.find((p) => p.id === personaId) || VOICE_PERSONAS[0]
-
-  // Tier 1: Persona match with Neural / High Quality
-  for (const kw of persona.keywords) {
-    const match = femaleVoices.find(
-      (v) => v.name.toLowerCase().includes(kw) && isHighQualityNeural(v)
-    )
-    if (match) return match
-  }
-
-  // Tier 2: Persona match without low-quality restriction
-  for (const kw of persona.keywords) {
-    const match = femaleVoices.find(
-      (v) => v.name.toLowerCase().includes(kw) && !isLowQualityRobotic(v.name)
-    )
-    if (match) return match
-  }
-
-  // Tier 3: Any Global Neural / Natural Female Voice
-  const globalNeural = femaleVoices.find((v) => isHighQualityNeural(v) && !isLowQualityRobotic(v.name))
-  if (globalNeural) return globalNeural
-
-  // Tier 4: Clean non-robotic English / Hindi voice
-  const cleanVoice = femaleVoices.find(
-    (v) => (v.lang.startsWith('en') || v.lang.startsWith('hi')) && !isLowQualityRobotic(v.name)
-  )
-  if (cleanVoice) return cleanVoice
-
-  // Tier 5: Fallback to first available non-male or any voice
-  return femaleVoices[0] || voices[0] || null
-}
-
-/**
- * Naturalizes text for human speech in English and Hindi.
- * Full expansion of symbols (&, +, /, @, #, %, ~, ₹, $, quotes, dimensions, abbreviations)
- * and natural conversational micro-pauses.
- */
-function naturalizeTextForSpeech(text, targetLang = 'en') {
-  if (!text) return ''
-
-  let cleaned = text
-    // 1. Decode HTML entities
-    .replace(/&amp;/gi, ' and ')
-    .replace(/&lt;/gi, '<')
-    .replace(/&gt;/gi, '>')
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;/gi, "'")
-    .replace(/&nbsp;/gi, ' ')
-
-    // 2. Strip Markdown syntax
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    .replace(/https?:\/\/\S+/g, '')
-    .replace(/```[\s\S]*?```/g, '')
-    .replace(/`([^`]+)`/g, '$1')
-    .replace(/\*\*([^*]+)\*\*/g, '$1')
-    .replace(/\*([^*]+)\*/g, '$1')
-    .replace(/_{1,2}([^_]+)_{1,2}/g, '$1')
-    .replace(/~~([^~]+)~~/g, '$1')
-    .replace(/#+\s*/g, '')
-
-    // 3. Parentheses into natural conversational pauses
-    .replace(/\(([^)]+)\)/g, ', $1, ')
-
-    // 4. Bullet points and list markers into smooth pauses
-    .replace(/^\s*[\u2022\u2023\u25E6\u2043\u2219\*\-\+]\s+/gm, '. ')
-    .replace(/^\s*\d+\.\s+/gm, '. ')
-
-    // 5. Special compound abbreviations BEFORE single symbol replacements
-    .replace(/\bw\/o\s+/gi, targetLang === 'hi' ? ' के बिना ' : ' without ')
-    .replace(/\bw\/\s+/gi, targetLang === 'hi' ? ' के साथ ' : ' with ')
-    .replace(/\band\/or\b/gi, targetLang === 'hi' ? ' और या ' : ' and or ')
-    .replace(/\bT&C\b|\bT&Cs\b/gi, targetLang === 'hi' ? 'नियम और शर्तें' : 'Terms and Conditions')
-    .replace(/\bB&B\b/gi, 'Bed and Breakfast')
-
-    // 6. Number ranges with hyphen: e.g. 5-7 days -> 5 to 7 days
-    .replace(/(\d+)\s*[-–—]\s*(\d+)\s*(days?|दिन|din|hrs?|hours?|weeks?|months?)/gi, (m, p1, p2, p3) => {
-      if (targetLang === 'hi') return `${p1} से ${p2} ${p3}`
-      return `${p1} to ${p2} ${p3}`
-    })
-
-  // 7. Expand universal symbols & abbreviations by language
-  if (targetLang === 'hi') {
-    cleaned = cleaned
-      // Ampersand & Conjunctions
-      .replace(/\s*&\s*/g, ' और ')
-      .replace(/\s*\+\s*/g, ' प्लस ')
-      .replace(/(\w+)\s*[/]\s*(\w+)/g, '$1 या $2')
-      .replace(/\s*[/]\s*/g, ' या ')
-      .replace(/\s*[@]\s*/g, ' एट ')
-      .replace(/#(\d+)/g, 'नंबर $1')
-      .replace(/[~～≈](\d+)/g, 'लगभग $1')
-
-      // Currencies
-      .replace(/₹\s*([0-9,]+(?:\.\d+)?)/g, '$1 रुपये')
-      .replace(/\b(?:Rs\.?|INR)\s*([0-9,]+(?:\.\d+)?)/gi, '$1 रुपये')
-      .replace(/\$\s*([0-9,]+(?:\.\d+)?)/g, '$1 डॉलर')
-
-      // Dimensions & Measurements
-      .replace(/(\d+(?:\.\d+)?)\s*["”]\s*[×xX]\s*(\d+(?:\.\d+)?)\s*["”]\s*[×xX]\s*(\d+(?:\.\d+)?)\s*["”]/g, '$1 बाई $2 बाई $3 इंच')
-      .replace(/(\d+(?:\.\d+)?)\s*["”]\s*[×xX]\s*(\d+(?:\.\d+)?)\s*["”]/g, '$1 बाई $2 इंच')
-      .replace(/(\d+(?:\.\d+)?)\s*["”]\s*[–-]\s*(\d+(?:\.\d+)?)\s*["”]/g, '$1 से $2 इंच')
-      .replace(/(\d+(?:\.\d+)?)\s*["”]/g, '$1 इंच')
-      .replace(/(\d+(?:\.\d+)?)\s*cm\b/gi, '$1 सेंटीमीटर')
-      .replace(/(\d+(?:\.\d+)?)\s*mm\b/gi, '$1 मिलीमीटर')
-      .replace(/(\d+(?:\.\d+)?)\s*kg\b/gi, '$1 किलोग्राम')
-      .replace(/(\d+(?:\.\d+)?)\s*gm?\b/gi, '$1 ग्राम')
-      .replace(/(\d+(?:\.\d+)?)\s*(?:Litres|Liters|L)\b/gi, '$1 लीटर')
-
-      // Percentages
-      .replace(/(\d+(?:\.\d+)?)\s*%\s*[–-]\s*(\d+(?:\.\d+)?)\s*%\+?/g, '$1 से $2 प्रतिशत')
-      .replace(/(\d+(?:\.\d+)?)\s*%\+/g, '$1 प्रतिशत या अधिक')
-      .replace(/(\d+(?:\.\d+)?)\s*%/g, '$1 प्रतिशत')
-
-      // Common Business & Retail terms
-      .replace(/\bMOQ\s*(\d+)\s*(?:pcs|pieces)?\b/gi, 'कम से कम $1 पीस')
-      .replace(/\bMOQ\b/gi, 'न्यूनतम ऑर्डर मात्रा')
-      .replace(/\b(?:pcs|pc)\b/gi, 'पीस')
-      .replace(/\bvs\.?\s*/gi, 'बनाम ')
-      .replace(/\b(?:e\.g\.|eg\.?)\s*/gi, 'जैसे कि ')
-      .replace(/\b(?:i\.e\.|ie\.?)\s*/gi, 'अर्थात ')
-      .replace(/\b(?:etc\.|etc)\b/gi, 'इत्यादि')
-      .replace(/\b(?:approx\.|approx)\b/gi, 'लगभग')
-      .replace(/\bavail\.?\b/gi, 'उपलब्ध')
-      .replace(/\b(?:incl\.|inc\.)\b/gi, 'सहित')
-      .replace(/\bCOD\b/gi, 'कैश ऑन डिलीवरी')
-      .replace(/\bUPI\b/gi, 'यू पी आई')
-      .replace(/\bGST\b/gi, 'जी एस टी')
-      .replace(/\bPIN:\s*(\d{6})\b/gi, 'पिन कोड $1')
-      .replace(/\bQty:\s*(\d+)/gi, 'मात्रा $1')
-  } else {
-    // English (Global)
-    cleaned = cleaned
-      // Ampersand & Conjunctions
-      .replace(/\s*&\s*/g, ' and ')
-      .replace(/\s*\+\s*/g, ' plus ')
-      .replace(/(\w+)\s*[/]\s*(\w+)/g, '$1 or $2')
-      .replace(/\s*[/]\s*/g, ' or ')
-      .replace(/\s*[@]\s*/g, ' at ')
-      .replace(/#(\d+)/g, 'Number $1')
-      .replace(/[~～≈](\d+)/g, 'about $1')
-
-      // Currencies
-      .replace(/₹\s*([0-9,]+(?:\.\d+)?)/g, '$1 rupees')
-      .replace(/\b(?:Rs\.?|INR)\s*([0-9,]+(?:\.\d+)?)/gi, '$1 rupees')
-      .replace(/\$\s*([0-9,]+(?:\.\d+)?)/g, '$1 dollars')
-
-      // Dimensions & Measurements
-      .replace(/(\d+(?:\.\d+)?)\s*["”]\s*[×xX]\s*(\d+(?:\.\d+)?)\s*["”]\s*[×xX]\s*(\d+(?:\.\d+)?)\s*["”]/g, '$1 by $2 by $3 inches')
-      .replace(/(\d+(?:\.\d+)?)\s*["”]\s*[×xX]\s*(\d+(?:\.\d+)?)\s*["”]/g, '$1 by $2 inches')
-      .replace(/(\d+(?:\.\d+)?)\s*["”]\s*[–-]\s*(\d+(?:\.\d+)?)\s*["”]/g, '$1 to $2 inches')
-      .replace(/(\d+(?:\.\d+)?)\s*["”]/g, '$1 inches')
-      .replace(/(\d+(?:\.\d+)?)\s*cm\b/gi, '$1 centimeters')
-      .replace(/(\d+(?:\.\d+)?)\s*mm\b/gi, '$1 millimeters')
-      .replace(/(\d+(?:\.\d+)?)\s*kg\b/gi, '$1 kilograms')
-      .replace(/(\d+(?:\.\d+)?)\s*gm?\b/gi, '$1 grams')
-      .replace(/(\d+(?:\.\d+)?)\s*(?:Litres|Liters|L)\b/gi, '$1 litres')
-
-      // Percentages
-      .replace(/(\d+(?:\.\d+)?)\s*%\s*[–-]\s*(\d+(?:\.\d+)?)\s*%\+?/g, '$1 to $2 percent')
-      .replace(/(\d+(?:\.\d+)?)\s*%\+/g, '$1 percent or more')
-      .replace(/(\d+(?:\.\d+)?)\s*%/g, '$1 percent')
-
-      // Common Business & Retail terms
-      .replace(/\bMOQ\s*(\d+)\s*(?:pcs|pieces)?\b/gi, 'minimum order of $1 pieces')
-      .replace(/\bMOQ\b/gi, 'minimum order quantity')
-      .replace(/\b(?:pcs|pc)\b/gi, 'pieces')
-      .replace(/\bvs\.?\s*/gi, 'versus ')
-      .replace(/\b(?:e\.g\.|eg\.?)\s*/gi, 'for example, ')
-      .replace(/\b(?:i\.e\.|ie\.?)\s*/gi, 'that is, ')
-      .replace(/\b(?:etc\.|etc)\b/gi, 'and so on')
-      .replace(/\b(?:approx\.|approx)\b/gi, 'approximately')
-      .replace(/\bavail\.?\b/gi, 'available')
-      .replace(/\b(?:incl\.|inc\.)\b/gi, 'including')
-      .replace(/\bCOD\b/gi, 'Cash on Delivery')
-      .replace(/\bUPI\b/gi, 'U P I')
-      .replace(/\bGST\b/gi, 'G S T')
-      .replace(/\bPIN:\s*(\d{6})\b/gi, 'PIN code $1')
-      .replace(/\bQty:\s*(\d+)/gi, 'Quantity $1')
-  }
-
-  // 8. Phone Numbers formatting for clear spoken cadence (e.g. +91 99824 51833 -> plus 91, 9 9 8 2 4, 5 1 8 3 3)
-  cleaned = cleaned.replace(/\+91\s*(\d{5})\s*(\d{5})/g, (match, p1, p2) => {
-    return 'plus 91, ' + p1.split('').join(' ') + ', ' + p2.split('').join(' ')
-  })
-
-  // 9. Conversational Human Micro-pauses (inserting natural pauses after greetings & transitions)
-  if (targetLang === 'hi') {
-    cleaned = cleaned.replace(/\b(नमस्ते|धन्यवाद|जरूर|बिल्कुल)\b(?!\s*[,.!?])/g, '$1,')
-  } else {
-    cleaned = cleaned.replace(/\b(Hello|Hi|Greetings|Certainly|Sure|Thank you)\b(?!\s*[,.!?])/gi, '$1,')
-  }
-
-  // 10. Final Clean of remaining non-pronounceable special symbols (preserving Devnagari and punctuation)
-  cleaned = cleaned
-    .replace(/[^\w\s.,!?:;'"–—\u0900-\u097F]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .replace(/\n+/g, '. ')
-    .replace(/\.\s*\.+/g, '.')
-    .replace(/,\s*,+/g, ',')
-    .trim()
-
-  return cleaned
-}
-
-/**
- * Splits text into natural human breath-length clauses (under 110 chars)
- */
-function splitTextIntoSentences(text) {
-  if (!text) return []
-  const rawSentences = text
-    .split(/(?<=[.!?।])\s+|\n+/)
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0)
-
-  const chunks = []
-  for (const s of rawSentences) {
-    if (s.length > 110) {
-      const sub = s.split(/(?<=[,;:])\s+/).filter(Boolean)
-      chunks.push(...sub)
-    } else {
-      chunks.push(s)
-    }
-  }
-  return chunks.length > 0 ? chunks : [text]
-}
-
 export default function ArtisanChatbot({ onSelectProduct }) {
   const [isOpen, setIsOpen] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
@@ -437,56 +76,79 @@ export default function ArtisanChatbot({ onSelectProduct }) {
   // Language state: 'en', 'hi'
   const [currentLanguage, setCurrentLanguage] = useState('en')
 
-  // Voice & Speech synthesis state (Locked to 1.0x standard human speed)
+  // Real Human Voice Synthesis state
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
   const [speakingMessageId, setSpeakingMessageId] = useState(null)
   const [speakingSentenceIndex, setSpeakingSentenceIndex] = useState(0)
   const [totalSentences, setTotalSentences] = useState(0)
   const [selectedPersona, setSelectedPersona] = useState('jaipur')
+  const [speakingSpeed, setSpeakingSpeed] = useState(1.0)
   const [showVoiceSettings, setShowVoiceSettings] = useState(false)
-  const [activeVoiceName, setActiveVoiceName] = useState('')
+  const [activeEngineName, setActiveEngineName] = useState('Studio Neural HD (Real Human Voice)')
+  const [testingPersonaId, setTestingPersonaId] = useState(null)
 
   const [hasUnread, setHasUnread] = useState(true)
   const [copiedId, setCopiedId] = useState(null)
   const [feedbackMap, setFeedbackMap] = useState({})
-  const [availableVoices, setAvailableVoices] = useState([])
 
   const cart = useCart()
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
   const streamTimerRef = useRef(null)
+  const voicePlayerRef = useRef(null)
 
-  // Speech queue control refs
-  const speechQueueRef = useRef([])
-  const currentChunkIndexRef = useRef(0)
-  const isCancelledRef = useRef(false)
-  const currentUtteranceRef = useRef(null)
-
-  // Pre-load synthesis voices on mount
+  // Initialize HumanVoicePlayer with reactive state callbacks
   useEffect(() => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return
-
-    const loadVoices = () => {
-      const v = window.speechSynthesis.getVoices()
-      if (v && v.length > 0) {
-        setAvailableVoices(v)
-        const matched = rankAndSelectNaturalVoice(v, selectedPersona, currentLanguage)
-        if (matched) setActiveVoiceName(matched.name)
+    const player = new HumanVoicePlayer({
+      onStart: ({ messageId, totalChunks, currentChunk, persona, engine }) => {
+        setIsSpeaking(true)
+        setIsPaused(false)
+        setSpeakingMessageId(messageId)
+        setTotalSentences(totalChunks)
+        setSpeakingSentenceIndex(currentChunk)
+        if (engine) setActiveEngineName(engine === 'Studio Neural HD' ? 'Studio Neural HD (Real Human Voice)' : engine)
+      },
+      onProgress: ({ messageId, totalChunks, currentChunk }) => {
+        setSpeakingMessageId(messageId)
+        setSpeakingSentenceIndex(currentChunk)
+        setTotalSentences(totalChunks)
+      },
+      onEnd: () => {
+        setIsSpeaking(false)
+        setIsPaused(false)
+        setSpeakingMessageId(null)
+        setSpeakingSentenceIndex(0)
+        setTotalSentences(0)
+        setTestingPersonaId(null)
+      },
+      onStateChange: ({ isPlaying, isPaused }) => {
+        setIsSpeaking(isPlaying)
+        setIsPaused(isPaused)
+        if (!isPlaying) {
+          setTestingPersonaId(null)
+        }
       }
+    })
+
+    player.setPersona(selectedPersona)
+    player.setLanguage(currentLanguage)
+    player.setSpeed(speakingSpeed)
+    voicePlayerRef.current = player
+
+    return () => {
+      player.stop()
     }
+  }, [])
 
-    loadVoices()
-    window.speechSynthesis.onvoiceschanged = loadVoices
-  }, [selectedPersona, currentLanguage])
-
-  // Update voice name when persona or language changes
+  // Synchronize persona, language, and speed with player
   useEffect(() => {
-    if (availableVoices.length > 0) {
-      const matched = rankAndSelectNaturalVoice(availableVoices, selectedPersona, currentLanguage)
-      if (matched) setActiveVoiceName(matched.name)
+    if (voicePlayerRef.current) {
+      voicePlayerRef.current.setPersona(selectedPersona)
+      voicePlayerRef.current.setLanguage(currentLanguage)
+      voicePlayerRef.current.setSpeed(speakingSpeed)
     }
-  }, [selectedPersona, currentLanguage, availableVoices])
+  }, [selectedPersona, currentLanguage, speakingSpeed])
 
   // Initial welcome message (Zero-Emoji)
   const [messages, setMessages] = useState([
@@ -516,37 +178,30 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     }
   }, [messages, isOpen, isTyping, streamedText])
 
-  // Stop voice speech if window closed
-  useEffect(() => {
-    if (!isOpen && typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      stopSpeaking()
-    }
-  }, [isOpen])
-
   // Clean stop helper
   const stopSpeaking = () => {
-    isCancelledRef.current = true
-    speechQueueRef.current = []
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel()
-    }
+    voicePlayerRef.current?.stop()
     setIsSpeaking(false)
     setIsPaused(false)
     setSpeakingMessageId(null)
     setSpeakingSentenceIndex(0)
     setTotalSentences(0)
+    setTestingPersonaId(null)
   }
+
+  // Stop voice speech if window closed
+  useEffect(() => {
+    if (!isOpen) {
+      stopSpeaking()
+    }
+  }, [isOpen])
 
   // Toggle pause/resume
   const togglePauseSpeech = () => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return
-
     if (isPaused) {
-      window.speechSynthesis.resume()
-      setIsPaused(false)
+      voicePlayerRef.current?.resume()
     } else {
-      window.speechSynthesis.pause()
-      setIsPaused(true)
+      voicePlayerRef.current?.pause()
     }
   }
 
@@ -579,111 +234,46 @@ export default function ArtisanChatbot({ onSelectProduct }) {
     }
   }
 
-  // Sequential sentence player for natural continuous 1x speech
-  const playNextSpeechChunk = useCallback((messageId, persona = selectedPersona, lang = currentLanguage) => {
-    if (isCancelledRef.current) return
-    if (currentChunkIndexRef.current >= speechQueueRef.current.length) {
-      setIsSpeaking(false)
-      setIsPaused(false)
-      setSpeakingMessageId(null)
-      setSpeakingSentenceIndex(0)
-      setTotalSentences(0)
-      return
-    }
-
-    const currentSentence = speechQueueRef.current[currentChunkIndexRef.current]
-    setSpeakingSentenceIndex(currentChunkIndexRef.current + 1)
-
-    const utterance = new SpeechSynthesisUtterance(currentSentence)
-    currentUtteranceRef.current = utterance
-
-    // Voice Selection
-    const voices = availableVoices.length > 0 ? availableVoices : window.speechSynthesis.getVoices()
-    const chosenVoice = rankAndSelectNaturalVoice(voices, persona, lang)
-
-    if (chosenVoice) {
-      utterance.voice = chosenVoice
-      utterance.lang = lang === 'hi' ? 'hi-IN' : chosenVoice.lang || 'en-IN'
-    } else {
-      utterance.lang = lang === 'hi' ? 'hi-IN' : 'en-IN'
-    }
-
-    // Locked to 1.0x normal natural human speaking speed with warm conversational pitch
-    utterance.rate = STANDARD_HUMAN_SPEAKING_SPEED
-    utterance.pitch = 1.02
-    utterance.volume = 1.0
-
-    utterance.onstart = () => {
-      setIsSpeaking(true)
-      setIsPaused(false)
-      setSpeakingMessageId(messageId)
-    }
-
-    utterance.onend = () => {
-      if (isCancelledRef.current) return
-      currentChunkIndexRef.current += 1
-      setTimeout(() => {
-        if (!isCancelledRef.current) {
-          playNextSpeechChunk(messageId, persona, lang)
-        }
-      }, 35)
-    }
-
-    utterance.onerror = (e) => {
-      if (e.error === 'interrupted' || e.error === 'canceled') return
-      currentChunkIndexRef.current += 1
-      setTimeout(() => {
-        if (!isCancelledRef.current) {
-          playNextSpeechChunk(messageId, persona, lang)
-        }
-      }, 35)
-    }
-
-    window.speechSynthesis.speak(utterance)
-  }, [availableVoices, selectedPersona, currentLanguage])
-
-  // Voice synthesis with Natural Human Voice at 1.0x
+  // Speak text with Ultra-Realistic Human Voice Engine
   const handleSpeakText = (messageId, rawText, overridePersona = null, overrideLang = null) => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-      alert('Text-to-speech is not supported in this browser.')
-      return
-    }
-
     if (isSpeaking && speakingMessageId === messageId && !overridePersona && !overrideLang) {
       stopSpeaking()
       return
     }
 
+    stopSpeaking()
     const persona = overridePersona || selectedPersona
     const lang = overrideLang || currentLanguage
 
+    voicePlayerRef.current?.speak(rawText, {
+      messageId,
+      personaId: persona,
+      lang,
+      speed: speakingSpeed
+    })
+  }
+
+  // Test / Preview Persona Voice sample
+  const handleTestPersonaVoice = (persona) => {
+    if (testingPersonaId === persona.id && isSpeaking) {
+      stopSpeaking()
+      return
+    }
+
     stopSpeaking()
-    isCancelledRef.current = false
+    setTestingPersonaId(persona.id)
+    const sample = persona.sampleText[currentLanguage] || persona.sampleText.en
 
-    const naturalSpokenText = naturalizeTextForSpeech(rawText, lang)
-    const sentenceChunks = splitTextIntoSentences(naturalSpokenText)
-
-    if (sentenceChunks.length === 0) return
-
-    speechQueueRef.current = sentenceChunks
-    currentChunkIndexRef.current = 0
-    setTotalSentences(sentenceChunks.length)
-    setSpeakingSentenceIndex(1)
-    setSpeakingMessageId(messageId)
-    setIsSpeaking(true)
-    setIsPaused(false)
-
-    setTimeout(() => {
-      playNextSpeechChunk(messageId, persona, lang)
-    }, 40)
+    voicePlayerRef.current?.speak(sample, {
+      messageId: `test-${persona.id}`,
+      personaId: persona.id,
+      lang: currentLanguage,
+      speed: speakingSpeed
+    })
   }
 
   const handlePersonaChange = (newPersona) => {
     setSelectedPersona(newPersona)
-    if (availableVoices.length > 0) {
-      const matched = rankAndSelectNaturalVoice(availableVoices, newPersona, currentLanguage)
-      if (matched) setActiveVoiceName(matched.name)
-    }
     if (isSpeaking && speakingMessageId) {
       const activeMsg = messages.find((m) => m.id === speakingMessageId)
       if (activeMsg) {
@@ -694,16 +284,17 @@ export default function ArtisanChatbot({ onSelectProduct }) {
 
   const handleLanguageChange = (newLang) => {
     setCurrentLanguage(newLang)
-    if (availableVoices.length > 0) {
-      const matched = rankAndSelectNaturalVoice(availableVoices, selectedPersona, newLang)
-      if (matched) setActiveVoiceName(matched.name)
-    }
     if (isSpeaking && speakingMessageId) {
       const activeMsg = messages.find((m) => m.id === speakingMessageId)
       if (activeMsg) {
         handleSpeakText(speakingMessageId, activeMsg.text, selectedPersona, newLang)
       }
     }
+  }
+
+  const handleSpeedChange = (newSpeed) => {
+    setSpeakingSpeed(newSpeed)
+    voicePlayerRef.current?.setSpeed(newSpeed)
   }
 
   const handleVoiceInput = () => {
@@ -949,8 +540,8 @@ export default function ArtisanChatbot({ onSelectProduct }) {
                     ? 'bg-rose text-white shadow-sm'
                     : 'text-white/75 hover:bg-white/10 hover:text-white'
                 }`}
-                title={isSpeaking ? 'Stop speaking' : 'Listen with Natural Voice'}
-                aria-label="Listen with Natural Voice"
+                title={isSpeaking ? 'Stop speaking' : 'Listen in Real Human Voice'}
+                aria-label="Listen in Real Human Voice"
               >
                 {isSpeaking ? (
                   <>
@@ -1020,119 +611,222 @@ export default function ArtisanChatbot({ onSelectProduct }) {
 
           {/* Voice Settings Dropdown / Drawer Popover */}
           {showVoiceSettings && (
-            <div className="bg-ink text-white px-5 py-3.5 border-b border-white/10 text-xs shadow-lg animate-fadeIn z-20 max-h-[70vh] overflow-y-auto">
-              <div className="flex items-center justify-between pb-2 border-b border-white/10">
-                <div className="flex items-center gap-1.5 font-bold text-saffron">
-                  <AudioWaveform size={14} />
-                  <span>Voice & Language Studio</span>
+            <div className="bg-ink text-white px-5 py-4 border-b border-white/10 text-xs shadow-2xl animate-fadeIn z-20 max-h-[75vh] overflow-y-auto space-y-4">
+              <div className="flex items-center justify-between pb-2.5 border-b border-white/10">
+                <div className="flex items-center gap-2 font-bold text-saffron text-sm">
+                  <AudioWaveform size={16} />
+                  <span>Real Human Voice Studio</span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowVoiceSettings(false)}
-                  className="text-white/60 hover:text-white text-[11px]"
+                  className="rounded-lg bg-white/10 px-2.5 py-1 text-white/70 hover:bg-white/20 hover:text-white text-[11px] font-semibold transition-colors"
                 >
                   Close
                 </button>
               </div>
 
+              {/* Engine Status Banner */}
+              <div className="flex items-center justify-between rounded-xl bg-gradient-to-r from-white/10 to-white/5 p-2.5 border border-white/10 shadow-inner">
+                <div className="flex items-center gap-2">
+                  <div className="relative flex h-3 w-3">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500" />
+                  </div>
+                  <div>
+                    <div className="text-[11px] font-bold text-white tracking-wide">
+                      {activeEngineName}
+                    </div>
+                    <div className="text-[9px] text-white/60">
+                      Expressive human intonation & natural breath cadence
+                    </div>
+                  </div>
+                </div>
+                <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[9px] font-bold text-emerald-300 border border-emerald-500/30 uppercase tracking-wider">
+                  Live HD
+                </span>
+              </div>
+
               {/* 1. Language Preference */}
-              <div className="mt-3">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-white/70 block mb-1.5">
-                  Bot Speaking & Chat Language:
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-white/70 block mb-1.5 flex items-center gap-1.5">
+                  <Globe size={12} className="text-saffron" />
+                  <span>Speaking & Chat Language:</span>
                 </label>
-                <div className="grid grid-cols-3 gap-1.5">
+                <div className="grid grid-cols-2 gap-2">
                   {SUPPORTED_LANGUAGES.map((l) => (
                     <button
                       key={l.id}
                       type="button"
                       onClick={() => handleLanguageChange(l.id)}
-                      className={`p-2 rounded-xl border text-center transition-all ${
+                      className={`p-2.5 rounded-xl border text-left transition-all ${
                         currentLanguage === l.id
                           ? 'border-saffron bg-saffron/20 text-white ring-1 ring-saffron/50 font-bold'
                           : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
                       }`}
                     >
-                      <div className="text-[11px] font-bold mt-0.5">{l.label}</div>
-                      <div className="text-[9px] text-white/50">{l.tag}</div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold">{l.label}</span>
+                        <span className="text-[10px] text-saffron uppercase font-mono">{l.code}</span>
+                      </div>
+                      <div className="text-[9px] text-white/50 mt-0.5">{l.tag} Voice Model</div>
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* 2. Persona Selector */}
-              <div className="mt-3">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-white/70 block mb-1.5">
-                  Voice Persona / Tone:
+              {/* 2. Persona Selector with Live Test Previews */}
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-white/70 block mb-1.5 flex items-center gap-1.5">
+                  <Sparkles size={12} className="text-saffron" />
+                  <span>Human Voice Personas:</span>
                 </label>
-                <div className="grid grid-cols-2 gap-1.5">
-                  {VOICE_PERSONAS.map((p) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {VOICE_PERSONAS.map((p) => {
+                    const isSelected = selectedPersona === p.id
+                    const isThisTesting = testingPersonaId === p.id && isSpeaking
+
+                    return (
+                      <div
+                        key={p.id}
+                        className={`rounded-2xl border p-3 transition-all ${
+                          isSelected
+                            ? 'border-saffron bg-saffron/15 text-white ring-1 ring-saffron/40'
+                            : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <button
+                            type="button"
+                            onClick={() => handlePersonaChange(p.id)}
+                            className="text-left font-bold text-xs hover:text-saffron transition-colors flex-1 truncate mr-2"
+                          >
+                            {p.name}
+                          </button>
+                          <span className="shrink-0 rounded-full bg-rose/40 px-1.5 py-0.5 text-[8px] font-bold uppercase text-rose-200 border border-rose/30">
+                            {p.badge}
+                          </span>
+                        </div>
+
+                        <p className="text-[10px] text-white/60 leading-relaxed mb-2.5">
+                          {p.desc}
+                        </p>
+
+                        <div className="flex items-center gap-2 pt-2 border-t border-white/10">
+                          <button
+                            type="button"
+                            onClick={() => handlePersonaChange(p.id)}
+                            className={`flex-1 rounded-lg py-1 px-2 text-[10px] font-bold transition-all text-center ${
+                              isSelected
+                                ? 'bg-saffron text-ink font-bold shadow-sm'
+                                : 'bg-white/10 text-white hover:bg-white/20'
+                            }`}
+                          >
+                            {isSelected ? 'Selected' : 'Select'}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleTestPersonaVoice(p)}
+                            className={`flex items-center gap-1 rounded-lg py-1 px-2.5 text-[10px] font-semibold border transition-all ${
+                              isThisTesting
+                                ? 'bg-rose text-white border-rose animate-pulse'
+                                : 'bg-white/5 border-white/15 text-white/80 hover:bg-white/15 hover:text-white'
+                            }`}
+                            title="Preview sample voice"
+                          >
+                            {isThisTesting ? (
+                              <>
+                                <Square size={10} />
+                                <span>Stop</span>
+                              </>
+                            ) : (
+                              <>
+                                <Play size={10} />
+                                <span>Preview</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* 3. Speaking Speed Selector */}
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-white/70 block mb-1.5 flex items-center gap-1.5">
+                  <RotateCcw size={12} className="text-saffron" />
+                  <span>Speaking Cadence / Speed:</span>
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {SPEAKING_SPEEDS.map((s) => (
                     <button
-                      key={p.id}
+                      key={s.value}
                       type="button"
-                      onClick={() => handlePersonaChange(p.id)}
-                      className={`text-left p-2 rounded-xl border transition-all ${
-                        selectedPersona === p.id
-                          ? 'border-saffron bg-saffron/15 text-white ring-1 ring-saffron/40'
+                      onClick={() => handleSpeedChange(s.value)}
+                      className={`p-2 rounded-xl border text-center transition-all ${
+                        speakingSpeed === s.value
+                          ? 'border-saffron bg-saffron/20 text-white ring-1 ring-saffron/50 font-bold'
                           : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
                       }`}
                     >
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-[11px] truncate">{p.name}</span>
-                      </div>
-                      <p className="text-[9px] text-white/50 truncate mt-0.5">{p.desc}</p>
+                      <div className="text-xs font-bold">{s.label}</div>
+                      <div className="text-[9px] text-white/50">{s.desc}</div>
                     </button>
                   ))}
                 </div>
               </div>
-
-              {/* Detected Engine Info */}
-              {activeVoiceName && (
-                <div className="mt-3 pt-2 border-t border-white/10 flex items-center justify-between text-[10px] text-white/60">
-                  <span className="truncate">Synthesizer: {activeVoiceName}</span>
-                  <span className="shrink-0 text-emerald-400 font-semibold">Ready</span>
-                </div>
-              )}
             </div>
           )}
 
           {/* Active Audio Playback HUD Bar */}
           {isSpeaking && (
-            <div className="bg-gradient-to-r from-ink via-[#381d33] to-ink px-4 py-2 text-white flex items-center justify-between shadow-md border-b border-rose/30 animate-fadeIn text-xs">
-              <div className="flex items-center gap-2 min-w-0">
-                <div className="flex items-end gap-0.5 h-3.5">
+            <div className="bg-gradient-to-r from-ink via-[#381d33] to-ink px-4 py-2.5 text-white flex items-center justify-between shadow-lg border-b border-rose/30 animate-fadeIn text-xs">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex items-end gap-1 h-4">
                   <span className="w-1 bg-saffron rounded-full animate-soundwave-1" />
                   <span className="w-1 bg-rose rounded-full animate-soundwave-2" />
                   <span className="w-1 bg-saffron rounded-full animate-soundwave-3" />
+                  <span className="w-1 bg-rose rounded-full animate-soundwave-1" />
                 </div>
                 <div className="truncate">
-                  <span className="font-bold text-saffron text-[11px]">
-                    {currentPersonaObj.name}
-                  </span>
-                  <span className="text-[10px] text-white/70 ml-1.5">
-                    ({isPaused ? 'Paused' : 'Speaking'} {totalSentences > 0 ? `${speakingSentenceIndex}/${totalSentences}` : ''})
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-bold text-saffron text-xs truncate">
+                      {currentPersonaObj.name}
+                    </span>
+                    <span className="rounded-full bg-rose/40 px-1.5 py-0.2 text-[8px] font-bold text-rose-200">
+                      Human HD
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-white/70">
+                    {isPaused ? 'Paused' : 'Speaking'} {totalSentences > 0 ? `· Sentence ${speakingSentenceIndex} of ${totalSentences}` : ''}
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-1.5 shrink-0">
+              <div className="flex items-center gap-2 shrink-0">
                 {/* Pause/Resume button */}
                 <button
                   type="button"
                   onClick={togglePauseSpeech}
-                  className="grid h-7 w-7 place-items-center rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+                  className="grid h-8 w-8 place-items-center rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors"
                   title={isPaused ? 'Resume speech' : 'Pause speech'}
+                  aria-label={isPaused ? 'Resume speech' : 'Pause speech'}
                 >
-                  {isPaused ? <Play size={13} /> : <Pause size={13} />}
+                  {isPaused ? <Play size={14} /> : <Pause size={14} />}
                 </button>
 
                 {/* Stop button */}
                 <button
                   type="button"
                   onClick={stopSpeaking}
-                  className="grid h-7 w-7 place-items-center rounded-lg bg-rose text-white hover:bg-terracotta transition-colors"
+                  className="grid h-8 w-8 place-items-center rounded-xl bg-rose text-white hover:bg-terracotta transition-colors shadow-sm"
                   title="Stop speaking"
+                  aria-label="Stop speaking"
                 >
-                  <Square size={12} />
+                  <Square size={13} />
                 </button>
               </div>
             </div>
@@ -1299,13 +993,13 @@ export default function ArtisanChatbot({ onSelectProduct }) {
                             <button
                               type="button"
                               onClick={() => handleSpeakText(msg.id, msg.text)}
-                              className={`transition-colors p-1 flex items-center gap-1.5 rounded-md px-1.5 py-0.5 ${
+                              className={`transition-colors p-1 flex items-center gap-1.5 rounded-md px-2 py-0.5 ${
                                 isThisMessageSpeaking
-                                  ? 'bg-rose/15 text-rose font-bold'
+                                  ? 'bg-rose/15 text-rose font-bold ring-1 ring-rose/30'
                                   : 'hover:text-rose hover:bg-ink/5'
                               }`}
-                              title={isThisMessageSpeaking ? 'Stop speaking' : 'Listen with Natural Voice'}
-                              aria-label="Listen with Natural Voice"
+                              title={isThisMessageSpeaking ? 'Stop speaking' : 'Listen with Real Human Voice'}
+                              aria-label="Listen with Real Human Voice"
                             >
                               {isThisMessageSpeaking ? (
                                 <>
@@ -1314,12 +1008,12 @@ export default function ArtisanChatbot({ onSelectProduct }) {
                                     <span className="w-0.5 bg-rose rounded-full animate-soundwave-2" />
                                     <span className="w-0.5 bg-rose rounded-full animate-soundwave-3" />
                                   </span>
-                                  <span className="text-[10px] font-bold text-rose">Speaking</span>
+                                  <span className="text-[10px] font-bold text-rose">Speaking HD</span>
                                 </>
                               ) : (
                                 <>
                                   <Volume2 size={13} />
-                                  <span className="text-[10px] font-medium text-ink/60">Voice</span>
+                                  <span className="text-[10px] font-medium text-ink/70">Human Voice</span>
                                 </>
                               )}
                             </button>
@@ -1439,9 +1133,9 @@ export default function ArtisanChatbot({ onSelectProduct }) {
 
             <div className="mt-2 flex items-center justify-between text-[10px] text-ink/40 px-1">
               <span className="flex items-center gap-1.5">
-                <span>{currentLangObj.label} · Natural Voice</span>
+                <span>{currentLangObj.label} · Real Human Voice</span>
                 <span className="text-rose font-semibold cursor-pointer hover:underline" onClick={() => setShowVoiceSettings(!showVoiceSettings)}>
-                  · Settings
+                  · Voice Studio
                 </span>
               </span>
               <button
