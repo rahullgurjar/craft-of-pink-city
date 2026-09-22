@@ -458,7 +458,7 @@ export default function ProductModal({
                       <strong>Handblock Printing Heritage:</strong> Each fabric is hand-printed using meticulously carved teak/sheesham wood blocks dipped in azo-free dyes, stamped repeatedly across premium cotton.
                     </p>
                     <p>
-                      <strong>Quilted Construction:</strong> Stuffed with soft lightweight padding and machine diamond/channel quilted for structured durability and a plush, luxurious tactile feel.
+                      <strong>Quilted Construction:</strong> Stuffed with soft lightweight pure cotton batting and channel quilted with parallel reinforced stitching for structured durability and a plush, luxurious tactile feel.
                     </p>
                   </div>
                 )}

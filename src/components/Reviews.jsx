@@ -8,7 +8,7 @@ const reviews = [
     rating: 5,
     title: 'Exquisite Handcrafted Gifting Pouches!',
     comment:
-      'We ordered 85 Marigold Bloom Pouches for our artisan gifting hampers. Everyone raved about the fabric richness, diamond quilting, and artisan tassels. Dispatched right on time with custom tags!',
+      'We ordered 85 Marigold Bloom Pouches for our artisan gifting hampers. Everyone raved about the fabric richness, channel quilting, and artisan tassels. Dispatched right on time with custom tags!',
     product: 'Marigold Bloom Pouch Trio',
   },
   {

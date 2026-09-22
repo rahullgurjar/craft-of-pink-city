@@ -64,21 +64,21 @@ const PILLARS = [
   },
   {
     id: 'quilting',
-    title: 'Precision Diamond Hand-Quilting',
-    shortTitle: 'Diamond Quilting',
+    title: 'Precision Channel Hand-Quilting',
+    shortTitle: 'Channel Quilting',
     icon: Layers,
     tag: 'Cushioned Luxury',
     image: quiltImg,
     lead: 'Multi-layer padded construction that protects your essentials.',
     description:
-      'Each duffle bag, cosmetic vanity box, and yoga carrier features pure cotton batting layered between handblock fabrics, secured with thousands of precise diamond stitches and reinforced piped edges.',
+      'Each duffle bag, cosmetic vanity box, and yoga carrier features pure cotton batting layered between handblock fabrics, secured with parallel linear channel stitches and reinforced piped edges.',
     specs: [
       { label: 'Batting Layer', value: '100% Fluffy Pure Cotton' },
-      { label: 'Stitch Pattern', value: 'Reinforced Diamond Quilting' },
+      { label: 'Stitch Pattern', value: 'Parallel Channel Quilting' },
       { label: 'Structure', value: 'Padded Protection with Piped Edges' },
       { label: 'Zippers', value: 'Smooth Heavy-Duty Artisan Sliders' },
     ],
-    highlight: 'Durable Diamond Architecture',
+    highlight: 'Durable Channel Architecture',
   },
 ]
 

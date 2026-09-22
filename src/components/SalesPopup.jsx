@@ -14,192 +14,404 @@ const resolveProductImage = (image) => {
   )
 }
 
-// Curated bulk & wholesale order profiles with authentic occasions and locations
-const BULK_ORDER_PROFILES = [
-  {
-    name: 'Radhika S.',
-    role: 'Wedding Planner',
-    city: 'Udaipur',
-    state: 'Rajasthan',
-    qty: '50 pieces',
-    tag: 'Wedding Favors',
-    badge: 'Bulk Order Placed'
-  },
-  {
-    name: 'Pooja S.',
-    role: 'Boutique Curator',
-    city: 'Mumbai',
-    state: 'Maharashtra',
-    qty: '75 units',
-    tag: 'Boutique Wholesale',
-    badge: 'Bulk Order Placed'
-  },
-  {
-    name: 'Aditi M.',
-    role: 'Corporate Gifting Lead',
-    city: 'Bengaluru',
-    state: 'Karnataka',
-    qty: '100 units',
-    tag: 'Corporate Hampers',
-    badge: 'Bulk Order Placed'
-  },
-  {
-    name: 'Kunal V.',
-    role: 'Event Designer',
-    city: 'New Delhi',
-    state: 'Delhi NCR',
-    qty: '60 pieces',
-    tag: 'Mehendi Giveaways',
-    badge: 'Bulk Order Placed'
-  },
-  {
-    name: 'Meera D.',
-    role: 'Resort Store Buyer',
-    city: 'Goa',
-    state: 'Goa',
-    qty: '80 units',
-    tag: 'Resort Gift Shop',
-    badge: 'Bulk Order Placed'
-  },
-  {
-    name: 'Siddharth J.',
-    role: 'Textile Wholesale Buyer',
-    city: 'Ahmedabad',
-    state: 'Gujarat',
-    qty: '150 units',
-    tag: 'Custom Batch Print',
-    badge: 'Bulk Order Placed'
-  },
-  {
-    name: 'Sarah T.',
-    role: 'Boutique Importer',
-    city: 'London',
-    state: 'United Kingdom',
-    qty: '200 pieces',
-    tag: 'Export Shipment',
-    badge: 'Bulk Order Placed'
-  },
-  {
-    name: 'Neha & Varun',
-    role: 'Bride & Groom',
-    city: 'Jaipur',
-    state: 'Rajasthan',
-    qty: '45 pieces',
-    tag: 'Wedding Welcome Bags',
-    badge: 'Bulk Order Placed'
-  },
-  {
-    name: 'Divya N.',
-    role: 'Handloom Studio',
-    city: 'Kolkata',
-    state: 'West Bengal',
-    qty: '90 units',
-    tag: 'Festive Collection Lot',
-    badge: 'Bulk Order Placed'
-  },
-  {
-    name: 'Rhea B.',
-    role: 'Merchandising Head',
-    city: 'Gurugram',
-    state: 'Haryana',
-    qty: '120 units',
-    tag: 'Client Appreciation Kit',
-    badge: 'Bulk Order Placed'
-  },
-  {
-    name: 'Ananya R.',
-    role: 'Concept Store',
-    city: 'Hyderabad',
-    state: 'Telangana',
-    qty: '40 units',
-    tag: 'Boutique Restock',
-    badge: 'Bulk Order Placed'
-  },
-  {
-    name: 'Tanya K.',
-    role: 'Luxury Gifting',
-    city: 'Chandigarh',
-    state: 'Punjab',
-    qty: '35 pieces',
-    tag: 'Custom Monogram Favors',
-    badge: 'Bulk Order Placed'
-  },
-  {
-    name: 'Farhan K.',
-    role: 'Souvenir Buyer',
-    city: 'Dubai',
-    state: 'UAE',
-    qty: '180 pieces',
-    tag: 'International Wholesale',
-    badge: 'Bulk Order Placed'
-  },
-  {
-    name: 'Kavita M.',
-    role: 'Family Host',
-    city: 'Chennai',
-    state: 'Tamil Nadu',
-    qty: '30 units',
-    tag: 'Anniversary Return Gifts',
-    badge: 'Bulk Order Placed'
-  }
+// Diverse pool of first names (Global Western, European, Indian Diaspora, East Asian, Middle Eastern, Latin American)
+const FIRST_NAMES_GLOBAL = [
+  'Emma', 'Liam', 'Olivia', 'Noah', 'Sophia', 'Oliver', 'Charlotte', 'James', 'Amelia', 'Lucas',
+  'Mia', 'Benjamin', 'Evelyn', 'Henry', 'Harper', 'Alexander', 'Isabella', 'Daniel', 'Maya', 'Sebastian',
+  'Chloe', 'Jack', 'Ella', 'Samuel', 'Grace', 'Ethan', 'Victoria', 'Leo', 'Scarlett', 'Gabriel',
+  'Zoe', 'Julian', 'Hannah', 'David', 'Elena', 'Adam', 'Clara', 'Arthur', 'Freja', 'Theo',
+  'Astrid', 'Felix', 'Camille', 'Louis', 'Mathilde', 'Matteo', 'Giulia', 'Marco', 'Sofia', 'Luca',
+  'Valentina', 'Carlos', 'Lucia', 'Diego', 'Lars', 'Linnea', 'Nina', 'Antoine', 'Elise', 'Hugo',
+  'Margot', 'Jonas', 'Leon', 'Maximilian', 'Maja', 'Oscar', 'Ingrid', 'Soren', 'Alister', 'Fiona',
+  'Callum', 'Isla', 'Declan', 'Siobhan', 'Ciara', 'Logan', 'Harrison', 'Stella', 'Austin', 'Audrey',
+  'Gemma', 'Marcus', 'Beatrice', 'Sienna', 'Tobias', 'Eva', 'Dominic', 'Nico', 'Bianca', 'Stefan',
+  'Celine', 'Jasper', 'Valerie', 'Giselle', 'Laurent', 'Helena', 'Kasper', 'Nadia', 'Vincent', 'Adele',
+  'Penelope', 'Mason', 'Freya', 'Maeve', 'Lachlan', 'Clive', 'Rowan', 'Gemma', 'Eileen', 'Harrison'
+]
+
+const FIRST_NAMES_INDIAN = [
+  'Aarav', 'Ananya', 'Rohan', 'Priya', 'Vikram', 'Meera', 'Arjun', 'Ishita', 'Kabir', 'Sneha',
+  'Dev', 'Tanvi', 'Rahul', 'Pooja', 'Karan', 'Neha', 'Siddharth', 'Shreya', 'Varun', 'Divya',
+  'Kunal', 'Riya', 'Aman', 'Tara', 'Raghav', 'Kavita', 'Nikhil', 'Deepa', 'Sameer', 'Payal',
+  'Vihaan', 'Krithi', 'Reyansh', 'Diya', 'Aryan', 'Avani', 'Tarun', 'Natasha', 'Sameera', 'Alok',
+  'Swati', 'Gaurav', 'Nidhi', 'Harsh', 'Simran', 'Manan', 'Akshara', 'Aditya', 'Radhika', 'Virendra',
+  'Shalini', 'Sunil', 'Bhavna', 'Uday', 'Ankita', 'Prateek', 'Pallavi', 'Manish', 'Sonam', 'Ayush',
+  'Komal', 'Pranav', 'Garima', 'Saurabh', 'Poonam', 'Abhinav', 'Archana', 'Kartik', 'Bani', 'Yash',
+  'Roshni', 'Rishabh', 'Gayatri', 'Chirag', 'Aashi', 'Tushar', 'Lavanya', 'Mayank', 'Mallika', 'Chetan',
+  'Geetika', 'Anmol', 'Juhi', 'Dhruv', 'Sanjana', 'Tejas', 'Tanushree', 'Naveen', 'Madhuri', 'Ishaan'
+]
+
+const FIRST_NAMES_INTERNATIONAL = [
+  'Tariq', 'Fatima', 'Rashid', 'Layla', 'Omar', 'Amira', 'Faisal', 'Soraya', 'Khalid', 'Noor',
+  'Zayd', 'Maryam', 'Hamza', 'Reem', 'Mansoor', 'Hessa', 'Kareem', 'Salma', 'Kenji', 'Yoko',
+  'Takashi', 'Hana', 'Hiroshi', 'Mei', 'Jin', 'Sakura', 'Ren', 'Emi', 'Kaori', 'Daisuke',
+  'Wei', 'Lin', 'Jun', 'Chen', 'Kai', 'Bryan', 'Denise', 'Kiran', 'Sora', 'Minh',
+  'Mateo', 'Camila', 'Thiago', 'Valentina', 'Santiago', 'Sofia', 'Rafael', 'Isabella', 'Fernando', 'Gabriela',
+  'Luciana', 'Andres', 'Beatriz', 'Felipe', 'Mariana', 'Esteban', 'Javier', 'Carmen', 'Pilar', 'Rodrigo'
+]
+
+const COUPLE_NAMES = [
+  'Emma & Oliver', 'Priya & Rohan', 'Chloe & Liam', 'Elena & Marco', 'Sophia & Lucas',
+  'Ananya & Kabir', 'Sarah & Mark', 'Camille & Antoine', 'Freja & Lars', 'Neha & Varun',
+  'Charlotte & James', 'Mia & Noah', 'Tara & Vihaan', 'Lucia & Carlos', 'Hannah & David',
+  'Zoe & Alexander', 'Shreya & Aditya', 'Reem & Tariq', 'Sakura & Kenji', 'Isabella & Leo',
+  'Pooja & Kunal', 'Maya & Ethan', 'Clara & Julian', 'Rhea & Siddharth', 'Divya & Arjun',
+  'Avani & Aryan', 'Valentina & Mateo', 'Ingrid & Soren', 'Astrid & Felix', 'Giselle & Laurent'
+]
+
+const LAST_NAME_SUFFIXES = [
+  // Authentic Global & Western surnames
+  'Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez',
+  'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin',
+  'Lee', 'Perez', 'Thompson', 'White', 'Harris', 'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson',
+  'Walker', 'Young', 'Allen', 'King', 'Wright', 'Scott', 'Torres', 'Nguyen', 'Hill', 'Flores',
+  'Green', 'Adams', 'Nelson', 'Baker', 'Hall', 'Rivera', 'Campbell', 'Mitchell', 'Carter', 'Roberts',
+  // European surnames
+  'Dubois', 'Moreau', 'Laurent', 'Simon', 'Michel', 'Lefebvre', 'Roux', 'David', 'Bertrand', 'Müller',
+  'Schmidt', 'Schneider', 'Fischer', 'Weber', 'Meyer', 'Wagner', 'Becker', 'Schulz', 'Hoffmann', 'Rossi',
+  'Russo', 'Ferrari', 'Esposito', 'Bianchi', 'Romano', 'Colombo', 'Ricci', 'Marino', 'Greco', 'Van Dijk',
+  'De Jong', 'Bakker', 'Jansen', 'Visser', 'Smit', 'Meijer', 'De Boer', 'Silva', 'Santos', 'Ferreira',
+  // Middle Eastern & East Asian surnames
+  'Al-Maktoum', 'Al-Mansoor', 'Al-Sabah', 'Al-Thani', 'Al-Nuaimi', 'Al-Kuwari', 'Al-Harbi', 'Al-Ghamdi',
+  'Tanaka', 'Sato', 'Suzuki', 'Takahashi', 'Watanabe', 'Kobayashi', 'Yamamoto', 'Nakamura', 'Chen', 'Lin',
+  'Tan', 'Lim', 'Wong', 'Zhang', 'Kim', 'Park', 'Choi',
+  // Indian heritage surnames
+  'Sharma', 'Mehta', 'Kapoor', 'Verma', 'Joshi', 'Patel', 'Nair', 'Iyer', 'Gupta', 'Rao',
+  'Malhotra', 'Chopra', 'Mukherjee', 'Singh', 'Bhatia', 'Saxena', 'Kaur', 'Deshmukh', 'Bansal', 'Chatterjee',
+  'Menon', 'Aggarwal', 'Sen', 'Dutta', 'Singhal', 'Kothari', 'Choudhary', 'Rathore', 'Shekhawat', 'Bhandari',
+  // Initials
+  'A.', 'B.', 'C.', 'D.', 'E.', 'F.', 'G.', 'H.', 'J.', 'K.', 'L.', 'M.',
+  'N.', 'P.', 'R.', 'S.', 'T.', 'V.', 'W.', 'Y.', 'Z.'
+]
+
+// Curated worldwide cities & countries across all major continents (EXCLUDING Pakistan)
+const WORLD_LOCATIONS = [
+  // ── United States ──
+  { city: 'New York', display: 'New York, USA', country: 'USA' },
+  { city: 'Los Angeles', display: 'Los Angeles, USA', country: 'USA' },
+  { city: 'San Francisco', display: 'San Francisco, USA', country: 'USA' },
+  { city: 'Chicago', display: 'Chicago, USA', country: 'USA' },
+  { city: 'Austin', display: 'Austin, USA', country: 'USA' },
+  { city: 'Seattle', display: 'Seattle, USA', country: 'USA' },
+  { city: 'Boston', display: 'Boston, USA', country: 'USA' },
+  { city: 'Miami', display: 'Miami, USA', country: 'USA' },
+  { city: 'Dallas', display: 'Dallas, USA', country: 'USA' },
+  { city: 'Brooklyn', display: 'Brooklyn, USA', country: 'USA' },
+  { city: 'Honolulu', display: 'Honolulu, USA', country: 'USA' },
+  { city: 'Atlanta', display: 'Atlanta, USA', country: 'USA' },
+  { city: 'Denver', display: 'Denver, USA', country: 'USA' },
+  { city: 'San Diego', display: 'San Diego, USA', country: 'USA' },
+  { city: 'Portland', display: 'Portland, USA', country: 'USA' },
+  { city: 'Nashville', display: 'Nashville, USA', country: 'USA' },
+  { city: 'Washington D.C.', display: 'Washington D.C., USA', country: 'USA' },
+  { city: 'Charleston', display: 'Charleston, USA', country: 'USA' },
+  { city: 'Scottsdale', display: 'Scottsdale, USA', country: 'USA' },
+  { city: 'Aspen', display: 'Aspen, USA', country: 'USA' },
+
+  // ── United Kingdom ──
+  { city: 'London', display: 'London, UK', country: 'UK' },
+  { city: 'Edinburgh', display: 'Edinburgh, UK', country: 'UK' },
+  { city: 'Manchester', display: 'Manchester, UK', country: 'UK' },
+  { city: 'Oxford', display: 'Oxford, UK', country: 'UK' },
+  { city: 'Cambridge', display: 'Cambridge, UK', country: 'UK' },
+  { city: 'Bath', display: 'Bath, UK', country: 'UK' },
+  { city: 'Bristol', display: 'Bristol, UK', country: 'UK' },
+  { city: 'Brighton', display: 'Brighton, UK', country: 'UK' },
+  { city: 'Cotswolds', display: 'Cotswolds, UK', country: 'UK' },
+  { city: 'Glasgow', display: 'Glasgow, UK', country: 'UK' },
+  { city: 'York', display: 'York, UK', country: 'UK' },
+
+  // ── Canada ──
+  { city: 'Toronto', display: 'Toronto, Canada', country: 'Canada' },
+  { city: 'Vancouver', display: 'Vancouver, Canada', country: 'Canada' },
+  { city: 'Montreal', display: 'Montreal, Canada', country: 'Canada' },
+  { city: 'Calgary', display: 'Calgary, Canada', country: 'Canada' },
+  { city: 'Ottawa', display: 'Ottawa, Canada', country: 'Canada' },
+  { city: 'Victoria', display: 'Victoria, Canada', country: 'Canada' },
+
+  // ── Australia & New Zealand ──
+  { city: 'Sydney', display: 'Sydney, Australia', country: 'Australia' },
+  { city: 'Melbourne', display: 'Melbourne, Australia', country: 'Australia' },
+  { city: 'Brisbane', display: 'Brisbane, Australia', country: 'Australia' },
+  { city: 'Perth', display: 'Perth, Australia', country: 'Australia' },
+  { city: 'Adelaide', display: 'Adelaide, Australia', country: 'Australia' },
+  { city: 'Gold Coast', display: 'Gold Coast, Australia', country: 'Australia' },
+  { city: 'Auckland', display: 'Auckland, New Zealand', country: 'New Zealand' },
+  { city: 'Wellington', display: 'Wellington, New Zealand', country: 'New Zealand' },
+  { city: 'Christchurch', display: 'Christchurch, New Zealand', country: 'New Zealand' },
+
+  // ── United Arab Emirates & Gulf (Strictly No Pakistan) ──
+  { city: 'Dubai', display: 'Dubai, UAE', country: 'UAE' },
+  { city: 'Abu Dhabi', display: 'Abu Dhabi, UAE', country: 'UAE' },
+  { city: 'Sharjah', display: 'Sharjah, UAE', country: 'UAE' },
+  { city: 'Riyadh', display: 'Riyadh, Saudi Arabia', country: 'Saudi Arabia' },
+  { city: 'Jeddah', display: 'Jeddah, Saudi Arabia', country: 'Saudi Arabia' },
+  { city: 'Doha', display: 'Doha, Qatar', country: 'Qatar' },
+  { city: 'Kuwait City', display: 'Kuwait City, Kuwait', country: 'Kuwait' },
+  { city: 'Manama', display: 'Manama, Bahrain', country: 'Bahrain' },
+  { city: 'Muscat', display: 'Muscat, Oman', country: 'Oman' },
+
+  // ── France ──
+  { city: 'Paris', display: 'Paris, France', country: 'France' },
+  { city: 'Nice', display: 'Nice, France', country: 'France' },
+  { city: 'Lyon', display: 'Lyon, France', country: 'France' },
+  { city: 'Bordeaux', display: 'Bordeaux, France', country: 'France' },
+  { city: 'Cannes', display: 'Cannes, France', country: 'France' },
+  { city: 'Marseille', display: 'Marseille, France', country: 'France' },
+
+  // ── Italy ──
+  { city: 'Milan', display: 'Milan, Italy', country: 'Italy' },
+  { city: 'Rome', display: 'Rome, Italy', country: 'Italy' },
+  { city: 'Florence', display: 'Florence, Italy', country: 'Italy' },
+  { city: 'Venice', display: 'Venice, Italy', country: 'Italy' },
+  { city: 'Lake Como', display: 'Como, Italy', country: 'Italy' },
+  { city: 'Naples', display: 'Naples, Italy', country: 'Italy' },
+
+  // ── Germany ──
+  { city: 'Berlin', display: 'Berlin, Germany', country: 'Germany' },
+  { city: 'Munich', display: 'Munich, Germany', country: 'Germany' },
+  { city: 'Frankfurt', display: 'Frankfurt, Germany', country: 'Germany' },
+  { city: 'Hamburg', display: 'Hamburg, Germany', country: 'Germany' },
+  { city: 'Cologne', display: 'Cologne, Germany', country: 'Germany' },
+
+  // ── Spain & Portugal ──
+  { city: 'Barcelona', display: 'Barcelona, Spain', country: 'Spain' },
+  { city: 'Madrid', display: 'Madrid, Spain', country: 'Spain' },
+  { city: 'Seville', display: 'Seville, Spain', country: 'Spain' },
+  { city: 'Ibiza', display: 'Ibiza, Spain', country: 'Spain' },
+  { city: 'Mallorca', display: 'Palma, Spain', country: 'Spain' },
+  { city: 'Lisbon', display: 'Lisbon, Portugal', country: 'Portugal' },
+  { city: 'Porto', display: 'Porto, Portugal', country: 'Portugal' },
+  { city: 'Algarve', display: 'Algarve, Portugal', country: 'Portugal' },
+
+  // ── Northern & Central Europe ──
+  { city: 'Amsterdam', display: 'Amsterdam, Netherlands', country: 'Netherlands' },
+  { city: 'Rotterdam', display: 'Rotterdam, Netherlands', country: 'Netherlands' },
+  { city: 'Utrecht', display: 'Utrecht, Netherlands', country: 'Netherlands' },
+  { city: 'Zurich', display: 'Zurich, Switzerland', country: 'Switzerland' },
+  { city: 'Geneva', display: 'Geneva, Switzerland', country: 'Switzerland' },
+  { city: 'Basel', display: 'Basel, Switzerland', country: 'Switzerland' },
+  { city: 'Vienna', display: 'Vienna, Austria', country: 'Austria' },
+  { city: 'Salzburg', display: 'Salzburg, Austria', country: 'Austria' },
+  { city: 'Brussels', display: 'Brussels, Belgium', country: 'Belgium' },
+  { city: 'Antwerp', display: 'Antwerp, Belgium', country: 'Belgium' },
+  { city: 'Stockholm', display: 'Stockholm, Sweden', country: 'Sweden' },
+  { city: 'Gothenburg', display: 'Gothenburg, Sweden', country: 'Sweden' },
+  { city: 'Copenhagen', display: 'Copenhagen, Denmark', country: 'Denmark' },
+  { city: 'Oslo', display: 'Oslo, Norway', country: 'Norway' },
+  { city: 'Helsinki', display: 'Helsinki, Finland', country: 'Finland' },
+  { city: 'Dublin', display: 'Dublin, Ireland', country: 'Ireland' },
+  { city: 'Galway', display: 'Galway, Ireland', country: 'Ireland' },
+  { city: 'Athens', display: 'Athens, Greece', country: 'Greece' },
+  { city: 'Santorini', display: 'Santorini, Greece', country: 'Greece' },
+  { city: 'Mykonos', display: 'Mykonos, Greece', country: 'Greece' },
+  { city: 'Monte Carlo', display: 'Monte Carlo, Monaco', country: 'Monaco' },
+  { city: 'Luxembourg City', display: 'Luxembourg City, Luxembourg', country: 'Luxembourg' },
+
+  // ── Asia-Pacific ──
+  { city: 'Singapore', display: 'Singapore', country: 'Singapore' },
+  { city: 'Tokyo', display: 'Tokyo, Japan', country: 'Japan' },
+  { city: 'Kyoto', display: 'Kyoto, Japan', country: 'Japan' },
+  { city: 'Osaka', display: 'Osaka, Japan', country: 'Japan' },
+  { city: 'Yokohama', display: 'Yokohama, Japan', country: 'Japan' },
+  { city: 'Seoul', display: 'Seoul, South Korea', country: 'South Korea' },
+  { city: 'Busan', display: 'Busan, South Korea', country: 'South Korea' },
+  { city: 'Kuala Lumpur', display: 'Kuala Lumpur, Malaysia', country: 'Malaysia' },
+  { city: 'Penang', display: 'Penang, Malaysia', country: 'Malaysia' },
+  { city: 'Bangkok', display: 'Bangkok, Thailand', country: 'Thailand' },
+  { city: 'Phuket', display: 'Phuket, Thailand', country: 'Thailand' },
+  { city: 'Chiang Mai', display: 'Chiang Mai, Thailand', country: 'Thailand' },
+  { city: 'Bali', display: 'Bali, Indonesia', country: 'Indonesia' },
+  { city: 'Jakarta', display: 'Jakarta, Indonesia', country: 'Indonesia' },
+  { city: 'Hong Kong', display: 'Hong Kong', country: 'Hong Kong' },
+  { city: 'Taipei', display: 'Taipei, Taiwan', country: 'Taiwan' },
+
+  // ── Latin America & Caribbean ──
+  { city: 'Mexico City', display: 'Mexico City, Mexico', country: 'Mexico' },
+  { city: 'Tulum', display: 'Tulum, Mexico', country: 'Mexico' },
+  { city: 'San Miguel de Allende', display: 'San Miguel, Mexico', country: 'Mexico' },
+  { city: 'São Paulo', display: 'São Paulo, Brazil', country: 'Brazil' },
+  { city: 'Rio de Janeiro', display: 'Rio de Janeiro, Brazil', country: 'Brazil' },
+  { city: 'Buenos Aires', display: 'Buenos Aires, Argentina', country: 'Argentina' },
+  { city: 'Santiago', display: 'Santiago, Chile', country: 'Chile' },
+  { city: 'Bogotá', display: 'Bogotá, Colombia', country: 'Colombia' },
+  { city: 'San José', display: 'San José, Costa Rica', country: 'Costa Rica' },
+  { city: 'Nassau', display: 'Nassau, Bahamas', country: 'Bahamas' },
+
+  // ── Africa & Indian Ocean ──
+  { city: 'Cape Town', display: 'Cape Town, South Africa', country: 'South Africa' },
+  { city: 'Johannesburg', display: 'Johannesburg, South Africa', country: 'South Africa' },
+  { city: 'Port Louis', display: 'Port Louis, Mauritius', country: 'Mauritius' },
+  { city: 'Grand Baie', display: 'Grand Baie, Mauritius', country: 'Mauritius' },
+  { city: 'Victoria', display: 'Victoria, Seychelles', country: 'Seychelles' },
+  { city: 'Nairobi', display: 'Nairobi, Kenya', country: 'Kenya' },
+  { city: 'Marrakech', display: 'Marrakech, Morocco', country: 'Morocco' },
+
+  // ── India (Heritage Craft & Metro Centers) ──
+  { city: 'Jaipur', display: 'Jaipur, Rajasthan', country: 'India' },
+  { city: 'Mumbai', display: 'Mumbai, Maharashtra', country: 'India' },
+  { city: 'Bengaluru', display: 'Bengaluru, Karnataka', country: 'India' },
+  { city: 'New Delhi', display: 'New Delhi, Delhi NCR', country: 'India' },
+  { city: 'Udaipur', display: 'Udaipur, Rajasthan', country: 'India' },
+  { city: 'Kolkata', display: 'Kolkata, West Bengal', country: 'India' },
+  { city: 'Hyderabad', display: 'Hyderabad, Telangana', country: 'India' },
+  { city: 'Chennai', display: 'Chennai, Tamil Nadu', country: 'India' },
+  { city: 'Ahmedabad', display: 'Ahmedabad, Gujarat', country: 'India' },
+  { city: 'Pune', display: 'Pune, Maharashtra', country: 'India' },
+  { city: 'Chandigarh', display: 'Chandigarh, Punjab', country: 'India' },
+  { city: 'Panaji', display: 'Panaji, Goa', country: 'India' },
+  { city: 'Kochi', display: 'Kochi, Kerala', country: 'India' },
+  { city: 'Gurugram', display: 'Gurugram, Haryana', country: 'India' },
+  { city: 'Lucknow', display: 'Lucknow, Uttar Pradesh', country: 'India' },
+  { city: 'Jodhpur', display: 'Jodhpur, Rajasthan', country: 'India' },
+  { city: 'Surat', display: 'Surat, Gujarat', country: 'India' },
+  { city: 'Dehradun', display: 'Dehradun, Uttarakhand', country: 'India' },
+  { city: 'Mysuru', display: 'Mysuru, Karnataka', country: 'India' },
+  { city: 'Indore', display: 'Indore, Madhya Pradesh', country: 'India' }
+]
+
+// Defensive safeguard: Ensure Pakistan and related cities are strictly excluded
+const SANITIZED_LOCATIONS = WORLD_LOCATIONS.filter(loc => {
+  const combined = `${loc.city} ${loc.display} ${loc.country || ''}`.toLowerCase()
+  return (
+    !combined.includes('pakistan') &&
+    !combined.includes('karachi') &&
+    !combined.includes('lahore') &&
+    !combined.includes('islamabad') &&
+    !combined.includes('rawalpindi') &&
+    !combined.includes('faisalabad') &&
+    !combined.includes('peshawar') &&
+    !combined.includes('quetta') &&
+    !combined.includes('multan')
+  )
+})
+
+const BULK_QUANTITIES = [
+  '15 pieces (Sample Trial)', '25 pieces', '35 units', '40 pieces', '50 units', '60 pieces',
+  '75 units', '80 pieces', '100 units', '120 pieces', '150 units',
+  '180 pieces', '200 units', '250 pieces', '300 units', '450 pieces', '500 units'
+]
+
+const TAGS_AND_ROLES = [
+  { tag: 'Wedding Favors', role: 'Wedding Planner', badge: 'Bulk Order Placed' },
+  { tag: 'Boutique Wholesale', role: 'Boutique Curator', badge: 'Wholesale Order Placed' },
+  { tag: 'Corporate Hampers', role: 'Corporate Gifting Lead', badge: 'Bulk Order Placed' },
+  { tag: 'Mehendi Giveaways', role: 'Event Designer', badge: 'Bulk Order Placed' },
+  { tag: 'Resort Gift Shop', role: 'Resort Store Buyer', badge: 'Boutique Order Placed' },
+  { tag: 'Export Consignment', role: 'Textile Importer', badge: 'Export Order Placed' },
+  { tag: 'Custom Batch Print', role: 'Handloom Studio', badge: 'Custom Batch Placed' },
+  { tag: 'Wedding Welcome Bags', role: 'Bride & Groom', badge: 'Bulk Order Placed' },
+  { tag: 'Festive Collection Lot', role: 'Concept Store Owner', badge: 'Wholesale Order Placed' },
+  { tag: 'Client Appreciation Kit', role: 'Merchandising Head', badge: 'Bulk Order Placed' },
+  { tag: 'Boutique Restock', role: 'Boutique Owner', badge: 'Boutique Order Placed' },
+  { tag: 'Monogram Favors', role: 'Luxury Gifting Lead', badge: 'Custom Batch Placed' },
+  { tag: 'International Consignment', role: 'Overseas Importer', badge: 'Export Order Placed' },
+  { tag: 'Anniversary Return Gifts', role: 'Celebration Host', badge: 'Bulk Order Placed' },
+  { tag: 'Hospitality Gifting Lot', role: 'Heritage Hotel Partner', badge: 'Wholesale Order Placed' },
+  { tag: 'Exhibition Restock', role: 'Gallery Curator', badge: 'Boutique Order Placed' },
+  { tag: 'VIP Suite Welcome Pack', role: 'Luxury Concierge', badge: 'Bulk Order Placed' },
+  { tag: 'Luxury Resort Spa Lot', role: 'Spa Director', badge: 'Export Order Placed' },
+  { tag: 'Yoga Studio Batch', role: 'Studio Founder', badge: 'Bulk Order Placed' },
+  { tag: 'Artisan Boutique Order', role: 'Retail Buyer', badge: 'Boutique Order Placed' }
 ]
 
 const TIME_AGO_LIST = [
   'Just now',
   '2 minutes ago',
   '4 minutes ago',
-  '6 minutes ago',
-  '11 minutes ago',
+  '7 minutes ago',
+  '12 minutes ago',
   '18 minutes ago',
-  '25 minutes ago',
+  '26 minutes ago',
   '38 minutes ago',
+  '45 minutes ago'
 ]
 
 export default function SalesPopup() {
-  const [currentSale, setCurrentSale] = useState(() => {
-    if (!products || products.length === 0) return null
-    const buyer = BULK_ORDER_PROFILES[0]
-    const product = products[0]
-    return {
-      buyerName: buyer.name,
-      role: buyer.role,
-      city: buyer.city,
-      state: buyer.state,
-      quantity: buyer.qty,
-      tag: buyer.tag,
-      badge: buyer.badge,
-      timeAgo: 'Just now',
-      product,
-    }
-  })
-
+  const [currentSale, setCurrentSale] = useState(null)
   const [isVisible, setIsVisible] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
   const [isDismissed, setIsDismissed] = useState(false)
   
   const timerRef = useRef(null)
   const hideTimerRef = useRef(null)
+  const usedNamesHistoryRef = useRef([])
+  const usedProductsHistoryRef = useRef([])
 
-  // Generate a random bulk sale record pairing buyer with a product
-  const generateSaleRecord = useCallback(() => {
+  // Helper to generate a unique random buyer name
+  const generateUniqueBuyerName = useCallback(() => {
+    let nameCandidate = ''
+    let attempts = 0
+    const history = usedNamesHistoryRef.current
+
+    while (attempts < 20) {
+      attempts++
+      const isCouple = Math.random() < 0.10
+      if (isCouple) {
+        nameCandidate = COUPLE_NAMES[Math.floor(Math.random() * COUPLE_NAMES.length)]
+      } else {
+        const poolPicker = Math.random()
+        let firstName = ''
+        if (poolPicker < 0.28) {
+          firstName = FIRST_NAMES_INDIAN[Math.floor(Math.random() * FIRST_NAMES_INDIAN.length)]
+        } else if (poolPicker < 0.72) {
+          firstName = FIRST_NAMES_GLOBAL[Math.floor(Math.random() * FIRST_NAMES_GLOBAL.length)]
+        } else {
+          firstName = FIRST_NAMES_INTERNATIONAL[Math.floor(Math.random() * FIRST_NAMES_INTERNATIONAL.length)]
+        }
+
+        const lastNameOrInitial = LAST_NAME_SUFFIXES[Math.floor(Math.random() * LAST_NAME_SUFFIXES.length)]
+        nameCandidate = `${firstName} ${lastNameOrInitial}`
+      }
+
+      // Ensure no recently used duplicate names
+      if (!history.includes(nameCandidate)) {
+        break
+      }
+    }
+
+    // Keep history sliding window of last 40 names
+    usedNamesHistoryRef.current = [...history.slice(-39), nameCandidate]
+    return nameCandidate
+  }, [])
+
+  // Helper to pick a non-consecutive product
+  const pickProduct = useCallback(() => {
     if (!products || products.length === 0) return null
+    const history = usedProductsHistoryRef.current
+    let available = products.filter(p => !history.includes(p.id))
+    if (available.length === 0) {
+      available = products
+      usedProductsHistoryRef.current = []
+    }
+    const product = available[Math.floor(Math.random() * available.length)]
+    usedProductsHistoryRef.current = [...usedProductsHistoryRef.current.slice(-6), product.id]
+    return product
+  }, [])
 
-    const buyer = BULK_ORDER_PROFILES[Math.floor(Math.random() * BULK_ORDER_PROFILES.length)]
-    const product = products[Math.floor(Math.random() * products.length)]
+  // Generate a random bulk sale record pairing buyer with a product & worldwide country
+  const generateSaleRecord = useCallback(() => {
+    const product = pickProduct()
+    if (!product) return null
+
+    const buyerName = generateUniqueBuyerName()
+    const loc = SANITIZED_LOCATIONS[Math.floor(Math.random() * SANITIZED_LOCATIONS.length)]
+    const tagRole = TAGS_AND_ROLES[Math.floor(Math.random() * TAGS_AND_ROLES.length)]
+    const quantity = BULK_QUANTITIES[Math.floor(Math.random() * BULK_QUANTITIES.length)]
     const timeAgo = TIME_AGO_LIST[Math.floor(Math.random() * TIME_AGO_LIST.length)]
 
     return {
-      buyerName: buyer.name,
-      role: buyer.role,
-      city: buyer.city,
-      state: buyer.state,
-      quantity: buyer.qty,
-      tag: buyer.tag,
-      badge: buyer.badge,
+      buyerName,
+      role: tagRole.role,
+      city: loc.display,
+      country: loc.country,
+      quantity,
+      tag: tagRole.tag,
+      badge: tagRole.badge,
       timeAgo,
       product,
     }
-  }, [])
+  }, [generateUniqueBuyerName, pickProduct])
 
   // Show a notification
   const showNextSale = useCallback(() => {
@@ -211,31 +423,31 @@ export default function SalesPopup() {
     setCurrentSale(sale)
     setIsVisible(true)
 
-    // Schedule auto-hide after 6.5 seconds (unless hovered)
+    // Auto-hide after 5.5 seconds (unless hovered)
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
     hideTimerRef.current = setTimeout(() => {
       setIsVisible(false)
       scheduleNextSale()
-    }, 6500)
+    }, 5500)
   }, [generateSaleRecord, isDismissed])
 
-  // Schedule next appearance
+  // Schedule next appearance with a balanced cadence (14s to 22s)
   const scheduleNextSale = useCallback(() => {
     if (isDismissed) return
     if (timerRef.current) clearTimeout(timerRef.current)
 
-    // Interval between 5 to 8 seconds
-    const delay = Math.floor(Math.random() * 3000) + 5000
+    // Interval: 14,000ms to 22,000ms
+    const delay = Math.floor(Math.random() * 8000) + 14000
     timerRef.current = setTimeout(() => {
       showNextSale()
     }, delay)
   }, [showNextSale, isDismissed])
 
-  // Initial startup after 1.2s
+  // Initial startup after a quick 2.5s delay
   useEffect(() => {
     const initialDelay = setTimeout(() => {
       showNextSale()
-    }, 1200)
+    }, 2500)
 
     return () => {
       clearTimeout(initialDelay)
@@ -269,10 +481,10 @@ export default function SalesPopup() {
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
     if (timerRef.current) clearTimeout(timerRef.current)
 
-    // Snooze for 30 seconds before resuming
+    // Snooze for 45 seconds before resuming
     timerRef.current = setTimeout(() => {
       scheduleNextSale()
-    }, 30000)
+    }, 45000)
   }
 
   // Open product details modal

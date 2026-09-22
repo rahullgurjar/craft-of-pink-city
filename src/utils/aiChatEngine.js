@@ -147,7 +147,7 @@ function synthesizeDynamicResponse(query, cartContext, lang = 'en') {
       }
     }
     return {
-      text: `**About Gulabi & Craft of Pink City:**\n\n• **I am Gulabi**, the intelligent AI concierge for *Craft of Pink City*—a direct artisan textile studio located in **Jaipur, Rajasthan**.\n• **Generational Heritage:** We specialize in authentic hand block-printed, quilted 100% pure cotton accessories using traditional woodblocks, natural vegetable dyes, and diamond quilting.\n• **Direct Workshop Model:** Every piece is ethically handcrafted by skilled local artisans without retail middlemen.\n• **Wholesale & Custom Gifting:** We partner with boutiques, brands, and corporate gifting clients across India and globally.`,
+      text: `**About Gulabi & Craft of Pink City:**\n\n• **I am Gulabi**, the intelligent AI concierge for *Craft of Pink City*—a direct artisan textile studio located in **Jaipur, Rajasthan**.\n• **Generational Heritage:** We specialize in authentic hand block-printed, quilted 100% pure cotton accessories using traditional woodblocks, natural vegetable dyes, and artisanal channel quilting.\n• **Direct Workshop Model:** Every piece is ethically handcrafted by skilled local artisans without retail middlemen.\n• **Wholesale & Custom Gifting:** We partner with boutiques, brands, and corporate gifting clients across India and globally.`,
       quickReplies: ['Show Bestsellers', 'Quilted Duffles', 'Wholesale & Bulk Catalog']
     }
   }
@@ -208,13 +208,13 @@ function synthesizeDynamicResponse(query, cartContext, lang = 'en') {
     const duffles = products.filter((p) => p.category === 'Duffle Bags')
     if (lang === 'hi') {
       return {
-        text: `**क्विल्टेड ट्रेवल डफल्स (फ्लाइट केबिन अप्रूव्ड):**\n\n• **साइज व क्षमता:** **18" लंबाई × 10" चौड़ाई × 10" ऊंचाई** (~28 लीटर क्षमता)।\n• **क्या-क्या आ सकता है:** 2–3 दिन के कपड़े, जूते, वैनिटी पाउच, चार्जर और ट्रेवल का जरूरी सामान।\n• **केबिन फ्रेंडली:** फ्लाइट के ओवरहेड बिन और सीट के नीचे आसानी से फिट होता है।\n• **मजबूती:** शुद्ध कॉटन कैनवास, डायमंड क्विल्टिंग, मजबूत डबल हैंडल और डिटैचेबल शोल्डर स्ट्रैप।`,
+        text: `**क्विल्टेड ट्रेवल डफल्स (फ्लाइट केबिन अप्रूव्ड):**\n\n• **साइज व क्षमता:** **18" लंबाई × 10" चौड़ाई × 10" ऊंचाई** (~28 लीटर क्षमता)।\n• **क्या-क्या आ सकता है:** 2–3 दिन के कपड़े, जूते, वैनिटी पाउच, चार्जर और ट्रेवल का जरूरी सामान।\n• **केबिन फ्रेंडली:** फ्लाइट के ओवरहेड बिन और सीट के नीचे आसानी से फिट होता है।\n• **मजबूती:** शुद्ध कॉटन कैनवास, पैरेलल चैनल क्विल्टिंग, मजबूत डबल हैंडल और डिटैचेबल शोल्डर स्ट्रैप।`,
         quickReplies: ['ब्लश बोटैनिकल डफल', 'हेरिटेज इंडिगो पैचवर्क', 'ब्लू पॉपी डफल'],
         products: duffles.slice(0, 3)
       }
     }
     return {
-      text: `**Quilted Travel Duffles (Cabin Approved):**\n\n• **Dimensions & Capacity:** **18" Length × 10" Width × 10" Height** (~28 Litres capacity).\n• **What Fits Inside:** 2–3 days of clothing, footwear, vanity pouch, toiletries, and travel essentials.\n• **Flight Friendly:** Fits effortlessly in airline overhead bins and under seats.\n• **Construction:** Diamond quilted with 100% cotton canvas, reinforced dual handles, and padded shoulder strap.`,
+      text: `**Quilted Travel Duffles (Cabin Approved):**\n\n• **Dimensions & Capacity:** **18" Length × 10" Width × 10" Height** (~28 Litres capacity).\n• **What Fits Inside:** 2–3 days of clothing, footwear, vanity pouch, toiletries, and travel essentials.\n• **Flight Friendly:** Fits effortlessly in airline overhead bins and under seats.\n• **Construction:** Channel quilted with 100% cotton canvas, reinforced dual handles, and padded shoulder strap.`,
       quickReplies: ['Blush Botanical Duffle', 'Heritage Indigo Patchwork', 'Blue Poppy Duffle'],
       products: duffles.slice(0, 3)
     }

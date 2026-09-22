@@ -269,7 +269,7 @@ function TermsContent() {
               <strong>60% Advance Payment (Mandatory to Confirm Order):</strong> A 60% advance payment is strictly required to confirm the order, lock fabric print selections, procure pure cotton fabric and natural dyes, and schedule artisan workshop batch stitching.
             </li>
             <li>
-              <strong>Remaining 40% Balance (Payable Prior to Dispatch):</strong> Once your complete batch is stitched, diamond-quilted, quality-checked, and packaged, our workshop team shares high-definition photos and video footage of your ready stock on WhatsApp for your inspection. The remaining 40% balance is payable prior to courier handover.
+              <strong>Remaining 40% Balance (Payable Prior to Dispatch):</strong> Once your complete batch is stitched, channel-quilted, quality-checked, and packaged, our workshop team shares high-definition photos and video footage of your ready stock on WhatsApp for your inspection. The remaining 40% balance is payable prior to courier handover.
             </li>
           </ul>
         </div>

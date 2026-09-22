@@ -11,7 +11,7 @@ export const products = [
     price: '₹1,449',
     image: 'yoga-bag-marigold-sunshine.jpg',
     badge: 'New Arrival',
-    description: 'Radiant sunshine-yellow quilted cotton yoga carrier with floral motifs, diamond stitching, and adjustable shoulder strap.',
+    description: 'Radiant sunshine-yellow quilted cotton yoga carrier with floral motifs, parallel channel stitching, and adjustable shoulder strap.',
   },
   {
     id: 'blush-botanical-barrel-duffle',
