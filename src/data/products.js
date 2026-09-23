@@ -394,7 +394,7 @@ export const products = [
 ]
 
 export const faqs = [
-  ['How can I place a retail order?', 'Choose any product from our collection and select “Order on WhatsApp”. Send us the product name and our team will confirm item availability, payment details, and estimated dispatch schedule for your order quantity.'],
+  ['How can I place a retail order?', 'Choose any product from our collection and click “Order Now” or “Add to Bag” to complete the verified checkout form. Your order is logged immediately with our Jaipur artisan production desk, and our team will confirm dispatch schedule with door-to-door tracking.'],
   ['Do you accept wholesale, bulk, and corporate gifting orders?', 'Yes! We specialize in wholesale and bulk orders for boutiques, retail stores, and corporate gifting hampers. We offer tiered wholesale pricing with custom print selections, personalized brand tags, and bespoke packaging.'],
   ['What is the Minimum Order Quantity (MOQ) for bulk purchases?', 'Our bulk order MOQ starts from just 25 pieces per category. You can mix and match colorways and block-print patterns.'],
   ['What are your payment terms (60% Advance Policy)?', 'For orders, a 60% advance payment is mandatory to confirm the order and begin artisan workshop batch crafting (fabric procurement, dyeing, quilting, stitching). The remaining 40% balance is payable prior to courier dispatch, after we share high-definition photos and video footage of your completed batch on WhatsApp.'],
