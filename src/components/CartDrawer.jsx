@@ -11,7 +11,6 @@ import {
   ShieldCheck,
   Truck,
   Loader2,
-  FileSpreadsheet,
   CheckCircle2,
   Mail,
   MapPin,
@@ -488,7 +487,7 @@ export default function CartDrawer({ onNavigateThankYou }) {
 
             <div className="flex items-center justify-between text-[11px] text-ink/60">
               <span className="flex items-center gap-1 text-emerald-700 font-semibold">
-                <FileSpreadsheet size={13} /> Auto-synced to Google Sheet
+                <CheckCircle2 size={13} /> Recorded with Artisan Workshop
               </span>
               <span className="flex items-center gap-1 text-ink/70 font-medium">
                 <ShieldCheck size={13} /> 100% Handcrafted Guarantee

@@ -15,7 +15,6 @@ import {
   ShoppingBag,
   Send,
   Loader2,
-  FileSpreadsheet,
   ArrowRight,
   ArrowLeft
 } from 'lucide-react'
@@ -478,8 +477,8 @@ export default function ProductModal({
                     )}
                   </button>
                   <p className="text-[11px] text-center text-ink/65 flex items-center justify-center gap-1.5">
-                    <FileSpreadsheet size={13} className="text-emerald-700" />
-                    <span>Auto-synced to Google Sheet & Jaipur Workshop</span>
+                    <ShieldCheck size={13} className="text-emerald-700" />
+                    <span>Directly received by Jaipur Artisan Workshop</span>
                   </p>
                 </form>
               ) : (

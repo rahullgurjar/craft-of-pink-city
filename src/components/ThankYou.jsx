@@ -9,7 +9,6 @@ import {
   Package,
   Clock,
   ShieldCheck,
-  FileSpreadsheet,
   ShoppingBag,
   Heart,
   Send,
@@ -121,10 +120,10 @@ export default function ThankYou({ inquiryData, onBackHome }) {
               Your inquiry has been successfully recorded and sent to our artisan workshop in Jaipur. A customized catalog pricing schedule and fabric swatches are being prepared for you.
             </p>
 
-            {/* Google Sheets Sync Confirmation Badge */}
+            {/* Artisan Confirmation Badge */}
             <div className="mt-6 inline-flex flex-wrap items-center justify-center gap-2.5 rounded-2xl border border-emerald-200 bg-emerald-50/80 px-4 py-2.5 text-xs text-emerald-900">
-              <FileSpreadsheet size={16} className="text-emerald-700" />
-              <span className="font-semibold">Details Logged to Google Sheet & Artisan Production Schedule</span>
+              <ShieldCheck size={16} className="text-emerald-700" />
+              <span className="font-semibold">Successfully Logged with Jaipur Artisan Production Desk</span>
               <span className="text-emerald-700 font-mono text-[11px]">[{refId}]</span>
             </div>
           </div>

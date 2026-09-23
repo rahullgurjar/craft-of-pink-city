@@ -10,7 +10,6 @@ import {
   Clock,
   ShieldCheck,
   Loader2,
-  FileSpreadsheet,
   Mail
 } from 'lucide-react'
 import { whatsappNumber, email } from '../data/products'
@@ -446,8 +445,8 @@ export default function BulkOrder({ onNavigateThankYou }) {
                     )}
                   </button>
                   <div className="flex items-center justify-center gap-2 text-center text-xs text-ink/65">
-                    <FileSpreadsheet size={14} className="text-emerald-700" />
-                    <span>Directly recorded in Artisan Production Schedule & Google Sheet</span>
+                    <ShieldCheck size={14} className="text-emerald-700" />
+                    <span>Directly recorded at Jaipur Artisan Production Desk</span>
                   </div>
                 </div>
               </form>
