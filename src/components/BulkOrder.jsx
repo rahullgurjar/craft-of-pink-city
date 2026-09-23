@@ -1,6 +1,20 @@
 import { useState } from 'react'
-import { CheckCircle2, MessageCircle, Package, Gift, Building2, Sparkles, Send, PhoneCall, Clock, ShieldCheck } from 'lucide-react'
-import { whatsappNumber, whatsapp, email } from '../data/products'
+import {
+  CheckCircle2,
+  Package,
+  Gift,
+  Building2,
+  Sparkles,
+  Send,
+  PhoneCall,
+  Clock,
+  ShieldCheck,
+  Loader2,
+  FileSpreadsheet,
+  Mail
+} from 'lucide-react'
+import { whatsappNumber, email } from '../data/products'
+import { submitToGoogleSheet } from '../config/googleSheet'
 
 const productCategories = [
   'Patchwork Duffle Bags',
@@ -54,18 +68,20 @@ const bulkPerks = [
   },
 ]
 
-export default function BulkOrder() {
-  const [formData, setFormData] = useState({
-    name: '',
-    company: '',
-    phone: '',
-    email: '',
-    selectedProducts: ['Quilted Tote Bags', 'Vanity Boxes & Pouches'],
-    quantity: '51 - 100 pcs (Mid-Volume Wholesale)',
-    timeline: 'Within 2 - 3 Weeks',
-    notes: '',
-  })
-  const [submitted, setSubmitted] = useState(false)
+const initialFormState = {
+  name: '',
+  company: '',
+  phone: '',
+  email: '',
+  selectedProducts: ['Quilted Tote Bags', 'Vanity Boxes & Pouches'],
+  quantity: '51 - 100 pcs (Mid-Volume Wholesale)',
+  timeline: 'Within 2 - 3 Weeks',
+  notes: '',
+}
+
+export default function BulkOrder({ onNavigateThankYou }) {
+  const [formData, setFormData] = useState(initialFormState)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleProductToggle = (item) => {
     setFormData((prev) => {
@@ -73,9 +89,10 @@ export default function BulkOrder() {
       if (exists) {
         return {
           ...prev,
-          selectedProducts: prev.selectedProducts.length > 1
-            ? prev.selectedProducts.filter((p) => p !== item)
-            : prev.selectedProducts,
+          selectedProducts:
+            prev.selectedProducts.length > 1
+              ? prev.selectedProducts.filter((p) => p !== item)
+              : prev.selectedProducts,
         }
       } else {
         return { ...prev, selectedProducts: [...prev.selectedProducts, item] }
@@ -83,33 +100,66 @@ export default function BulkOrder() {
     })
   }
 
-  const buildWhatsAppMessage = () => {
-    const msg = [
-      `*🌟 NEW BULK / WHOLESALE ENQUIRY - Craft of Pink City*`,
-      `----------------------------------------`,
-      `👤 *Name:* ${formData.name || 'Not provided'}`,
-      formData.company ? `🏢 *Company / Studio:* ${formData.company}` : '',
-      `📞 *Phone / WhatsApp:* ${formData.phone || 'Not provided'}`,
-      formData.email ? `✉️ *Email:* ${formData.email}` : '',
-      `🛍️ *Interested In:* ${formData.selectedProducts.join(', ')}`,
-      `📦 *Estimated Quantity:* ${formData.quantity}`,
-      `⏳ *Required Timeline:* ${formData.timeline}`,
-      formData.notes ? `📝 *Custom Requirements / Notes:* ${formData.notes}` : '',
-      `----------------------------------------`,
-      `Please provide catalog pricing and availability. Thank you!`,
-    ]
-      .filter(Boolean)
-      .join('\n')
-
-    return encodeURIComponent(msg)
-  }
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    setSubmitted(true)
-    const encodedMessage = buildWhatsAppMessage()
-    const targetUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`
-    window.open(targetUrl, '_blank', 'noopener,noreferrer')
+
+    if (
+      !formData.name.trim() ||
+      !formData.phone.trim() ||
+      !formData.email.trim() ||
+      isSubmitting
+    ) {
+      return
+    }
+
+    setIsSubmitting(true)
+
+    const randomId = Math.floor(10000 + Math.random() * 90000)
+    const refId = `CPC-${randomId}`
+
+    const submissionPayload = {
+      ...formData,
+      refId,
+      timestamp: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+      source: 'Website Bulk & Custom Order Form',
+    }
+
+    // 1. Meta Pixel Lead Tracking (if available)
+    try {
+      if (typeof window !== 'undefined' && window.fbq) {
+        window.fbq('track', 'Lead', {
+          content_name: 'Bulk Order Form Submission',
+          content_category: formData.selectedProducts.join(', '),
+          value: formData.quantity,
+          currency: 'INR',
+        })
+      }
+    } catch (pixelErr) {
+      console.debug('Pixel Lead tracking ignored:', pixelErr)
+    }
+
+    // 2. Submit form data directly to Google Sheet
+    try {
+      await submitToGoogleSheet(submissionPayload)
+    } catch (err) {
+      console.error('Google Sheet submission failed:', err)
+    }
+
+    // 3. Cache payload in sessionStorage for Thank You page
+    try {
+      sessionStorage.setItem('cpc_last_inquiry', JSON.stringify(submissionPayload))
+    } catch (storageErr) {
+      console.warn('Session storage write error:', storageErr)
+    }
+
+    setIsSubmitting(false)
+
+    // 4. Redirect to Thank You page
+    if (onNavigateThankYou) {
+      onNavigateThankYou(submissionPayload)
+    } else {
+      window.location.hash = 'thank-you'
+    }
   }
 
   return (
@@ -182,13 +232,13 @@ export default function BulkOrder() {
             <div className="lg:col-span-5 flex flex-col justify-between border-b border-ink/10 pb-8 lg:border-b-0 lg:border-r lg:pb-0 lg:pr-10">
               <div>
                 <span className="text-[11px] font-bold uppercase tracking-[.2em] text-terracotta">
-                  Quick Quotation Request
+                  Direct Workshop Quotation
                 </span>
                 <h3 className="mt-2 font-serif text-3xl text-ink sm:text-4xl">
-                  Get a Custom Quote <br /><i>in 2 Hours on WhatsApp</i>
+                  Request a Custom Quote <br /><i>from Jaipur Artisans</i>
                 </h3>
                 <p className="mt-4 text-sm leading-relaxed text-ink/75">
-                  Fill in your approximate requirements below. Our workshop team in Jaipur will prepare a tailored catalog with discounted tier pricing, available print swatches, and timeline estimates.
+                  Fill in your requirements below. Our workshop team in Jaipur will prepare a tailored catalog with discounted tier pricing, available print swatches, and timeline estimates.
                 </p>
 
                 <div className="mt-8 space-y-3.5">
@@ -209,7 +259,6 @@ export default function BulkOrder() {
                     <p className="text-xs text-ink/80"><strong>Custom Tags & Packaging:</strong> Brand logo tags, custom monograms & order-based tailored delivery schedules.</p>
                   </div>
                 </div>
-
               </div>
 
               {/* Direct Call / Contact Box */}
@@ -226,7 +275,7 @@ export default function BulkOrder() {
                     href={`mailto:${email}?subject=Bulk%20Order%20Enquiry`}
                     className="inline-flex items-center gap-2 rounded-xl border border-ink/30 bg-white px-4 py-2 text-xs font-bold text-ink transition-colors hover:border-rose hover:text-rose"
                   >
-                    Email Catalog Request
+                    <Mail size={14} /> Email Catalog Desk
                   </a>
                 </div>
               </div>
@@ -258,7 +307,7 @@ export default function BulkOrder() {
                     <input
                       id="bulk-company"
                       type="text"
-                      placeholder="e.g. Boutique, Studio, or Company Name (optional)"
+                      placeholder="e.g. Boutique, Studio, or Company Name"
                       value={formData.company}
                       onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                       className="w-full rounded-xl border border-ink/20 bg-ivory/50 px-4 py-3 text-sm text-ink outline-none transition focus:border-rose focus:bg-white focus:ring-2 focus:ring-rose/20"
@@ -266,11 +315,11 @@ export default function BulkOrder() {
                   </div>
                 </div>
 
-                {/* Phone & Email */}
+                {/* Phone & Mandatory Email */}
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label htmlFor="bulk-phone" className="block text-xs font-bold uppercase tracking-wider text-ink/80 mb-2">
-                      WhatsApp Number / Phone *
+                      Phone / WhatsApp Number *
                     </label>
                     <input
                       id="bulk-phone"
@@ -284,12 +333,13 @@ export default function BulkOrder() {
                   </div>
                   <div>
                     <label htmlFor="bulk-email" className="block text-xs font-bold uppercase tracking-wider text-ink/80 mb-2">
-                      Email Address <span className="text-[10px] font-medium text-ink/50 normal-case">(optional)</span>
+                      Email Address *
                     </label>
                     <input
                       id="bulk-email"
                       type="email"
-                      placeholder="e.g. contact@example.com (optional)"
+                      required
+                      placeholder="e.g. ananya@example.com"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="w-full rounded-xl border border-ink/20 bg-ivory/50 px-4 py-3 text-sm text-ink outline-none transition focus:border-rose focus:bg-white focus:ring-2 focus:ring-rose/20"
@@ -377,25 +427,29 @@ export default function BulkOrder() {
                 </div>
 
                 {/* Submit Action */}
-                <div className="pt-2">
+                <div className="pt-2 space-y-3">
                   <button
                     type="submit"
-                    className="w-full flex items-center justify-center gap-3 rounded-2xl bg-[#25D366] px-6 py-4 text-sm font-bold uppercase tracking-wider text-white shadow-lg transition-all duration-300 hover:bg-[#20bd5a] hover:shadow-xl hover:-translate-y-0.5"
+                    disabled={isSubmitting}
+                    className="w-full flex items-center justify-center gap-3 rounded-2xl bg-rose px-6 py-4 text-sm font-bold uppercase tracking-wider text-white shadow-xl shadow-rose/20 transition-all duration-300 hover:bg-[#962325] hover:shadow-2xl hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none cursor-pointer"
                   >
-                    <MessageCircle size={20} className="fill-white text-white" />
-                    Submit Bulk Enquiry on WhatsApp
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 size={20} className="animate-spin text-white" />
+                        <span>Submitting to Workshop Desk...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send size={18} className="text-white" />
+                        <span>Submit Custom Order & Bulk Inquiry</span>
+                      </>
+                    )}
                   </button>
-                  <p className="mt-2.5 text-center text-xs text-ink/60">
-                    Direct connection with Jaipur artisan workshop • Instant responses during working hours
-                  </p>
-                </div>
-
-                {submitted && (
-                  <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-emerald-800 text-xs flex items-center gap-2">
-                    <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
-                    <span>WhatsApp chat opened! If it didn't open automatically, <a href={`https://wa.me/${whatsappNumber}?text=${buildWhatsAppMessage()}`} target="_blank" rel="noreferrer" className="underline font-bold">click here to send</a>.</span>
+                  <div className="flex items-center justify-center gap-2 text-center text-xs text-ink/65">
+                    <FileSpreadsheet size={14} className="text-emerald-700" />
+                    <span>Directly recorded in Artisan Production Schedule & Google Sheet</span>
                   </div>
-                )}
+                </div>
               </form>
             </div>
           </div>

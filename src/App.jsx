@@ -23,20 +23,40 @@ const ArtisanChatbot = lazy(() => import('./components/ArtisanChatbot'));
 const CartDrawer = lazy(() => import('./components/CartDrawer'));
 const PolicyModal = lazy(() => import('./components/PolicyModal'));
 const SalesPopup = lazy(() => import('./components/SalesPopup'));
+const ThankYou = lazy(() => import('./components/ThankYou'));
 
 export default function App() {
   const [isPolicyOpen, setIsPolicyOpen] = useState(false);
   const [policyTab, setPolicyTab] = useState('privacy');
+  const [isThankYouPage, setIsThankYouPage] = useState(false);
+  const [inquiryData, setInquiryData] = useState(null);
 
   const openPolicy = (tab = 'privacy') => {
     setPolicyTab(tab);
     setIsPolicyOpen(true);
   };
 
-  // Hash route listener for policy links (e.g. #privacy, #terms, #shipping, #refunds)
+  // Hash and Path route listener
   useEffect(() => {
-    const handleHashChange = () => {
+    const handleRouteChange = () => {
       const hash = window.location.hash.replace('#', '').toLowerCase();
+      const pathname = window.location.pathname.toLowerCase();
+
+      if (hash === 'thank-you' || pathname === '/thank-you') {
+        setIsThankYouPage(true);
+        // Load cached inquiry data if available
+        try {
+          const cached = sessionStorage.getItem('cpc_last_inquiry');
+          if (cached) {
+            setInquiryData(JSON.parse(cached));
+          }
+        } catch (e) {
+          console.debug('Error reading cached inquiry:', e);
+        }
+      } else {
+        setIsThankYouPage(false);
+      }
+
       if (['privacy', 'terms', 'shipping', 'refunds', 'policies'].includes(hash)) {
         const targetTab = hash === 'policies' ? 'privacy' : hash;
         setPolicyTab(targetTab);
@@ -44,10 +64,43 @@ export default function App() {
       }
     };
 
-    handleHashChange();
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    handleRouteChange();
+    window.addEventListener('hashchange', handleRouteChange);
+    window.addEventListener('popstate', handleRouteChange);
+    return () => {
+      window.removeEventListener('hashchange', handleRouteChange);
+      window.removeEventListener('popstate', handleRouteChange);
+    };
   }, []);
+
+  const handleNavigateThankYou = (data) => {
+    setInquiryData(data);
+    setIsThankYouPage(true);
+    window.location.hash = 'thank-you';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleBackToStore = (sectionId = 'home') => {
+    setIsThankYouPage(false);
+    window.history.pushState(null, '', `#${sectionId}`);
+
+    setTimeout(() => {
+      if (sectionId === 'home') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        const targetElement = document.getElementById(sectionId);
+        if (targetElement) {
+          const navHeight = 76;
+          const elementPosition = targetElement.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - navHeight;
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth',
+          });
+        }
+      }
+    }, 50);
+  };
 
   return (
     <ErrorBoundary>
@@ -56,42 +109,75 @@ export default function App() {
           <a className="skip-link" href="#main">
             Skip to content
           </a>
-          <ErrorBoundary><AnnouncementBar /></ErrorBoundary>
-          <ErrorBoundary><Navbar /></ErrorBoundary>
-          <main id="main">
-            <ErrorBoundary><Hero /></ErrorBoundary>
-            <ErrorBoundary><About /></ErrorBoundary>
-            <ErrorBoundary><CraftProcess /></ErrorBoundary>
-            <Suspense fallback={null}>
-              <ErrorBoundary><FabricExplorer /></ErrorBoundary>
-            </Suspense>
-            <ErrorBoundary><Products /></ErrorBoundary>
-            <Suspense fallback={null}>
-              <ErrorBoundary><BundleSave /></ErrorBoundary>
-            </Suspense>
-            <Suspense fallback={<div className="min-h-[300px] flex items-center justify-center text-ink/40 text-xs">Loading reviews...</div>}>
-              <ErrorBoundary><Reviews /></ErrorBoundary>
-            </Suspense>
-            <Suspense fallback={null}>
-              <ErrorBoundary><BulkOrder /></ErrorBoundary>
-            </Suspense>
-            <Suspense fallback={null}>
-              <ErrorBoundary><WhyChooseUs /></ErrorBoundary>
-            </Suspense>
-            <Suspense fallback={null}>
-              <ErrorBoundary><FAQ /></ErrorBoundary>
-            </Suspense>
-            <Suspense fallback={null}>
-              <ErrorBoundary><InstagramCTA /></ErrorBoundary>
-            </Suspense>
-          </main>
+          <ErrorBoundary>
+            <AnnouncementBar />
+          </ErrorBoundary>
+          <ErrorBoundary>
+            <Navbar
+              onNavigateHome={handleBackToStore}
+              isThankYouPage={isThankYouPage}
+            />
+          </ErrorBoundary>
+
+          {isThankYouPage ? (
+            <main id="main" className="min-h-screen">
+              <Suspense
+                fallback={
+                  <div className="min-h-screen flex items-center justify-center bg-[#faf4ec] text-ink/70">
+                    <div className="text-center space-y-3">
+                      <div className="h-8 w-8 mx-auto animate-spin rounded-full border-2 border-rose border-t-transparent" />
+                      <p className="font-serif text-lg">Preparing your confirmation...</p>
+                    </div>
+                  </div>
+                }
+              >
+                <ErrorBoundary>
+                  <ThankYou
+                    inquiryData={inquiryData}
+                    onBackHome={handleBackToStore}
+                  />
+                </ErrorBoundary>
+              </Suspense>
+            </main>
+          ) : (
+            <main id="main">
+              <ErrorBoundary><Hero /></ErrorBoundary>
+              <ErrorBoundary><About /></ErrorBoundary>
+              <ErrorBoundary><CraftProcess /></ErrorBoundary>
+              <Suspense fallback={null}>
+                <ErrorBoundary><FabricExplorer /></ErrorBoundary>
+              </Suspense>
+              <ErrorBoundary><Products onNavigateThankYou={handleNavigateThankYou} /></ErrorBoundary>
+              <Suspense fallback={null}>
+                <ErrorBoundary><BundleSave /></ErrorBoundary>
+              </Suspense>
+              <Suspense fallback={<div className="min-h-[300px] flex items-center justify-center text-ink/40 text-xs">Loading reviews...</div>}>
+                <ErrorBoundary><Reviews /></ErrorBoundary>
+              </Suspense>
+              <Suspense fallback={null}>
+                <ErrorBoundary>
+                  <BulkOrder onNavigateThankYou={handleNavigateThankYou} />
+                </ErrorBoundary>
+              </Suspense>
+              <Suspense fallback={null}>
+                <ErrorBoundary><WhyChooseUs /></ErrorBoundary>
+              </Suspense>
+              <Suspense fallback={null}>
+                <ErrorBoundary><FAQ /></ErrorBoundary>
+              </Suspense>
+              <Suspense fallback={null}>
+                <ErrorBoundary><InstagramCTA /></ErrorBoundary>
+              </Suspense>
+            </main>
+          )}
+
           <ErrorBoundary><Footer onOpenPolicy={openPolicy} /></ErrorBoundary>
           <ErrorBoundary><FloatingWhatsApp /></ErrorBoundary>
           <Suspense fallback={null}>
             <ErrorBoundary><ArtisanChatbot /></ErrorBoundary>
           </Suspense>
           <Suspense fallback={null}>
-            <ErrorBoundary><CartDrawer /></ErrorBoundary>
+            <ErrorBoundary><CartDrawer onNavigateThankYou={handleNavigateThankYou} /></ErrorBoundary>
           </Suspense>
           <Suspense fallback={null}>
             <ErrorBoundary><SalesPopup /></ErrorBoundary>

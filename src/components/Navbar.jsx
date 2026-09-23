@@ -17,13 +17,18 @@ const links = [
   ['FAQs', 'faq'],
 ];
 
-export default function Navbar() {
+export default function Navbar({ onNavigateHome, isThankYouPage = false }) {
   const [open, setOpen] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [activeSection, setActiveSection] = useState('home');
   const { totalCount, setIsCartOpen } = useCart();
 
   useEffect(() => {
+    if (isThankYouPage) {
+      setActiveSection('bulk-orders');
+      return;
+    }
+
     const handleScroll = () => {
       const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
       if (totalHeight > 0) {
@@ -47,11 +52,17 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isThankYouPage]);
 
   const handleNavClick = (e, id) => {
     e.preventDefault();
     setOpen(false);
+
+    if (isThankYouPage && onNavigateHome) {
+      onNavigateHome(id);
+      return;
+    }
+
     const targetElement = document.getElementById(id);
     if (targetElement) {
       const navHeight = 76;
@@ -60,20 +71,26 @@ export default function Navbar() {
 
       window.scrollTo({
         top: offsetPosition,
-        behavior: 'smooth'
+        behavior: 'smooth',
       });
       window.history.pushState(null, '', `#${id}`);
       setActiveSection(id);
+    } else if (onNavigateHome) {
+      onNavigateHome(id);
+    } else {
+      window.location.hash = id;
     }
   };
 
   return (
     <header className="sticky top-0 z-40 border-b border-ink/10 bg-ivory/95 backdrop-blur-md transition-shadow duration-300">
       {/* Top Page Scroll Progress Bar */}
-      <div
-        className="fixed top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-rose via-saffron to-rose z-[100] origin-left transition-transform duration-75 ease-out pointer-events-none shadow-sm"
-        style={{ transform: `scaleX(${scrollProgress / 100})` }}
-      />
+      {!isThankYouPage && (
+        <div
+          className="fixed top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-rose via-saffron to-rose z-[100] origin-left transition-transform duration-75 ease-out pointer-events-none shadow-sm"
+          style={{ transform: `scaleX(${scrollProgress / 100})` }}
+        />
+      )}
 
       <nav className="mx-auto flex h-[76px] max-w-7xl items-center justify-between px-5 lg:px-8">
         <a
@@ -96,7 +113,7 @@ export default function Navbar() {
         {/* Desktop Nav Links */}
         <div className="hidden items-center gap-4 text-xs font-semibold uppercase tracking-[.13em] lg:flex">
           {links.map(([label, id]) => {
-            const isActive = activeSection === id;
+            const isActive = !isThankYouPage && activeSection === id;
             return (
               <a
                 key={id}
@@ -118,65 +135,37 @@ export default function Navbar() {
               </a>
             );
           })}
-
-          {/* Social Icons */}
-          <div className="flex items-center gap-2 border-l border-ink/15 pl-4">
-            <a
-              aria-label="Craft of Pink City on Instagram"
-              className="grid min-h-11 min-w-8 place-items-center text-rose hover:text-ink transition-transform duration-200 hover:scale-110"
-              href={instagram}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <InstagramIcon size={19} />
-            </a>
-            <a
-              aria-label="Chat with Craft of Pink City on WhatsApp"
-              className="grid min-h-11 min-w-8 place-items-center text-rose hover:text-ink transition-transform duration-200 hover:scale-110"
-              href={whatsapp}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <WhatsAppIcon size={20} />
-            </a>
-          </div>
-
-          {/* Cart Bag Button Desktop */}
-          <button
-            type="button"
-            onClick={() => setIsCartOpen(true)}
-            className="relative flex items-center gap-2 rounded-2xl bg-ink px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white transition-all duration-300 hover:bg-rose hover:shadow-md hover:-translate-y-0.5"
-            aria-label={`Open shopping bag with ${totalCount} items`}
-          >
-            <ShoppingBag size={16} />
-            <span>Bag</span>
-            {totalCount > 0 && (
-              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-rose px-1.5 text-[10px] font-bold text-white shadow-sm animate-scaleIn">
-                {totalCount}
-              </span>
-            )}
-          </button>
         </div>
 
-        {/* Mobile Right Controls: Cart + Hamburger */}
-        <div className="flex items-center gap-2 lg:hidden">
-          {/* Mobile Cart Button */}
+        {/* Right CTA Actions: Cart & Contact */}
+        <div className="flex items-center gap-3">
+          {/* Cart Bag Trigger */}
           <button
             type="button"
             onClick={() => setIsCartOpen(true)}
-            className="relative grid h-11 w-11 place-items-center rounded-xl bg-ink/5 text-ink hover:bg-rose/10 hover:text-rose transition-colors"
-            aria-label={`Open shopping bag with ${totalCount} items`}
+            className="relative flex items-center gap-2 rounded-full border border-ink/15 bg-white/80 px-3.5 py-2 text-xs font-bold uppercase tracking-wider text-ink shadow-xs backdrop-blur-sm transition-all hover:border-rose hover:bg-rose hover:text-white hover:shadow-md"
+            aria-label={`Open shopping cart (${totalCount} items)`}
           >
-            <ShoppingBag size={20} />
-            {totalCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose px-1 text-[9px] font-bold text-white shadow-sm animate-scaleIn">
-                {totalCount}
-              </span>
-            )}
+            <ShoppingBag size={16} />
+            <span className="hidden sm:inline">Bag</span>
+            <span className="grid h-5 w-5 place-items-center rounded-full bg-rose text-[10px] font-bold text-white transition-colors group-hover:bg-white group-hover:text-rose">
+              {totalCount}
+            </span>
           </button>
 
+          <a
+            href={whatsapp}
+            target="_blank"
+            rel="noreferrer"
+            className="hidden items-center gap-2 rounded-full bg-ink px-4 py-2 text-xs font-bold uppercase tracking-[.13em] text-ivory transition-transform duration-300 hover:scale-[1.03] hover:bg-rose sm:flex shadow-xs"
+          >
+            <WhatsAppIcon size={14} /> WhatsApp
+          </a>
+
+          {/* Mobile Hamburger Toggle */}
           <button
-            className="grid min-h-11 min-w-11 place-items-center rounded-xl bg-ink/5 text-ink transition-colors hover:bg-rose/10 hover:text-rose"
+            type="button"
+            className="grid h-10 w-10 place-items-center rounded-full bg-ink/5 text-ink hover:bg-ink/10 lg:hidden"
             onClick={() => setOpen(!open)}
             aria-expanded={open}
             aria-controls="mobile-navigation"
@@ -194,7 +183,7 @@ export default function Navbar() {
           className="border-t border-ink/10 bg-ivory px-5 py-5 lg:hidden animate-slideUp shadow-xl"
         >
           {links.map(([label, id]) => {
-            const isActive = activeSection === id;
+            const isActive = !isThankYouPage && activeSection === id;
             return (
               <a
                 key={id}

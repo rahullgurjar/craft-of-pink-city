@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import { Sparkles, ShoppingBag, Check, ArrowRight, Gift, Percent } from 'lucide-react'
-import { products, whatsapp } from '../data/products'
+import { Sparkles, ShoppingBag, Check, ArrowRight, Gift, Percent, Send } from 'lucide-react'
+import { products } from '../data/products'
 import { useCart } from '../context/CartContext'
 import { useCurrency } from '../context/CurrencyContext'
-import WhatsAppIcon from './WhatsAppIcon'
 
 // Resolve image assets dynamically
 const newImages = import.meta.glob('../assets/products-new/*', { eager: true, import: 'default' })
@@ -87,12 +86,11 @@ export default function BundleSave() {
     setIsCartOpen(true)
   }
 
-  const handleWhatsAppOrder = () => {
-    const productNames = bundleProducts.map((p) => p.name).join(', ')
-    const text = encodeURIComponent(
-      `Hello Craft of Pink City, I would like to order the Curated Bundle:\n🎁 *${activeBundle.title}*\n🛍️ Includes: ${productNames}\n💰 Bundle Offer Price: ₹${activeBundle.bundlePrice} (Save ₹${activeBundle.savings})\n\nPlease share dispatch details!`
-    )
-    window.open(`${whatsapp}?text=${text}`, '_blank')
+  const handleDirectOrder = () => {
+    bundleProducts.forEach((prod) => {
+      addToCart(prod, 1)
+    })
+    setIsCartOpen(true)
   }
 
   return (
@@ -121,7 +119,7 @@ export default function BundleSave() {
                 key={bundle.id}
                 type="button"
                 onClick={() => setSelectedBundleId(bundle.id)}
-                className={`rounded-2xl px-5 py-3 text-xs font-bold uppercase tracking-wider transition-all duration-300 ${
+                className={`rounded-2xl px-5 py-3 text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
                   isSelected
                     ? 'bg-rose text-white shadow-xl shadow-rose/25 ring-2 ring-rose/50 scale-105'
                     : 'bg-[#faf6ef] text-ink/70 hover:bg-rose/10 hover:text-rose border border-ink/10'
@@ -133,67 +131,55 @@ export default function BundleSave() {
           })}
         </div>
 
-        {/* Active Bundle Showcase Card */}
-        <div className="mt-12 overflow-hidden rounded-3xl border border-ink/15 bg-[#faf6ef]/90 shadow-2xl p-6 sm:p-10 lg:p-12">
-          <div className="grid lg:grid-cols-[1.2fr_.8fr] gap-10 items-center">
-            {/* Left: 3 Coordinated Product Cards */}
-            <div>
-              <div className="flex items-center gap-2 mb-6">
+        {/* Selected Bundle Showcase Card */}
+        <div className="mt-12 rounded-3xl border border-ink/15 bg-[#faf6f0] p-6 lg:p-10 shadow-lg">
+          <div className="grid gap-10 lg:grid-cols-12 lg:items-center">
+            {/* Left 3 Image Previews */}
+            <div className="lg:col-span-7">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-[11px] font-bold uppercase tracking-[.2em] text-rose">
+                  {activeBundle.tag}
+                </span>
                 <span className="rounded-full bg-rose px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
                   {activeBundle.badge}
                 </span>
-                <span className="text-xs font-semibold text-terracotta">
-                  {activeBundle.tag}
-                </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-3 gap-3 sm:gap-4">
                 {bundleProducts.map((prod, idx) => (
                   <div
                     key={prod.id || idx}
-                    className="group rounded-2xl bg-white p-3 border border-ink/10 shadow-sm transition hover:shadow-md hover:border-rose/30 flex flex-col justify-between"
+                    className="group relative aspect-[3/4] overflow-hidden rounded-2xl bg-white border border-ink/10 shadow-sm"
                   >
-                    <div className="relative aspect-square overflow-hidden rounded-xl bg-[#faf6ef] mb-3">
-                      <img
-                        src={resolveProductImage(prod.image)}
-                        alt={prod.name}
-                        className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${
-                          prod.image?.includes('coral-paisley') ? 'object-bottom' : 'object-center'
-                        }`}
-                        loading="lazy"
-                        decoding="async"
-                      />
-                      <span className="absolute top-2 left-2 rounded-full bg-white/90 backdrop-blur-sm px-2 py-0.5 text-[9px] font-bold text-ink uppercase">
-                        Item {idx + 1}
-                      </span>
-                    </div>
-
-                    <div>
-                      <h4 className="text-xs font-bold text-ink line-clamp-2 leading-tight">
+                    <img
+                      src={resolveProductImage(prod.image)}
+                      alt={prod.name}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/90 via-ink/40 to-transparent p-2 text-white">
+                      <p className="text-[10px] sm:text-xs font-semibold truncate leading-tight">
                         {prod.name}
-                      </h4>
-                      <p className="mt-1 text-xs font-serif font-bold text-rose">
-                        {formatPrice(prod.price)}
                       </p>
+                      <p className="text-[9px] text-white/70">{formatPrice(prod.price)}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Right: Bundle Price & 1-Click Action */}
-            <div className="rounded-3xl bg-white p-6 sm:p-8 border border-ink/10 shadow-xl flex flex-col justify-between">
+            {/* Right Pricing & Actions */}
+            <div className="lg:col-span-5 flex flex-col justify-between rounded-2xl bg-white p-6 sm:p-8 border border-ink/10 shadow-sm">
               <div>
-                <h3 className="font-serif text-2xl sm:text-3xl font-bold text-ink">
+                <h3 className="font-serif text-3xl font-bold text-ink leading-tight">
                   {activeBundle.title}
                 </h3>
-                <p className="mt-2 text-xs sm:text-sm text-ink/70 leading-relaxed">
+                <p className="mt-3 text-xs leading-relaxed text-ink/75">
                   {activeBundle.description}
                 </p>
 
                 {/* Price Breakdown */}
-                <div className="mt-6 pt-6 border-t border-ink/10">
-                  <div className="flex items-center justify-between text-xs text-ink/60 mb-1">
+                <div className="mt-6 rounded-xl bg-[#faf6f0] p-4 border border-ink/10 space-y-2">
+                  <div className="flex items-center justify-between text-xs text-ink/60">
                     <span>Individual Total:</span>
                     <span className="line-through">{formatPrice(activeBundle.originalPrice)}</span>
                   </div>
@@ -236,7 +222,7 @@ export default function BundleSave() {
                 <button
                   type="button"
                   onClick={handleAddBundleToCart}
-                  className="w-full btn-primary rounded-2xl justify-center shadow-lg hover:bg-rose transition-all py-3.5"
+                  className="w-full btn-primary rounded-2xl justify-center shadow-lg hover:bg-rose transition-all py-3.5 cursor-pointer"
                 >
                   <ShoppingBag size={16} />
                   <span>{isAdded ? 'Added Entire Set to Bag!' : 'Add Entire 3-Piece Set to Bag'}</span>
@@ -244,11 +230,11 @@ export default function BundleSave() {
 
                 <button
                   type="button"
-                  onClick={handleWhatsAppOrder}
-                  className="w-full inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-5 text-xs font-bold uppercase tracking-wider text-white shadow-md transition-all hover:bg-[#20ba59]"
+                  onClick={handleDirectOrder}
+                  className="w-full inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-rose px-5 text-xs font-bold uppercase tracking-wider text-white shadow-md transition-all hover:bg-[#962325] cursor-pointer"
                 >
-                  <WhatsAppIcon size={18} />
-                  <span>Order Bundle on WhatsApp</span>
+                  <Send size={15} />
+                  <span>Order Bundle Set ({formatPrice(activeBundle.bundlePrice)})</span>
                 </button>
               </div>
             </div>

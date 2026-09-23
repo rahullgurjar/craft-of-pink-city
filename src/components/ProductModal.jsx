@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import {
   X,
-  ArrowUpRight,
   Package,
   Sparkles,
   ShieldCheck,
@@ -13,14 +12,16 @@ import {
   ChevronRight,
   Plus,
   Minus,
-  Layers,
-  Heart,
-  ShoppingBag
+  ShoppingBag,
+  Send,
+  Loader2,
+  FileSpreadsheet,
+  ArrowRight,
+  ArrowLeft
 } from 'lucide-react'
-import { whatsapp, whatsappNumber } from '../data/products'
-import WhatsAppIcon from './WhatsAppIcon'
 import { useCart } from '../context/CartContext'
 import { useCurrency } from '../context/CurrencyContext'
+import { submitToGoogleSheet } from '../config/googleSheet'
 
 export default function ProductModal({
   product,
@@ -28,10 +29,21 @@ export default function ProductModal({
   onSelectProduct,
   allProducts = [],
   resolveProductImage,
+  onNavigateThankYou,
 }) {
   const [quantity, setQuantity] = useState(1)
   const [copied, setCopied] = useState(false)
   const [activeTab, setActiveTab] = useState('details') // 'details' | 'specs' | 'craft'
+  const [isOrdering, setIsOrdering] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [customerData, setCustomerData] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    address: '',
+    notes: '',
+  })
+
   const { addToCart } = useCart()
   const { formatPrice } = useCurrency()
 
@@ -63,6 +75,7 @@ export default function ProductModal({
   useEffect(() => {
     setQuantity(1)
     setActiveTab('details')
+    setIsOrdering(false)
   }, [product?.id, product?.name])
 
   if (!product) return null
@@ -88,38 +101,10 @@ export default function ProductModal({
     }
   }
 
-  // Related products from same category (excluding current)
-  const relatedProducts = allProducts
-    .filter(
-      (p) =>
-        p.category === product.category &&
-        ((p.id && p.id !== product.id) || p.name !== product.name)
-    )
-    .slice(0, 4)
-
   // Parse numeric price for calculation
-  const numericPriceMatch = product.price ? product.price.replace(/[^0-9]/g, '') : ''
+  const numericPriceMatch = product.price ? String(product.price).replace(/[^0-9]/g, '') : ''
   const unitPrice = numericPriceMatch ? parseInt(numericPriceMatch, 10) : 0
-  const totalPrice = unitPrice ? (unitPrice * quantity).toLocaleString('en-IN') : null
-
-  // Direct product deep link
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://craftofpinkcity.shop'
-  const productLink = `${baseUrl}/?product=${product.id || encodeURIComponent(product.name)}`
-
-  // WhatsApp order link WITH direct product URL
-  const orderMessage = encodeURIComponent(
-    `Hello Craft of Pink City, I would like to order:\n🛍️ *${product.name}* (Qty: ${quantity} × ${product.price}${
-      quantity > 1 ? ` • Total: ₹${totalPrice}` : ''
-    })\n🔗 Product Link: ${productLink}\n\nPlease confirm availability and payment details!`
-  )
-  const whatsappOrderUrl = `${whatsapp}?text=${orderMessage}`
-
-  // Bulk inquiry message WITH direct product URL
-  const bulkMessage = encodeURIComponent(
-    `Hello Craft of Pink City, I would like to request a Wholesale / Bulk Order quote for "${product.name}" (25+ MOQ).\n🔗 Product Link: ${productLink}\n\nPlease share bulk tier pricing and timeline.`
-  )
-  const whatsappBulkUrl = `${whatsapp}?text=${bulkMessage}`
-
+  const totalPriceFormatted = formatPrice(unitPrice * quantity)
 
   const handleShare = async () => {
     try {
@@ -138,47 +123,120 @@ export default function ProductModal({
     const cat = (product.category || '').toLowerCase()
     let dimensions = 'Standard Handcrafted Size'
     if (cat.includes('yoga')) {
-      dimensions = 'Approx. 28" (L) x 6.5" (Dia) — Fits standard & extra-thick mats'
+      dimensions = '28" Length × 6.5" Diameter (Fits all mats)'
     } else if (cat.includes('duffle')) {
-      dimensions = 'Approx. 18" (L) x 10" (W) x 10" (H) — Roomy weekend & cabin carry'
+      dimensions = '18" Length × 10" Diameter Barrel Duffel'
     } else if (cat.includes('tote')) {
-      dimensions = 'Approx. 16" (W) x 14" (H) x 4.5" (Base) — Fits 15" laptop + essentials'
-    } else if (cat.includes('vanity')) {
-      dimensions = 'Approx. 9.5" (L) x 6.5" (W) x 5.5" (H) with reinforced padded walls'
+      dimensions = '16" Width × 14" Height × 4" Gusset'
     } else if (cat.includes('laptop')) {
-      dimensions = 'Fits 13" to 15.6" Laptops, MacBooks & iPads with padded foam'
-    } else if (cat.includes('pouch')) {
-      dimensions = product.price.includes('Set of 3')
-        ? '3 Nested Sizes: Large (9x6"), Medium (7.5x5"), Small (6x4")'
-        : 'Approx. 8.5" (L) x 5.5" (H) with 2" bottom gusset'
+      dimensions = '14.5" × 10.5" (Fits 13" & 14" Laptops)'
+    } else if (cat.includes('vanity') || cat.includes('box')) {
+      dimensions = '9" Length × 6" Width × 5" Height'
+    } else if (cat.includes('pouch') || cat.includes('organizer')) {
+      dimensions = '8" × 5" Compact Multi-Pocket'
     }
 
     return [
-      { label: 'Craft Origin', value: 'Jaipur, Rajasthan (India)' },
-      { label: 'Fabric / Material', value: '100% Pure Jaipuri Quilted Cotton' },
-      { label: 'Printing Technique', value: 'Hand Block Printing (Carved Sheesham Wood Blocks)' },
-      { label: 'Closure & Hardware', value: 'Smooth Heavy-Duty Zipper + Handcrafted Fabric Tassels' },
+      { label: 'Category', value: product.category || 'Quilted Accessory' },
       { label: 'Dimensions', value: dimensions },
-      { label: 'Wash & Care', value: 'Gentle hand wash in cold water with mild detergent; dry in shade' },
-      { label: 'Dispatch Timeline', value: 'Decided and confirmed upon order on WhatsApp based on quantity' },
+      { label: 'Material', value: '100% Pure Organic Cambric Cotton' },
+      { label: 'Filling', value: 'Lightweight Natural Cotton Quilting Sheet' },
+      { label: 'Printing Technique', value: 'Authentic Jaipur Hand Block Printing' },
+      { label: 'Closure', value: 'Heavy Duty Smooth Metal Zipper with Tassel Pull' },
+      { label: 'Wash Care', value: 'Gentle hand wash in cold water or dry clean' },
+      { label: 'Origin', value: 'Handcrafted with pride in Jaipur, Rajasthan' },
     ]
+  }
+
+  const handleDirectOrderSubmit = async (e) => {
+    e.preventDefault()
+
+    if (
+      !customerData.name.trim() ||
+      !customerData.phone.trim() ||
+      !customerData.email.trim() ||
+      !customerData.address.trim() ||
+      isSubmitting
+    ) {
+      return
+    }
+
+    setIsSubmitting(true)
+
+    const randomId = Math.floor(10000 + Math.random() * 90000)
+    const refId = `CPC-${randomId}`
+
+    const orderPayload = {
+      refId,
+      timestamp: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+      name: customerData.name.trim(),
+      phone: customerData.phone.trim(),
+      email: customerData.email.trim(),
+      address: customerData.address.trim(),
+      notes: customerData.notes.trim(),
+      items: [
+        {
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          unitPrice,
+          quantity,
+        },
+      ],
+      selectedProducts: [`${product.name} (x${quantity})`],
+      quantity: `${quantity} pc(s)`,
+      totalAmount: totalPriceFormatted,
+      timeline: 'Immediate Dispatch',
+      source: 'Website Product Direct Order',
+    }
+
+    // 1. Pixel Tracking
+    try {
+      if (typeof window !== 'undefined' && window.fbq) {
+        window.fbq('track', 'InitiateCheckout', {
+          content_name: product.name,
+          value: unitPrice * quantity,
+          currency: 'INR',
+        })
+      }
+    } catch (pixelErr) {
+      console.debug('Pixel error:', pixelErr)
+    }
+
+    // 2. Submit to Google Sheet
+    try {
+      await submitToGoogleSheet(orderPayload)
+    } catch (err) {
+      console.error('Google Sheet submission error:', err)
+    }
+
+    // 3. Cache for Thank You page
+    try {
+      sessionStorage.setItem('cpc_last_inquiry', JSON.stringify(orderPayload))
+    } catch (err) {
+      console.warn('Storage error:', err)
+    }
+
+    setIsSubmitting(false)
+    onClose()
+
+    // 4. Redirect to Thank You page
+    if (onNavigateThankYou) {
+      onNavigateThankYou(orderPayload)
+    } else {
+      window.location.hash = 'thank-you'
+    }
   }
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-5 md:p-8 overflow-y-auto"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/75 p-4 sm:p-6 backdrop-blur-md animate-fadeIn"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-product-title"
+      onClick={onClose}
     >
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-ink/70 backdrop-blur-md transition-opacity duration-300 animate-fadeIn"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-
-      {/* Prev / Next floating arrows on large screens */}
+      {/* Desktop Next/Previous Navigation */}
       {allProducts.length > 1 && (
         <>
           <button
@@ -235,7 +293,7 @@ export default function ProductModal({
             <button
               type="button"
               onClick={onClose}
-              className="grid h-8 w-8 place-items-center rounded-full bg-ink/5 text-ink hover:bg-rose hover:text-white transition-colors"
+              className="grid h-8 w-8 place-items-center rounded-full bg-ink/5 text-ink hover:bg-rose hover:text-white transition-colors cursor-pointer"
               aria-label="Close product details"
             >
               <X size={18} />
@@ -292,7 +350,7 @@ export default function ProductModal({
               </div>
             </div>
 
-            {/* Right: Product Information & Actions */}
+            {/* Right: Product Information & Interactive Form */}
             <div className="flex flex-col justify-between space-y-6">
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-[.2em] text-rose">
@@ -316,103 +374,199 @@ export default function ProductModal({
                 </div>
 
                 {/* Description */}
-                <p className="mt-4 text-sm sm:text-base leading-relaxed text-ink/80">
+                <p className="mt-4 text-sm leading-relaxed text-ink/80">
                   {product.description}
                 </p>
               </div>
 
-              {/* Quantity Selector & Total Price Calculation */}
-              <div className="rounded-2xl border border-ink/10 bg-white/70 p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-ink/80">
-                    Quantity
-                  </span>
-                  {unitPrice > 0 && (
-                    <span className="text-xs font-semibold text-ink/70">
-                      Total:{' '}
-                      <strong className="font-serif text-base text-rose font-bold">
-                        {formatPrice(unitPrice * quantity)}
-                      </strong>
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center rounded-xl border border-ink/20 bg-ivory">
-                    <button
-                      type="button"
-                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                      disabled={quantity <= 1}
-                      className="grid h-10 w-10 place-items-center text-ink hover:text-rose disabled:opacity-30 disabled:hover:text-ink transition-colors"
-                      aria-label="Decrease quantity"
-                    >
-                      <Minus size={16} />
-                    </button>
-                    <span className="w-10 text-center font-bold text-sm text-ink select-none">
-                      {quantity}
+              {/* Toggle Direct Order Form vs Standard Info */}
+              {isOrdering ? (
+                /* Direct Order Form */
+                <form onSubmit={handleDirectOrderSubmit} className="space-y-4 rounded-2xl border border-rose/30 bg-rose/5 p-5">
+                  <div className="flex items-center justify-between border-b border-rose/20 pb-3">
+                    <span className="font-serif font-bold text-base text-ink">
+                      Direct Order · {product.name}
                     </span>
                     <button
                       type="button"
-                      onClick={() => setQuantity((q) => q + 1)}
-                      className="grid h-10 w-10 place-items-center text-ink hover:text-rose transition-colors"
-                      aria-label="Increase quantity"
+                      onClick={() => setIsOrdering(false)}
+                      className="text-xs text-rose hover:underline font-semibold"
                     >
-                      <Plus size={16} />
+                      ← Back
                     </button>
                   </div>
 
-                  <span className="text-[11px] text-ink/60">
-                    Need 25+ pieces for wholesale or bulk orders? Tiered wholesale rates apply.
-                  </span>
-                </div>
-              </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-ink/80 mb-1">
+                      Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Ananya Sharma"
+                      value={customerData.name}
+                      onChange={(e) => setCustomerData({ ...customerData, name: e.target.value })}
+                      className="w-full rounded-xl border border-ink/20 bg-white px-3 py-2 text-xs text-ink outline-none transition focus:border-rose focus:ring-2 focus:ring-rose/20"
+                    />
+                  </div>
 
-              {/* Primary Call to Actions */}
-              <div className="space-y-2.5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    addToCart(product, quantity)
-                    onClose()
-                  }}
-                  className="flex w-full min-h-[50px] items-center justify-center gap-2.5 rounded-xl bg-ink px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-white shadow-md transition-all hover:bg-rose hover:shadow-lg hover:-translate-y-0.5"
-                >
-                  <ShoppingBag size={17} />
-                  <span>Add to Shopping Bag ({quantity} {quantity > 1 ? 'items' : 'item'})</span>
-                </button>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-ink/80 mb-1">
+                        Phone / WhatsApp *
+                      </label>
+                      <input
+                        type="tel"
+                        required
+                        placeholder="e.g. +91 98765 43210"
+                        value={customerData.phone}
+                        onChange={(e) => setCustomerData({ ...customerData, phone: e.target.value })}
+                        className="w-full rounded-xl border border-ink/20 bg-white px-3 py-2 text-xs text-ink outline-none transition focus:border-rose focus:ring-2 focus:ring-rose/20"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-ink/80 mb-1">
+                        Email Address *
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        placeholder="e.g. ananya@domain.com"
+                        value={customerData.email}
+                        onChange={(e) => setCustomerData({ ...customerData, email: e.target.value })}
+                        className="w-full rounded-xl border border-ink/20 bg-white px-3 py-2 text-xs text-ink outline-none transition focus:border-rose focus:ring-2 focus:ring-rose/20"
+                      />
+                    </div>
+                  </div>
 
-                <a
-                  href={whatsappOrderUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex w-full min-h-[50px] items-center justify-center gap-2.5 rounded-xl bg-[#25D366] px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-emerald-600/20 transition-all hover:bg-[#20ba59] hover:shadow-xl hover:-translate-y-0.5"
-                >
-                  <WhatsAppIcon size={18} />
-                  <span>Instant Order on WhatsApp</span>
-                  <ArrowUpRight size={16} />
-                </a>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-ink/80 mb-1">
+                      Delivery Address & Pincode *
+                    </label>
+                    <textarea
+                      required
+                      rows={2}
+                      placeholder="Complete street address, city, state, and pin code"
+                      value={customerData.address}
+                      onChange={(e) => setCustomerData({ ...customerData, address: e.target.value })}
+                      className="w-full rounded-xl border border-ink/20 bg-white px-3 py-2 text-xs text-ink outline-none transition focus:border-rose focus:ring-2 focus:ring-rose/20 resize-none"
+                    />
+                  </div>
 
-                <div className="flex gap-2">
-                  <a
-                    href={whatsappBulkUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex-1 flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-rose/30 bg-rose/5 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-rose hover:bg-rose hover:text-white transition-all"
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-xs text-ink/70">Quantity: <strong>{quantity}</strong></span>
+                    <span className="font-serif font-bold text-base text-rose">
+                      Total: {totalPriceFormatted}
+                    </span>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full flex min-h-[48px] items-center justify-center gap-2.5 rounded-xl bg-rose px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-white shadow-xl shadow-rose/25 transition-all hover:bg-[#962325] hover:shadow-2xl disabled:opacity-70 cursor-pointer"
                   >
-                    <Package size={15} />
-                    <span>Wholesale Quote (25+ MOQ)</span>
-                  </a>
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin text-white" />
+                        <span>Logging Order to Workshop...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send size={16} />
+                        <span>Place Order · {totalPriceFormatted}</span>
+                      </>
+                    )}
+                  </button>
+                  <p className="text-[11px] text-center text-ink/65 flex items-center justify-center gap-1.5">
+                    <FileSpreadsheet size={13} className="text-emerald-700" />
+                    <span>Auto-synced to Google Sheet & Jaipur Workshop</span>
+                  </p>
+                </form>
+              ) : (
+                /* Standard View with Quantity & CTAs */
+                <>
+                  {/* Quantity Selector & Total Price Calculation */}
+                  <div className="rounded-2xl border border-ink/10 bg-white/70 p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold uppercase tracking-wider text-ink/80">
+                        Quantity
+                      </span>
+                      {unitPrice > 0 && (
+                        <span className="text-xs font-semibold text-ink/70">
+                          Total:{' '}
+                          <strong className="font-serif text-base text-rose font-bold">
+                            {totalPriceFormatted}
+                          </strong>
+                        </span>
+                      )}
+                    </div>
 
-                  <a
-                    href="#bulk-orders"
-                    onClick={onClose}
-                    className="flex items-center justify-center rounded-xl border border-ink/15 bg-white px-3 py-2.5 text-xs font-semibold text-ink/80 hover:border-rose hover:text-rose transition-all"
-                    title="Customize for Wholesale / Corporate Hampers"
-                  >
-                    Bulk Form
-                  </a>
-                </div>
-              </div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center rounded-xl border border-ink/20 bg-ivory">
+                        <button
+                          type="button"
+                          onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                          disabled={quantity <= 1}
+                          className="grid h-10 w-10 place-items-center text-ink hover:text-rose disabled:opacity-30 disabled:hover:text-ink transition-colors cursor-pointer"
+                          aria-label="Decrease quantity"
+                        >
+                          <Minus size={16} />
+                        </button>
+                        <span className="w-10 text-center font-bold text-sm text-ink select-none">
+                          {quantity}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setQuantity((q) => q + 1)}
+                          className="grid h-10 w-10 place-items-center text-ink hover:text-rose transition-colors cursor-pointer"
+                          aria-label="Increase quantity"
+                        >
+                          <Plus size={16} />
+                        </button>
+                      </div>
+
+                      <span className="text-[11px] text-ink/60">
+                        Need 25+ pieces for wholesale or bulk orders? Tiered wholesale rates apply.
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Primary Call to Actions */}
+                  <div className="space-y-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setIsOrdering(true)}
+                      className="flex w-full min-h-[50px] items-center justify-center gap-2.5 rounded-xl bg-rose px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-rose/20 transition-all hover:bg-[#962325] hover:shadow-xl hover:-translate-y-0.5 cursor-pointer"
+                    >
+                      <Send size={16} />
+                      <span>Order Now / Fill Form ({totalPriceFormatted})</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        addToCart(product, quantity)
+                        onClose()
+                      }}
+                      className="flex w-full min-h-[50px] items-center justify-center gap-2.5 rounded-xl bg-ink px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-white shadow-md transition-all hover:bg-rose hover:shadow-lg hover:-translate-y-0.5 cursor-pointer"
+                    >
+                      <ShoppingBag size={17} />
+                      <span>Add to Shopping Bag ({quantity} {quantity > 1 ? 'items' : 'item'})</span>
+                    </button>
+
+                    <div className="flex gap-2">
+                      <a
+                        href="#bulk-orders"
+                        onClick={onClose}
+                        className="flex-1 flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-rose/30 bg-rose/5 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-rose hover:bg-rose hover:text-white transition-all cursor-pointer"
+                      >
+                        <Package size={15} />
+                        <span>Wholesale Quote (25+ MOQ)</span>
+                      </a>
+                    </div>
+                  </div>
+                </>
+              )}
 
               {/* Quick tabs: Details vs Specs vs Craft */}
               <div className="border-t border-ink/10 pt-4">
@@ -420,7 +574,7 @@ export default function ProductModal({
                   <button
                     type="button"
                     onClick={() => setActiveTab('details')}
-                    className={`pb-1 transition-colors ${
+                    className={`pb-1 transition-colors cursor-pointer ${
                       activeTab === 'details'
                         ? 'border-b-2 border-rose text-rose font-bold'
                         : 'text-ink/60 hover:text-ink'
@@ -431,7 +585,7 @@ export default function ProductModal({
                   <button
                     type="button"
                     onClick={() => setActiveTab('craft')}
-                    className={`pb-1 transition-colors ${
+                    className={`pb-1 transition-colors cursor-pointer ${
                       activeTab === 'craft'
                         ? 'border-b-2 border-rose text-rose font-bold'
                         : 'text-ink/60 hover:text-ink'
@@ -455,53 +609,16 @@ export default function ProductModal({
                 {activeTab === 'craft' && (
                   <div className="mt-3 text-xs leading-relaxed text-ink/80 space-y-2">
                     <p>
-                      <strong>Handblock Printing Heritage:</strong> Each fabric is hand-printed using meticulously carved teak/sheesham wood blocks dipped in azo-free dyes, stamped repeatedly across premium cotton.
+                      Hand block-printed in the ancient craft hubs of <strong>Bagru & Sanganer</strong>, Jaipur using carved teakwood blocks and natural, skin-safe mineral pigments.
                     </p>
                     <p>
-                      <strong>Quilted Construction:</strong> Stuffed with soft lightweight pure cotton batting and channel quilted with parallel reinforced stitching for structured durability and a plush, luxurious tactile feel.
+                      Each piece is meticulously layered with pure organic cotton batting, channel-quilted by hand, and stitched with reinforced double-piped hems for lifelong durability.
                     </p>
                   </div>
                 )}
               </div>
             </div>
           </div>
-
-          {/* Related Products from same collection */}
-          {relatedProducts.length > 0 && (
-            <div className="border-t border-ink/10 pt-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-serif text-xl sm:text-2xl text-ink">
-                  More in <i>{product.category}</i>
-                </h3>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-rose">
-                  {relatedProducts.length} related styles
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {relatedProducts.map((rel) => (
-                  <button
-                    type="button"
-                    key={rel.id || rel.name}
-                    onClick={() => onSelectProduct(rel)}
-                    className="group flex flex-col text-left rounded-xl bg-white/70 p-2.5 border border-ink/10 transition-all hover:border-rose/50 hover:shadow-md hover:-translate-y-1"
-                  >
-                    <div className="aspect-[4/5] w-full overflow-hidden rounded-lg bg-ivory">
-                      <img
-                        src={resolveProductImage ? resolveProductImage(rel.image) : rel.image}
-                        alt={rel.name}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                    </div>
-                    <h4 className="mt-2 text-xs font-serif font-bold text-ink line-clamp-1 group-hover:text-rose">
-                      {rel.name}
-                    </h4>
-                    <span className="mt-0.5 text-xs font-bold text-rose">{rel.price}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
