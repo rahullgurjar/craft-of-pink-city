@@ -10,10 +10,12 @@ import {
   Clock,
   ShieldCheck,
   Loader2,
-  Mail
+  Mail,
+  AlertCircle
 } from 'lucide-react'
 import { whatsappNumber, email } from '../data/products'
 import { submitToGoogleSheet } from '../config/googleSheet'
+import { validateName, validatePhone, validateEmail } from '../utils/validation'
 
 const productCategories = [
   'Patchwork Duffle Bags',
@@ -80,6 +82,7 @@ const initialFormState = {
 
 export default function BulkOrder({ onNavigateThankYou }) {
   const [formData, setFormData] = useState(initialFormState)
+  const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleProductToggle = (item) => {
@@ -99,15 +102,39 @@ export default function BulkOrder({ onNavigateThankYou }) {
     })
   }
 
+  const handleBlur = (field) => {
+    let result
+    if (field === 'name') result = validateName(formData.name)
+    if (field === 'phone') result = validatePhone(formData.phone)
+    if (field === 'email') result = validateEmail(formData.email)
+
+    if (result) {
+      setErrors((prev) => ({
+        ...prev,
+        [field]: result.isValid ? null : result.error,
+      }))
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (
-      !formData.name.trim() ||
-      !formData.phone.trim() ||
-      !formData.email.trim() ||
-      isSubmitting
-    ) {
+    if (isSubmitting) return
+
+    // Strict Verification of all Client Inputs
+    const nameVal = validateName(formData.name)
+    const phoneVal = validatePhone(formData.phone)
+    const emailVal = validateEmail(formData.email)
+
+    const newErrors = {}
+    if (!nameVal.isValid) newErrors.name = nameVal.error
+    if (!phoneVal.isValid) newErrors.phone = phoneVal.error
+    if (!emailVal.isValid) newErrors.email = emailVal.error
+
+    setErrors(newErrors)
+
+    // Stop immediately if any details are fake, incomplete, or invalid
+    if (Object.keys(newErrors).length > 0) {
       return
     }
 
@@ -282,7 +309,7 @@ export default function BulkOrder({ onNavigateThankYou }) {
 
             {/* Form Right Side Interactive Form */}
             <div className="lg:col-span-7">
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} noValidate className="space-y-6">
                 {/* Name & Company */}
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
@@ -295,9 +322,22 @@ export default function BulkOrder({ onNavigateThankYou }) {
                       required
                       placeholder="e.g. Ananya Sharma"
                       value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full rounded-xl border border-ink/20 bg-ivory/50 px-4 py-3 text-sm text-ink outline-none transition focus:border-rose focus:bg-white focus:ring-2 focus:ring-rose/20"
+                      onBlur={() => handleBlur('name')}
+                      onChange={(e) => {
+                        setFormData({ ...formData, name: e.target.value })
+                        if (errors.name) setErrors({ ...errors, name: null })
+                      }}
+                      className={`w-full rounded-xl border bg-ivory/50 px-4 py-3 text-sm text-ink outline-none transition ${
+                        errors.name
+                          ? 'border-red-500 ring-2 ring-red-200 bg-red-50/30'
+                          : 'border-ink/20 focus:border-rose focus:bg-white focus:ring-2 focus:ring-rose/20'
+                      }`}
                     />
+                    {errors.name && (
+                      <p className="mt-1.5 text-xs font-medium text-red-600 flex items-center gap-1">
+                        <AlertCircle size={13} /> {errors.name}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label htmlFor="bulk-company" className="block text-xs font-bold uppercase tracking-wider text-ink/80 mb-2">
@@ -326,9 +366,22 @@ export default function BulkOrder({ onNavigateThankYou }) {
                       required
                       placeholder="e.g. +91 98765 43210"
                       value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full rounded-xl border border-ink/20 bg-ivory/50 px-4 py-3 text-sm text-ink outline-none transition focus:border-rose focus:bg-white focus:ring-2 focus:ring-rose/20"
+                      onBlur={() => handleBlur('phone')}
+                      onChange={(e) => {
+                        setFormData({ ...formData, phone: e.target.value })
+                        if (errors.phone) setErrors({ ...errors, phone: null })
+                      }}
+                      className={`w-full rounded-xl border bg-ivory/50 px-4 py-3 text-sm text-ink outline-none transition ${
+                        errors.phone
+                          ? 'border-red-500 ring-2 ring-red-200 bg-red-50/30'
+                          : 'border-ink/20 focus:border-rose focus:bg-white focus:ring-2 focus:ring-rose/20'
+                      }`}
                     />
+                    {errors.phone && (
+                      <p className="mt-1.5 text-xs font-medium text-red-600 flex items-center gap-1">
+                        <AlertCircle size={13} /> {errors.phone}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label htmlFor="bulk-email" className="block text-xs font-bold uppercase tracking-wider text-ink/80 mb-2">
@@ -338,11 +391,24 @@ export default function BulkOrder({ onNavigateThankYou }) {
                       id="bulk-email"
                       type="email"
                       required
-                      placeholder="e.g. ananya@example.com"
+                      placeholder="e.g. ananya@domain.com"
                       value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full rounded-xl border border-ink/20 bg-ivory/50 px-4 py-3 text-sm text-ink outline-none transition focus:border-rose focus:bg-white focus:ring-2 focus:ring-rose/20"
+                      onBlur={() => handleBlur('email')}
+                      onChange={(e) => {
+                        setFormData({ ...formData, email: e.target.value })
+                        if (errors.email) setErrors({ ...errors, email: null })
+                      }}
+                      className={`w-full rounded-xl border bg-ivory/50 px-4 py-3 text-sm text-ink outline-none transition ${
+                        errors.email
+                          ? 'border-red-500 ring-2 ring-red-200 bg-red-50/30'
+                          : 'border-ink/20 focus:border-rose focus:bg-white focus:ring-2 focus:ring-rose/20'
+                      }`}
                     />
+                    {errors.email && (
+                      <p className="mt-1.5 text-xs font-medium text-red-600 flex items-center gap-1">
+                        <AlertCircle size={13} /> {errors.email}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -435,7 +501,7 @@ export default function BulkOrder({ onNavigateThankYou }) {
                     {isSubmitting ? (
                       <>
                         <Loader2 size={20} className="animate-spin text-white" />
-                        <span>Submitting to Workshop Desk...</span>
+                        <span>Verifying & Submitting Inquiry...</span>
                       </>
                     ) : (
                       <>

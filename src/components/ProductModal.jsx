@@ -16,11 +16,13 @@ import {
   Send,
   Loader2,
   ArrowRight,
-  ArrowLeft
+  ArrowLeft,
+  AlertCircle
 } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useCurrency } from '../context/CurrencyContext'
 import { submitToGoogleSheet } from '../config/googleSheet'
+import { validateName, validatePhone, validateEmail, validateAddress } from '../utils/validation'
 
 export default function ProductModal({
   product,
@@ -35,6 +37,7 @@ export default function ProductModal({
   const [activeTab, setActiveTab] = useState('details') // 'details' | 'specs' | 'craft'
   const [isOrdering, setIsOrdering] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errors, setErrors] = useState({})
   const [customerData, setCustomerData] = useState({
     name: '',
     phone: '',
@@ -70,11 +73,12 @@ export default function ProductModal({
     }
   }, [product, allProducts])
 
-  // Reset quantity and tab whenever active product changes
+  // Reset quantity, tab, and errors whenever active product changes
   useEffect(() => {
     setQuantity(1)
     setActiveTab('details')
     setIsOrdering(false)
+    setErrors({})
   }, [product?.id, product?.name])
 
   if (!product) return null
@@ -147,16 +151,42 @@ export default function ProductModal({
     ]
   }
 
+  const handleBlur = (field) => {
+    let result
+    if (field === 'name') result = validateName(customerData.name)
+    if (field === 'phone') result = validatePhone(customerData.phone)
+    if (field === 'email') result = validateEmail(customerData.email)
+    if (field === 'address') result = validateAddress(customerData.address)
+
+    if (result) {
+      setErrors((prev) => ({
+        ...prev,
+        [field]: result.isValid ? null : result.error,
+      }))
+    }
+  }
+
   const handleDirectOrderSubmit = async (e) => {
     e.preventDefault()
 
-    if (
-      !customerData.name.trim() ||
-      !customerData.phone.trim() ||
-      !customerData.email.trim() ||
-      !customerData.address.trim() ||
-      isSubmitting
-    ) {
+    if (isSubmitting) return
+
+    // Strict Input Verification
+    const nameVal = validateName(customerData.name)
+    const phoneVal = validatePhone(customerData.phone)
+    const emailVal = validateEmail(customerData.email)
+    const addressVal = validateAddress(customerData.address)
+
+    const newErrors = {}
+    if (!nameVal.isValid) newErrors.name = nameVal.error
+    if (!phoneVal.isValid) newErrors.phone = phoneVal.error
+    if (!emailVal.isValid) newErrors.email = emailVal.error
+    if (!addressVal.isValid) newErrors.address = addressVal.error
+
+    setErrors(newErrors)
+
+    // Halt submission if any field fails authenticity/format verification
+    if (Object.keys(newErrors).length > 0) {
       return
     }
 
@@ -381,7 +411,7 @@ export default function ProductModal({
               {/* Toggle Direct Order Form vs Standard Info */}
               {isOrdering ? (
                 /* Direct Order Form */
-                <form onSubmit={handleDirectOrderSubmit} className="space-y-4 rounded-2xl border border-rose/30 bg-rose/5 p-5">
+                <form onSubmit={handleDirectOrderSubmit} noValidate className="space-y-4 rounded-2xl border border-rose/30 bg-rose/5 p-5">
                   <div className="flex items-center justify-between border-b border-rose/20 pb-3">
                     <span className="font-serif font-bold text-base text-ink">
                       Direct Order · {product.name}
@@ -389,7 +419,7 @@ export default function ProductModal({
                     <button
                       type="button"
                       onClick={() => setIsOrdering(false)}
-                      className="text-xs text-rose hover:underline font-semibold"
+                      className="text-xs text-rose hover:underline font-semibold cursor-pointer"
                     >
                       ← Back
                     </button>
@@ -404,9 +434,22 @@ export default function ProductModal({
                       required
                       placeholder="e.g. Ananya Sharma"
                       value={customerData.name}
-                      onChange={(e) => setCustomerData({ ...customerData, name: e.target.value })}
-                      className="w-full rounded-xl border border-ink/20 bg-white px-3 py-2 text-xs text-ink outline-none transition focus:border-rose focus:ring-2 focus:ring-rose/20"
+                      onBlur={() => handleBlur('name')}
+                      onChange={(e) => {
+                        setCustomerData({ ...customerData, name: e.target.value })
+                        if (errors.name) setErrors({ ...errors, name: null })
+                      }}
+                      className={`w-full rounded-xl border bg-white px-3 py-2 text-xs text-ink outline-none transition ${
+                        errors.name
+                          ? 'border-red-500 ring-2 ring-red-200 bg-red-50/20'
+                          : 'border-ink/20 focus:border-rose focus:ring-2 focus:ring-rose/20'
+                      }`}
                     />
+                    {errors.name && (
+                      <p className="mt-1 text-[11px] font-medium text-red-600 flex items-center gap-1">
+                        <AlertCircle size={12} /> {errors.name}
+                      </p>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
@@ -419,9 +462,22 @@ export default function ProductModal({
                         required
                         placeholder="e.g. +91 98765 43210"
                         value={customerData.phone}
-                        onChange={(e) => setCustomerData({ ...customerData, phone: e.target.value })}
-                        className="w-full rounded-xl border border-ink/20 bg-white px-3 py-2 text-xs text-ink outline-none transition focus:border-rose focus:ring-2 focus:ring-rose/20"
+                        onBlur={() => handleBlur('phone')}
+                        onChange={(e) => {
+                          setCustomerData({ ...customerData, phone: e.target.value })
+                          if (errors.phone) setErrors({ ...errors, phone: null })
+                        }}
+                        className={`w-full rounded-xl border bg-white px-3 py-2 text-xs text-ink outline-none transition ${
+                          errors.phone
+                            ? 'border-red-500 ring-2 ring-red-200 bg-red-50/20'
+                            : 'border-ink/20 focus:border-rose focus:ring-2 focus:ring-rose/20'
+                        }`}
                       />
+                      {errors.phone && (
+                        <p className="mt-1 text-[11px] font-medium text-red-600 flex items-center gap-1">
+                          <AlertCircle size={12} /> {errors.phone}
+                        </p>
+                      )}
                     </div>
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-ink/80 mb-1">
@@ -432,9 +488,22 @@ export default function ProductModal({
                         required
                         placeholder="e.g. ananya@domain.com"
                         value={customerData.email}
-                        onChange={(e) => setCustomerData({ ...customerData, email: e.target.value })}
-                        className="w-full rounded-xl border border-ink/20 bg-white px-3 py-2 text-xs text-ink outline-none transition focus:border-rose focus:ring-2 focus:ring-rose/20"
+                        onBlur={() => handleBlur('email')}
+                        onChange={(e) => {
+                          setCustomerData({ ...customerData, email: e.target.value })
+                          if (errors.email) setErrors({ ...errors, email: null })
+                        }}
+                        className={`w-full rounded-xl border bg-white px-3 py-2 text-xs text-ink outline-none transition ${
+                          errors.email
+                            ? 'border-red-500 ring-2 ring-red-200 bg-red-50/20'
+                            : 'border-ink/20 focus:border-rose focus:ring-2 focus:ring-rose/20'
+                        }`}
                       />
+                      {errors.email && (
+                        <p className="mt-1 text-[11px] font-medium text-red-600 flex items-center gap-1">
+                          <AlertCircle size={12} /> {errors.email}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -447,9 +516,22 @@ export default function ProductModal({
                       rows={2}
                       placeholder="Complete street address, city, state, and pin code"
                       value={customerData.address}
-                      onChange={(e) => setCustomerData({ ...customerData, address: e.target.value })}
-                      className="w-full rounded-xl border border-ink/20 bg-white px-3 py-2 text-xs text-ink outline-none transition focus:border-rose focus:ring-2 focus:ring-rose/20 resize-none"
+                      onBlur={() => handleBlur('address')}
+                      onChange={(e) => {
+                        setCustomerData({ ...customerData, address: e.target.value })
+                        if (errors.address) setErrors({ ...errors, address: null })
+                      }}
+                      className={`w-full rounded-xl border bg-white px-3 py-2 text-xs text-ink outline-none transition resize-none ${
+                        errors.address
+                          ? 'border-red-500 ring-2 ring-red-200 bg-red-50/20'
+                          : 'border-ink/20 focus:border-rose focus:ring-2 focus:ring-rose/20'
+                      }`}
                     />
+                    {errors.address && (
+                      <p className="mt-1 text-[11px] font-medium text-red-600 flex items-center gap-1">
+                        <AlertCircle size={12} /> {errors.address}
+                      </p>
+                    )}
                   </div>
 
                   <div className="flex items-center justify-between pt-1">
@@ -467,7 +549,7 @@ export default function ProductModal({
                     {isSubmitting ? (
                       <>
                         <Loader2 size={18} className="animate-spin text-white" />
-                        <span>Logging Order to Workshop...</span>
+                        <span>Verifying & Logging Order...</span>
                       </>
                     ) : (
                       <>
