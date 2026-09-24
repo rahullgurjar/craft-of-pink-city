@@ -143,6 +143,7 @@ export function CartProvider({ children }) {
         isCartOpen,
         setIsCartOpen,
         totalCount,
+        subtotal: subtotalNumeric,
         subtotalNumeric,
         subtotalFormatted,
         getWhatsAppCheckoutUrl,

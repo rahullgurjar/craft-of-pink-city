@@ -262,21 +262,23 @@ export default function CartDrawer({ onNavigateThankYou }) {
         </div>
 
         {/* Free Shipping Progress Indicator (Threshold ₹1,999) */}
-        {!isCheckingOut && (
+        {!isCheckingOut && items.length > 0 && (
           <div className="bg-[#1e121d] px-6 py-2.5 text-white">
             <div className="flex items-center justify-between text-[11px]">
               <span className="flex items-center gap-1.5 text-saffron font-bold">
                 <Truck size={13} />
-                {subtotal >= 1999 ? '🎉 Free Express Shipping Unlocked!' : `Add ${formatPrice(Math.max(0, 1999 - subtotal))} for Free Shipping`}
+                {(subtotal || 0) >= 1999
+                  ? '🎉 Free Express Shipping Unlocked!'
+                  : `Add ${formatPrice(Math.max(0, 1999 - (subtotal || 0)))} for Free Shipping`}
               </span>
               <span className="text-[10px] text-white/60 font-mono">
-                {Math.min(100, Math.round((subtotal / 1999) * 100))}%
+                {Math.min(100, Math.round(((subtotal || 0) / 1999) * 100))}%
               </span>
             </div>
             <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white/20">
               <div
                 className="h-full bg-gradient-to-r from-rose to-saffron transition-all duration-500 rounded-full"
-                style={{ width: `${Math.min(100, (subtotal / 1999) * 100)}%` }}
+                style={{ width: `${Math.min(100, ((subtotal || 0) / 1999) * 100)}%` }}
               />
             </div>
           </div>
