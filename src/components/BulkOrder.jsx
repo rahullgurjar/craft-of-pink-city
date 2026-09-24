@@ -18,6 +18,7 @@ import { whatsappNumber, email } from '../data/products'
 import WhatsAppIcon from './WhatsAppIcon'
 import { submitToGoogleSheet } from '../config/googleSheet'
 import { validateName, validatePhone, validateEmail } from '../utils/validation'
+import { addInboundLead } from '../utils/leadsManager'
 
 const productCategories = [
   'Patchwork Duffle Bags',
@@ -173,8 +174,9 @@ export default function BulkOrder({ onNavigateThankYou }) {
       console.error('Google Sheet submission failed:', err)
     }
 
-    // 3. Cache payload in sessionStorage for Thank You page
+    // 3. Cache payload in sessionStorage & Staff CRM
     try {
+      addInboundLead(submissionPayload)
       sessionStorage.setItem('cpc_last_inquiry', JSON.stringify(submissionPayload))
     } catch (storageErr) {
       console.warn('Session storage write error:', storageErr)

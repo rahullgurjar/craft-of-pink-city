@@ -9,6 +9,8 @@ const newImages = import.meta.glob('../assets/products-new/*', { eager: true, im
 const legacyImages = import.meta.glob('../assets/products/*', { eager: true, import: 'default' })
 
 const resolveProductImage = (image) => {
+  if (!image) return ''
+  if (image.startsWith('data:') || image.startsWith('http')) return image
   return (
     newImages[`../assets/products-new/${image}`] ||
     legacyImages[`../assets/products/${image}`] ||

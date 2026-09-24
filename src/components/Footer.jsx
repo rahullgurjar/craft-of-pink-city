@@ -237,6 +237,14 @@ export default function Footer({ onOpenPolicy, onOpenSupport }) {
           >
             Support & Help
           </button>
+          <span>·</span>
+          <a
+            href="#admin"
+            className="hover:text-rose hover:underline inline-flex items-center gap-1 opacity-60 hover:opacity-100 transition-all font-mono text-[11px]"
+            title="Staff Atelier CRM & Product Manager (Alt+A)"
+          >
+            <ShieldCheck size={12} className="text-rose" /> Staff Portal
+          </a>
         </div>
       </div>
     </footer>

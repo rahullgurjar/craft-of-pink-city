@@ -1,15 +1,16 @@
 import { useMemo, useState, useEffect } from 'react'
 import { ArrowUpRight, Package, Eye, Sparkles, Search, X, SlidersHorizontal, ShoppingBag, Send } from 'lucide-react'
-import { products } from '../data/products'
+import { useProducts } from '../context/ProductsContext'
 import ProductModal from './ProductModal'
 import { useCart } from '../context/CartContext'
 import { useCurrency } from '../context/CurrencyContext'
 
-const categories = ['All', ...new Set(products.map((product) => product.category))]
 const newImages = import.meta.glob('../assets/products-new/*', { eager: true, import: 'default' })
 const legacyImages = import.meta.glob('../assets/products/*', { eager: true, import: 'default' })
 
 const resolveProductImage = (image) => {
+  if (!image) return ''
+  if (image.startsWith('data:') || image.startsWith('http')) return image
   return (
     newImages[`../assets/products-new/${image}`] ||
     legacyImages[`../assets/products/${image}`] ||
@@ -18,6 +19,7 @@ const resolveProductImage = (image) => {
 }
 
 export default function Products({ onNavigateThankYou }) {
+  const { products, categories, allProducts } = useProducts()
   const [activeCategory, setActiveCategory] = useState('All')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedProduct, setSelectedProduct] = useState(null)

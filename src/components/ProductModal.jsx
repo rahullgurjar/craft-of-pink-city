@@ -24,6 +24,7 @@ import { useCart } from '../context/CartContext'
 import { useCurrency } from '../context/CurrencyContext'
 import { submitToGoogleSheet } from '../config/googleSheet'
 import { validateName, validatePhone, validateEmail, validateAddress } from '../utils/validation'
+import { addInboundLead } from '../utils/leadsManager'
 
 export default function ProductModal({
   product,
@@ -240,8 +241,9 @@ export default function ProductModal({
       console.error('Google Sheet submission error:', err)
     }
 
-    // 3. Cache for Thank You page
+    // 3. Cache for Thank You page & Staff CRM
     try {
+      addInboundLead(orderPayload)
       sessionStorage.setItem('cpc_last_inquiry', JSON.stringify(orderPayload))
     } catch (err) {
       console.warn('Storage error:', err)

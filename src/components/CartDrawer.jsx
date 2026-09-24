@@ -24,11 +24,14 @@ import { useCart } from '../context/CartContext'
 import { useCurrency } from '../context/CurrencyContext'
 import { submitToGoogleSheet } from '../config/googleSheet'
 import { validateName, validatePhone, validateEmail, validateAddress } from '../utils/validation'
+import { addInboundLead } from '../utils/leadsManager'
 
 const newImages = import.meta.glob('../assets/products-new/*', { eager: true, import: 'default' })
 const legacyImages = import.meta.glob('../assets/products/*', { eager: true, import: 'default' })
 
 const resolveProductImage = (image) => {
+  if (!image) return ''
+  if (image.startsWith('data:') || image.startsWith('http')) return image
   return (
     newImages[`../assets/products-new/${image}`] ||
     legacyImages[`../assets/products/${image}`] ||
@@ -174,8 +177,9 @@ export default function CartDrawer({ onNavigateThankYou }) {
       console.error('Google Sheet submission failed:', err)
     }
 
-    // 3. Cache payload in sessionStorage for Thank You page
+    // 3. Cache payload in sessionStorage & Staff CRM
     try {
+      addInboundLead(orderPayload)
       sessionStorage.setItem('cpc_last_inquiry', JSON.stringify(orderPayload))
     } catch (storageErr) {
       console.warn('Session storage write error:', storageErr)
