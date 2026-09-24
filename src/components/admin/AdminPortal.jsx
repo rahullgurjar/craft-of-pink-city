@@ -76,7 +76,7 @@ import {
 import { GOOGLE_SHEET_WEB_APP_URL } from '../../config/googleSheet'
 
 const MASTER_PIN_KEY = 'cpc_staff_master_pin_v1'
-const AUTH_TOKEN_KEY = 'cpc_staff_auth_token_v1'
+const IDLE_TIMEOUT_KEY = 'cpc_staff_idle_timeout_min'
 const DEFAULT_PIN = '1471' // Matching atelier support WhatsApp ending 1471
 
 const AVAILABLE_SAMPLE_IMAGES = [
@@ -111,17 +111,19 @@ const resolveProductImage = (image) => {
 }
 
 export default function AdminPortal({ onBackToStore }) {
-  // Authentication State
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    try {
-      return localStorage.getItem(AUTH_TOKEN_KEY) === 'authenticated'
-    } catch {
-      return false
-    }
-  })
+  // Authentication State - Always requires fresh PIN verification on every login session
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [pinInput, setPinInput] = useState('')
   const [pinError, setPinError] = useState('')
-  const [rememberMe, setRememberMe] = useState(true)
+  const [idleTimeoutMin, setIdleTimeoutMin] = useState(() => {
+    try {
+      const val = parseInt(localStorage.getItem(IDLE_TIMEOUT_KEY) || '5', 10)
+      return isNaN(val) || val <= 0 ? 5 : val
+    } catch {
+      return 5
+    }
+  })
+  const [idleChangeMsg, setIdleChangeMsg] = useState('')
 
   // Current Active Tab: 'dashboard' | 'leads' | 'products' | 'popups' | 'settings'
   const [activeTab, setActiveTab] = useState('leads')
@@ -162,6 +164,13 @@ export default function AdminPortal({ onBackToStore }) {
   const [newMasterPin, setNewMasterPin] = useState('')
   const [pinChangeMsg, setPinChangeMsg] = useState('')
 
+  // Clear any legacy persistent authentication tokens on startup
+  useEffect(() => {
+    try {
+      localStorage.removeItem('cpc_staff_auth_token_v1')
+    } catch {}
+  }, [])
+
   // Listen for real-time leads
   useEffect(() => {
     const handleNewLead = () => {
@@ -171,6 +180,49 @@ export default function AdminPortal({ onBackToStore }) {
     return () => window.removeEventListener('cpc-new-lead-received', handleNewLead)
   }, [])
 
+  // Inactivity Auto-Logout Tracker
+  useEffect(() => {
+    if (!isAuthenticated) return
+
+    let timeoutId = null
+    const timeoutMs = (idleTimeoutMin || 5) * 60 * 1000
+
+    const triggerAutoLogout = () => {
+      setIsAuthenticated(false)
+      setPinInput('')
+      setPinError(`🔒 Auto-logged out due to ${idleTimeoutMin || 5} minutes of inactivity for staff security. Please re-enter your master PIN.`)
+    }
+
+    const resetInactivityTimer = () => {
+      if (timeoutId) clearTimeout(timeoutId)
+      timeoutId = setTimeout(triggerAutoLogout, timeoutMs)
+    }
+
+    // Passive activity listeners (mouse movement, clicks, typing, scrolling, touches)
+    const activityEvents = [
+      'mousemove',
+      'mousedown',
+      'keydown',
+      'touchstart',
+      'scroll',
+      'wheel',
+      'click',
+    ]
+
+    resetInactivityTimer()
+
+    activityEvents.forEach((evt) => {
+      window.addEventListener(evt, resetInactivityTimer, { passive: true })
+    })
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId)
+      activityEvents.forEach((evt) => {
+        window.removeEventListener(evt, resetInactivityTimer)
+      })
+    }
+  }, [isAuthenticated, idleTimeoutMin])
+
   // AUTHENTICATION HANDLERS
   const handlePinSubmit = (e) => {
     e.preventDefault()
@@ -178,9 +230,6 @@ export default function AdminPortal({ onBackToStore }) {
     if (pinInput.trim() === storedPin) {
       setIsAuthenticated(true)
       setPinError('')
-      if (rememberMe) {
-        localStorage.setItem(AUTH_TOKEN_KEY, 'authenticated')
-      }
     } else {
       setPinError('Incorrect Staff Passcode. Please try again or check with the Jaipur workshop desk.')
       setPinInput('')
@@ -188,9 +237,22 @@ export default function AdminPortal({ onBackToStore }) {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem(AUTH_TOKEN_KEY)
+    try {
+      localStorage.removeItem('cpc_staff_auth_token_v1')
+    } catch {}
     setIsAuthenticated(false)
     setPinInput('')
+    setPinError('')
+  }
+
+  const handleUpdateIdleTimeout = (minutes) => {
+    const minVal = parseInt(minutes, 10) || 5
+    setIdleTimeoutMin(minVal)
+    try {
+      localStorage.setItem(IDLE_TIMEOUT_KEY, String(minVal))
+      setIdleChangeMsg(`Auto-lock timeout updated to ${minVal} minutes.`)
+      setTimeout(() => setIdleChangeMsg(''), 4000)
+    } catch {}
   }
 
   // LEADS ACTIONS
@@ -454,7 +516,7 @@ export default function AdminPortal({ onBackToStore }) {
               Staff & Workshop Portal
             </h1>
             <p className="text-xs text-white/60">
-              Enter your authorized staff master PIN to access the leads CRM, orders pipeline, and live product catalog.
+              Authorized workshop staff verification. Master PIN is required on every login session.
             </p>
           </div>
 
@@ -479,29 +541,30 @@ export default function AdminPortal({ onBackToStore }) {
                   className="w-full rounded-2xl border border-white/20 bg-black/40 pl-11 pr-4 py-3.5 text-center font-mono text-xl tracking-widest text-white placeholder:text-white/20 outline-none transition focus:border-rose focus:ring-2 focus:ring-rose/30"
                 />
               </div>
+
               {pinError && (
-                <p className="mt-2 text-xs font-medium text-rose flex items-center gap-1.5">
-                  <AlertCircle size={14} /> {pinError}
-                </p>
+                <div className={`mt-3 p-3 rounded-2xl text-xs flex items-start gap-2.5 ${
+                  pinError.includes('inactivity') || pinError.includes('Auto-logged out')
+                    ? 'bg-amber-500/20 border border-amber-500/40 text-amber-200'
+                    : 'bg-rose/20 border border-rose/40 text-rose-200'
+                }`}>
+                  <AlertCircle className="shrink-0 mt-0.5" size={15} />
+                  <p className="font-medium leading-relaxed">{pinError}</p>
+                </div>
               )}
             </div>
 
-            <div className="flex items-center justify-between text-xs text-white/70">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="rounded border-white/30 text-rose focus:ring-rose"
-                />
-                <span>Remember session</span>
-              </label>
-              <span className="text-[11px] text-white/40">Default Atelier PIN: 1471</span>
+            <div className="flex items-center justify-between text-xs text-white/60 bg-white/5 p-2.5 rounded-xl border border-white/5">
+              <div className="flex items-center gap-1.5 text-[11px]">
+                <Clock size={13} className="text-saffron" />
+                <span>Auto-locks on {idleTimeoutMin}m inactivity</span>
+              </div>
+              <span className="text-[11px] text-white/40">Default PIN: 1471</span>
             </div>
 
             <button
               type="submit"
-              className="w-full flex items-center justify-center gap-2 rounded-2xl bg-rose py-4 text-xs font-bold uppercase tracking-wider text-white shadow-xl shadow-rose/30 hover:bg-[#962325] transition-all cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 rounded-2xl bg-rose py-4 text-xs font-bold uppercase tracking-wider text-white shadow-xl shadow-rose/30 hover:bg-[#962325] transition-all cursor-pointer font-sans"
             >
               <Unlock size={16} /> Unlock Staff Dashboard
             </button>
@@ -618,6 +681,12 @@ export default function AdminPortal({ onBackToStore }) {
 
         {/* Live Store Button & Logout */}
         <div className="flex items-center gap-2">
+          {/* Active Auto-lock Security Indicator */}
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[11px] text-white/80" title={`Session automatically locks after ${idleTimeoutMin} minutes of inactivity`}>
+            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>Auto-Lock: {idleTimeoutMin}m idle</span>
+          </div>
+
           <button
             type="button"
             onClick={onBackToStore}
@@ -1378,11 +1447,63 @@ export default function AdminPortal({ onBackToStore }) {
                 )}
                 <button
                   type="submit"
-                  className="rounded-xl bg-ink px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white hover:bg-rose transition"
+                  className="rounded-xl bg-ink px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white hover:bg-rose transition cursor-pointer"
                 >
                   Update Master PIN
                 </button>
               </form>
+            </div>
+
+            {/* Inactivity Auto-Logout Timeout Settings */}
+            <div className="rounded-3xl bg-white border border-ink/10 p-6 shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+                    <Clock size={20} />
+                  </div>
+                  <div>
+                    <h4 className="font-serif text-base font-bold text-ink">Auto-Lock Inactivity Timer</h4>
+                    <p className="text-xs text-ink/60">
+                      Automatically locks the staff portal when no mouse, keyboard, touch, or scroll activity is detected.
+                    </p>
+                  </div>
+                </div>
+                <span className="rounded-full bg-amber-100 text-amber-900 px-3 py-1 text-xs font-bold">
+                  {idleTimeoutMin} min timeout
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {[
+                  { label: '2 Minutes (High Security)', val: 2 },
+                  { label: '5 Minutes (Recommended)', val: 5 },
+                  { label: '10 Minutes', val: 10 },
+                  { label: '15 Minutes', val: 15 },
+                ].map((opt) => (
+                  <button
+                    key={opt.val}
+                    type="button"
+                    onClick={() => handleUpdateIdleTimeout(opt.val)}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
+                      idleTimeoutMin === opt.val
+                        ? 'bg-rose text-white shadow'
+                        : 'border border-ink/10 bg-ink/5 text-ink/80 hover:bg-ink/10'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+
+              {idleChangeMsg && (
+                <p className="text-xs font-semibold text-emerald-700 flex items-center gap-1">
+                  <CheckCircle2 size={14} /> {idleChangeMsg}
+                </p>
+              )}
+
+              <p className="text-[11px] text-ink/50 bg-[#faf4ec] p-3 rounded-xl border border-ink/5">
+                🔒 <strong>Atelier Security Policy:</strong> Every login requires entering the staff PIN. If the screen is left idle for {idleTimeoutMin} minutes, the session immediately locks to protect client leads and order records.
+              </p>
             </div>
 
             {/* Google Sheets Webhook Integration Info */}
