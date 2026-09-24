@@ -1,12 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { CheckCircle2, X, Sparkles, MapPin, ArrowUpRight, PackageCheck, Layers } from 'lucide-react'
 import { products } from '../data/products'
+import { getPopupConfig, getPopupItems } from '../utils/salesPopupsManager'
 
 // Resolve image assets dynamically
 const newImages = import.meta.glob('../assets/products-new/*', { eager: true, import: 'default' })
 const legacyImages = import.meta.glob('../assets/products/*', { eager: true, import: 'default' })
 
 const resolveProductImage = (image) => {
+  if (!image) return ''
+  if (image.startsWith('data:') || image.startsWith('http')) return image
   return (
     newImages[`../assets/products-new/${image}`] ||
     legacyImages[`../assets/products/${image}`] ||
@@ -328,6 +331,8 @@ const TIME_AGO_LIST = [
 ]
 
 export default function SalesPopup() {
+  const [config, setConfig] = useState(getPopupConfig)
+  const [customPopups, setCustomPopups] = useState(getPopupItems)
   const [currentSale, setCurrentSale] = useState(null)
   const [isVisible, setIsVisible] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
@@ -335,8 +340,37 @@ export default function SalesPopup() {
   
   const timerRef = useRef(null)
   const hideTimerRef = useRef(null)
+  const customIndexRef = useRef(0)
   const usedNamesHistoryRef = useRef([])
   const usedProductsHistoryRef = useRef([])
+
+  // Listen for real-time config updates from Staff Portal
+  useEffect(() => {
+    const handleConfigUpdate = (e) => {
+      if (e.detail) setConfig(e.detail)
+    }
+    const handleItemsUpdate = (e) => {
+      if (e.detail) setCustomPopups(e.detail)
+    }
+    const handleTestTrigger = (e) => {
+      if (e.detail) {
+        setCurrentSale(e.detail)
+        setIsVisible(true)
+        if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
+        hideTimerRef.current = setTimeout(() => {
+          setIsVisible(false)
+        }, (config.displayDuration || 5.5) * 1000)
+      }
+    }
+    window.addEventListener('cpc-popup-config-updated', handleConfigUpdate)
+    window.addEventListener('cpc-popup-items-updated', handleItemsUpdate)
+    window.addEventListener('cpc-trigger-test-popup', handleTestTrigger)
+    return () => {
+      window.removeEventListener('cpc-popup-config-updated', handleConfigUpdate)
+      window.removeEventListener('cpc-popup-items-updated', handleItemsUpdate)
+      window.removeEventListener('cpc-trigger-test-popup', handleTestTrigger)
+    }
+  }, [config.displayDuration])
 
   // Helper to generate a unique random buyer name
   const generateUniqueBuyerName = useCallback(() => {
@@ -389,8 +423,45 @@ export default function SalesPopup() {
     return product
   }, [])
 
-  // Generate a random bulk sale record pairing buyer with a product & worldwide country
+  // Generate a sale record pairing buyer with a product & worldwide country
   const generateSaleRecord = useCallback(() => {
+    if (!config.isEnabled) return null
+
+    const enabledCustom = customPopups.filter((p) => p.isEnabled)
+    const shouldPickCustom =
+      config.mode === 'custom_only' ||
+      (config.mode === 'hybrid' && enabledCustom.length > 0 && Math.random() < 0.6)
+
+    if (shouldPickCustom && enabledCustom.length > 0) {
+      const idx = customIndexRef.current % enabledCustom.length
+      customIndexRef.current += 1
+      const item = enabledCustom[idx]
+
+      const matchedProd =
+        products.find(
+          (p) =>
+            p.name.toLowerCase() === item.productName?.toLowerCase() ||
+            p.image === item.productImage
+        ) || {
+          id: item.productName?.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+          name: item.productName,
+          image: item.productImage,
+          category: 'Quilted Bag',
+        }
+
+      return {
+        buyerName: item.buyerName,
+        role: item.badge || 'Verified Client',
+        city: item.city,
+        country: item.country || '',
+        quantity: item.quantity,
+        tag: item.tag || 'Artisan Quilted Batch',
+        badge: item.badge || 'Bulk Order Placed',
+        timeAgo: item.timeAgo || 'Recently',
+        product: matchedProd,
+      }
+    }
+
     const product = pickProduct()
     if (!product) return null
 
@@ -411,11 +482,11 @@ export default function SalesPopup() {
       timeAgo,
       product,
     }
-  }, [generateUniqueBuyerName, pickProduct])
+  }, [config.isEnabled, config.mode, customPopups, generateUniqueBuyerName, pickProduct])
 
   // Show a notification
   const showNextSale = useCallback(() => {
-    if (isDismissed) return
+    if (!config.isEnabled || isDismissed) return
 
     const sale = generateSaleRecord()
     if (!sale) return
@@ -423,28 +494,30 @@ export default function SalesPopup() {
     setCurrentSale(sale)
     setIsVisible(true)
 
-    // Auto-hide after 5.5 seconds (unless hovered)
+    // Auto-hide after configured duration (default 5.5s)
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
     hideTimerRef.current = setTimeout(() => {
       setIsVisible(false)
       scheduleNextSale()
-    }, 5500)
-  }, [generateSaleRecord, isDismissed])
+    }, (config.displayDuration || 5.5) * 1000)
+  }, [config.displayDuration, config.isEnabled, generateSaleRecord, isDismissed])
 
-  // Schedule next appearance with a balanced cadence (14s to 22s)
+  // Schedule next appearance with configured cadence
   const scheduleNextSale = useCallback(() => {
-    if (isDismissed) return
+    if (!config.isEnabled || isDismissed) return
     if (timerRef.current) clearTimeout(timerRef.current)
 
-    // Interval: 14,000ms to 22,000ms
-    const delay = Math.floor(Math.random() * 8000) + 14000
+    const baseInterval = (config.displayInterval || 18) * 1000
+    const delay = Math.max(6000, baseInterval + Math.floor(Math.random() * 4000) - 2000)
     timerRef.current = setTimeout(() => {
       showNextSale()
     }, delay)
-  }, [showNextSale, isDismissed])
+  }, [config.displayInterval, config.isEnabled, isDismissed, showNextSale])
 
   // Initial startup after a quick 2.5s delay
   useEffect(() => {
+    if (!config.isEnabled) return
+
     const initialDelay = setTimeout(() => {
       showNextSale()
     }, 2500)
@@ -454,7 +527,7 @@ export default function SalesPopup() {
       if (timerRef.current) clearTimeout(timerRef.current)
       if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
     }
-  }, [showNextSale])
+  }, [config.isEnabled, showNextSale])
 
   // Handle Pause on Hover
   const handleMouseEnter = () => {

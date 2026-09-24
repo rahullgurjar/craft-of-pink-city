@@ -42,7 +42,13 @@ import {
   Video,
   LogOut,
   SlidersHorizontal,
-  ChevronDown
+  ChevronDown,
+  BellRing,
+  ToggleLeft,
+  ToggleRight,
+  Play,
+  MapPin,
+  PackageCheck
 } from 'lucide-react'
 import { useProducts } from '../../context/ProductsContext'
 import { useCurrency } from '../../context/CurrencyContext'
@@ -57,6 +63,16 @@ import {
   printLeadPackingSlip,
   LEAD_STATUSES,
 } from '../../utils/leadsManager'
+import {
+  getPopupConfig,
+  savePopupConfig,
+  getPopupItems,
+  savePopupItems,
+  addCustomPopup,
+  updateCustomPopup,
+  deleteCustomPopup,
+  resetPopupsToDefault,
+} from '../../utils/salesPopupsManager'
 import { GOOGLE_SHEET_WEB_APP_URL } from '../../config/googleSheet'
 
 const MASTER_PIN_KEY = 'cpc_staff_master_pin_v1'
@@ -107,7 +123,7 @@ export default function AdminPortal({ onBackToStore }) {
   const [pinError, setPinError] = useState('')
   const [rememberMe, setRememberMe] = useState(true)
 
-  // Current Active Tab: 'dashboard' | 'leads' | 'products' | 'settings'
+  // Current Active Tab: 'dashboard' | 'leads' | 'products' | 'popups' | 'settings'
   const [activeTab, setActiveTab] = useState('leads')
 
   // Products Context
@@ -134,6 +150,13 @@ export default function AdminPortal({ onBackToStore }) {
   const [isAddLeadModalOpen, setIsAddLeadModalOpen] = useState(false)
   const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
+
+  // Social Proof Popups State
+  const [popupConfig, setPopupConfig] = useState(getPopupConfig)
+  const [popupItems, setPopupItems] = useState(getPopupItems)
+  const [isAddPopupModalOpen, setIsAddPopupModalOpen] = useState(false)
+  const [editingPopup, setEditingPopup] = useState(null)
+  const [testTriggerFeedback, setTestTriggerFeedback] = useState('')
 
   // Settings State
   const [newMasterPin, setNewMasterPin] = useState('')
@@ -223,7 +246,6 @@ export default function AdminPortal({ onBackToStore }) {
     const inProductionCount = leads.filter((l) => l.status === 'in_production').length
     const dispatchedCount = leads.filter((l) => l.status === 'dispatched' || l.status === 'completed').length
 
-    // Estimated value calculation
     let estimatedPipelineVal = 0
     leads.forEach((l) => {
       if (l.totalAmount) {
@@ -252,7 +274,7 @@ export default function AdminPortal({ onBackToStore }) {
     image: 'duffle-blush-botanical-barrel.jpg',
     status: 'in_stock',
   })
-  const [imageUploadType, setImageUploadType] = useState('asset') // 'asset' | 'file' | 'url'
+  const [imageUploadType, setImageUploadType] = useState('asset')
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0]
@@ -302,6 +324,103 @@ export default function AdminPortal({ onBackToStore }) {
     alert('Product details updated successfully!')
   }
 
+  // SOCIAL PROOF POPUPS HANDLERS
+  const handleUpdatePopupConfig = (key, value) => {
+    const updated = { ...popupConfig, [key]: value }
+    setPopupConfig(updated)
+    savePopupConfig(updated)
+  }
+
+  const handleTogglePopupItem = (id, currentVal) => {
+    const updated = updateCustomPopup(id, { isEnabled: !currentVal })
+    setPopupItems(updated)
+  }
+
+  const handleDeletePopupItem = (id) => {
+    if (window.confirm('Delete this order notification popup?')) {
+      const updated = deleteCustomPopup(id)
+      setPopupItems(updated)
+    }
+  }
+
+  const handleTriggerTestPopup = (popupItem) => {
+    const item = popupItem || popupItems[0]
+    if (!item) return
+
+    const matchedProd =
+      products.find(
+        (p) =>
+          p.name.toLowerCase() === item.productName?.toLowerCase() ||
+          p.image === item.productImage
+      ) || {
+        id: item.productName?.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        name: item.productName,
+        image: item.productImage,
+        category: 'Quilted Bag',
+      }
+
+    const payload = {
+      buyerName: item.buyerName,
+      role: item.badge || 'Verified Client',
+      city: item.city,
+      country: item.country || '',
+      quantity: item.quantity,
+      tag: item.tag || 'Artisan Quilted Batch',
+      badge: item.badge || 'Bulk Order Placed',
+      timeAgo: 'Just now',
+      product: matchedProd,
+    }
+
+    window.dispatchEvent(new CustomEvent('cpc-trigger-test-popup', { detail: payload }))
+    setTestTriggerFeedback(`Fired test popup for "${item.buyerName}"! Check the website or preview.`)
+    setTimeout(() => setTestTriggerFeedback(''), 4000)
+  }
+
+  // [NEW POPUP MODAL FORM STATE]
+  const [newPopupForm, setNewPopupForm] = useState({
+    buyerName: 'Zara Al-Mansoor',
+    city: 'Dubai, UAE',
+    country: 'UAE',
+    productName: 'Royal Bengal Tiger Quilted Yoga Bag',
+    productImage: 'yoga-bag-magenta-tiger.jpg',
+    quantity: '50 pieces (Boutique Tier)',
+    badge: 'Bulk Order Placed',
+    tag: 'Monogram Favors',
+    timeAgo: '12 minutes ago',
+  })
+
+  const handleCreatePopupSubmit = (e) => {
+    e.preventDefault()
+    if (!newPopupForm.buyerName.trim() || !newPopupForm.productName.trim()) {
+      alert('Please fill in buyer name and product.')
+      return
+    }
+    const updated = addCustomPopup(newPopupForm)
+    setPopupItems(updated)
+    setIsAddPopupModalOpen(false)
+    setNewPopupForm({
+      buyerName: 'Zara Al-Mansoor',
+      city: 'Dubai, UAE',
+      country: 'UAE',
+      productName: 'Royal Bengal Tiger Quilted Yoga Bag',
+      productImage: 'yoga-bag-magenta-tiger.jpg',
+      quantity: '50 pieces (Boutique Tier)',
+      badge: 'Bulk Order Placed',
+      tag: 'Monogram Favors',
+      timeAgo: '12 minutes ago',
+    })
+    alert('🎉 Order notification popup saved!')
+  }
+
+  const handleSavePopupEdit = (e) => {
+    e.preventDefault()
+    if (!editingPopup) return
+    const updated = updateCustomPopup(editingPopup.id, editingPopup)
+    setPopupItems(updated)
+    setEditingPopup(null)
+    alert('Notification popup updated!')
+  }
+
   // CHANGE PIN HANDLER
   const handleChangePin = (e) => {
     e.preventDefault()
@@ -320,12 +439,10 @@ export default function AdminPortal({ onBackToStore }) {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-[#1e121d] flex flex-col justify-center items-center px-4 py-12 relative overflow-hidden">
-        {/* Background decorative ambient glow */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-rose/20 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-10 right-10 w-72 h-72 bg-saffron/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative w-full max-w-md bg-[#2a1b29] border border-white/10 rounded-3xl p-8 shadow-2xl backdrop-blur-xl text-white">
-          {/* Logo & Header */}
           <div className="text-center space-y-2 mb-8">
             <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-rose/20 text-rose border border-rose/30 shadow-inner">
               <Shield size={32} />
@@ -341,7 +458,6 @@ export default function AdminPortal({ onBackToStore }) {
             </p>
           </div>
 
-          {/* Form */}
           <form onSubmit={handlePinSubmit} className="space-y-5">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-white/80 mb-2">
@@ -391,7 +507,6 @@ export default function AdminPortal({ onBackToStore }) {
             </button>
           </form>
 
-          {/* Back to store */}
           <div className="mt-6 pt-6 border-t border-white/10 text-center">
             <button
               type="button"
@@ -433,11 +548,11 @@ export default function AdminPortal({ onBackToStore }) {
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex items-center gap-1 bg-white/10 p-1 rounded-2xl">
+        <div className="flex flex-wrap items-center gap-1 bg-white/10 p-1 rounded-2xl">
           <button
             type="button"
             onClick={() => setActiveTab('dashboard')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
               activeTab === 'dashboard'
                 ? 'bg-rose text-white shadow'
                 : 'text-white/70 hover:text-white hover:bg-white/5'
@@ -448,7 +563,7 @@ export default function AdminPortal({ onBackToStore }) {
           <button
             type="button"
             onClick={() => setActiveTab('leads')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
               activeTab === 'leads'
                 ? 'bg-rose text-white shadow'
                 : 'text-white/70 hover:text-white hover:bg-white/5'
@@ -465,7 +580,7 @@ export default function AdminPortal({ onBackToStore }) {
           <button
             type="button"
             onClick={() => setActiveTab('products')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
               activeTab === 'products'
                 ? 'bg-rose text-white shadow'
                 : 'text-white/70 hover:text-white hover:bg-white/5'
@@ -477,8 +592,21 @@ export default function AdminPortal({ onBackToStore }) {
           </button>
           <button
             type="button"
+            onClick={() => setActiveTab('popups')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              activeTab === 'popups'
+                ? 'bg-rose text-white shadow'
+                : 'text-white/70 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <BellRing size={14} />
+            <span>Social Proof Popups</span>
+            <span className="text-[10px] text-white/50">({popupItems.length})</span>
+          </button>
+          <button
+            type="button"
             onClick={() => setActiveTab('settings')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
               activeTab === 'settings'
                 ? 'bg-rose text-white shadow'
                 : 'text-white/70 hover:text-white hover:bg-white/5'
@@ -516,7 +644,6 @@ export default function AdminPortal({ onBackToStore }) {
         {/* ==================================================== */}
         {activeTab === 'dashboard' && (
           <div className="space-y-6">
-            {/* KPI Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="rounded-3xl bg-white p-5 border border-ink/10 shadow-sm flex items-center justify-between">
                 <div>
@@ -603,20 +730,19 @@ export default function AdminPortal({ onBackToStore }) {
 
               <div className="rounded-3xl bg-white p-6 border border-ink/10 shadow-sm flex flex-col justify-between">
                 <div>
-                  <span className="eyebrow text-emerald-700">Google Sheet Sync</span>
-                  <h4 className="font-serif text-xl font-bold text-ink mt-1">Connected Sheet</h4>
+                  <span className="eyebrow text-purple-700">Urgency & Social Proof</span>
+                  <h4 className="font-serif text-xl font-bold text-ink mt-1">Social Proof Popups</h4>
                   <p className="text-xs text-ink/70 mt-2">
-                    All website submissions are continuously synced with your Google Apps Script endpoint.
+                    Manage buyer names, cities, and live order popups that encourage visitor conversions.
                   </p>
                 </div>
-                <a
-                  href="https://docs.google.com/spreadsheets"
-                  target="_blank"
-                  rel="noreferrer"
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('popups')}
                   className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl border border-ink/20 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-ink hover:bg-ink hover:text-white transition"
                 >
-                  <ExternalLink size={15} /> Open Google Sheet
-                </a>
+                  <BellRing size={15} /> Manage Popups ({popupItems.length})
+                </button>
               </div>
             </div>
 
@@ -672,7 +798,6 @@ export default function AdminPortal({ onBackToStore }) {
         {/* ==================================================== */}
         {activeTab === 'leads' && (
           <div className="space-y-6">
-            {/* Header & Controls */}
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div>
                 <h3 className="font-serif text-2xl font-bold text-ink">Inquiries & Orders CRM</h3>
@@ -742,7 +867,7 @@ export default function AdminPortal({ onBackToStore }) {
               </div>
             </div>
 
-            {/* Leads Table / Cards */}
+            {/* Leads Table */}
             <div className="rounded-3xl bg-white border border-ink/10 shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs text-ink">
@@ -774,7 +899,6 @@ export default function AdminPortal({ onBackToStore }) {
                             className="hover:bg-rose/5 transition-colors cursor-pointer group"
                             onClick={() => setSelectedLead(lead)}
                           >
-                            {/* Ref & Date */}
                             <td className="px-5 py-4">
                               <span className="font-mono font-bold text-rose">{lead.refId}</span>
                               <p className="text-[10px] text-ink/50 mt-0.5">{lead.timestamp}</p>
@@ -783,7 +907,6 @@ export default function AdminPortal({ onBackToStore }) {
                               </span>
                             </td>
 
-                            {/* Customer */}
                             <td className="px-5 py-4">
                               <span className="font-serif text-sm font-bold text-ink group-hover:text-rose transition-colors">
                                 {lead.name}
@@ -796,13 +919,11 @@ export default function AdminPortal({ onBackToStore }) {
                               <p className="text-[11px] text-ink/70 mt-1 font-mono">{lead.phone}</p>
                             </td>
 
-                            {/* Products */}
                             <td className="px-5 py-4 max-w-xs">
                               <p className="font-semibold text-ink line-clamp-2">{lead.products}</p>
                               <p className="text-[11px] text-ink/60 mt-0.5 font-mono">Qty: {lead.quantity}</p>
                             </td>
 
-                            {/* Amount */}
                             <td className="px-5 py-4">
                               <span className="font-serif text-sm font-bold text-rose">
                                 {lead.totalAmount || 'Per Quotation'}
@@ -810,7 +931,6 @@ export default function AdminPortal({ onBackToStore }) {
                               <p className="text-[10px] text-ink/50 mt-0.5">{lead.timeline}</p>
                             </td>
 
-                            {/* Status */}
                             <td className="px-5 py-4" onClick={(e) => e.stopPropagation()}>
                               <select
                                 value={lead.status}
@@ -825,10 +945,8 @@ export default function AdminPortal({ onBackToStore }) {
                               </select>
                             </td>
 
-                            {/* Quick Actions */}
                             <td className="px-5 py-4 text-right" onClick={(e) => e.stopPropagation()}>
                               <div className="flex items-center justify-end gap-1.5">
-                                {/* 1-Click WhatsApp */}
                                 <a
                                   href={generateWhatsAppMessage(
                                     lead,
@@ -842,7 +960,6 @@ export default function AdminPortal({ onBackToStore }) {
                                   <MessageCircle size={15} />
                                 </a>
 
-                                {/* Print Packing Slip */}
                                 <button
                                   type="button"
                                   title="Print Packing Slip"
@@ -852,7 +969,6 @@ export default function AdminPortal({ onBackToStore }) {
                                   <Printer size={15} />
                                 </button>
 
-                                {/* Delete */}
                                 <button
                                   type="button"
                                   title="Delete Lead"
@@ -906,7 +1022,6 @@ export default function AdminPortal({ onBackToStore }) {
                   className="rounded-3xl border border-ink/10 bg-white p-5 shadow-sm flex flex-col justify-between hover:shadow-lg transition group"
                 >
                   <div>
-                    {/* Thumbnail & Badges */}
                     <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-ivory border border-ink/10">
                       <img
                         src={resolveProductImage(product.image)}
@@ -923,7 +1038,6 @@ export default function AdminPortal({ onBackToStore }) {
                       </span>
                     </div>
 
-                    {/* Details */}
                     <div className="mt-4">
                       <div className="flex items-start justify-between gap-2">
                         <h4 className="font-serif text-lg font-bold text-ink group-hover:text-rose transition-colors">
@@ -937,7 +1051,6 @@ export default function AdminPortal({ onBackToStore }) {
                     </div>
                   </div>
 
-                  {/* Action Controls */}
                   <div className="mt-5 pt-3 border-t border-ink/10 flex items-center justify-between gap-2">
                     <button
                       type="button"
@@ -966,7 +1079,262 @@ export default function AdminPortal({ onBackToStore }) {
         )}
 
         {/* ==================================================== */}
-        {/* TAB 4: STORE SETTINGS & SECURITY */}
+        {/* TAB 4: SOCIAL PROOF & LIVE POPUPS MANAGER */}
+        {/* ==================================================== */}
+        {activeTab === 'popups' && (
+          <div className="space-y-6">
+            {/* Header & Controls */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h3 className="font-serif text-2xl font-bold text-ink">Social Proof & Order Popups</h3>
+                <p className="text-xs text-ink/60">
+                  Manage the verified order badges and live buyer notifications shown to store visitors.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAddPopupModalOpen(true)}
+                  className="inline-flex items-center gap-2 rounded-xl bg-rose px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white hover:bg-[#962325] transition shadow-md shadow-rose/25"
+                >
+                  <Plus size={16} /> Add Order Popup
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm('Reset all popup settings and notifications back to defaults?')) {
+                      const res = resetPopupsToDefault()
+                      setPopupConfig(res.config)
+                      setPopupItems(res.items)
+                    }
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-ink/20 bg-white px-3 py-2.5 text-xs font-bold text-ink hover:bg-ink hover:text-white transition"
+                >
+                  <RefreshCw size={14} /> Reset
+                </button>
+              </div>
+            </div>
+
+            {/* Global Settings Card */}
+            <div className="rounded-3xl bg-white border border-ink/10 p-6 shadow-sm space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-ink/10 pb-5">
+                <div className="flex items-center gap-3">
+                  <div className={`h-11 w-11 rounded-2xl flex items-center justify-center font-bold ${
+                    popupConfig.isEnabled ? 'bg-emerald-50 text-emerald-700' : 'bg-ink/5 text-ink/40'
+                  }`}>
+                    <BellRing size={22} />
+                  </div>
+                  <div>
+                    <h4 className="font-serif text-base font-bold text-ink">Live Storefront Popups Switch</h4>
+                    <p className="text-xs text-ink/60">Toggle all recent order notifications on or off globally across the website.</p>
+                  </div>
+                </div>
+
+                {/* Master Toggle */}
+                <button
+                  type="button"
+                  onClick={() => handleUpdatePopupConfig('isEnabled', !popupConfig.isEnabled)}
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition ${
+                    popupConfig.isEnabled
+                      ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/25'
+                      : 'bg-ink/10 text-ink/60'
+                  }`}
+                >
+                  {popupConfig.isEnabled ? (
+                    <>
+                      <CheckCircle2 size={16} /> Popups Active (Live)
+                    </>
+                  ) : (
+                    <>
+                      <X size={16} /> Popups Paused
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Timing & Mode Selectors */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-ink/70 mb-1.5">
+                    Notification Mode
+                  </label>
+                  <select
+                    value={popupConfig.mode}
+                    onChange={(e) => handleUpdatePopupConfig('mode', e.target.value)}
+                    className="w-full rounded-xl border border-ink/20 bg-white px-3 py-2 outline-none focus:border-rose"
+                  >
+                    <option value="hybrid">🌟 Hybrid (Staff List + Worldwide Auto)</option>
+                    <option value="custom_only">📋 Staff Curated List Only</option>
+                    <option value="dynamic_only">🌐 Global Auto-Generator Only</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-ink/70 mb-1.5">
+                    Display Cadence (Interval)
+                  </label>
+                  <select
+                    value={popupConfig.displayInterval}
+                    onChange={(e) => handleUpdatePopupConfig('displayInterval', Number(e.target.value))}
+                    className="w-full rounded-xl border border-ink/20 bg-white px-3 py-2 outline-none focus:border-rose"
+                  >
+                    <option value={10}>⚡ High Urgency (Every 10 seconds)</option>
+                    <option value={18}>🎯 Standard Balanced (Every 18 seconds)</option>
+                    <option value={30}>🌿 Subtle (Every 30 seconds)</option>
+                    <option value={60}>🛋️ Relaxed (Every 60 seconds)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-ink/70 mb-1.5">
+                    Display Stay Duration
+                  </label>
+                  <select
+                    value={popupConfig.displayDuration}
+                    onChange={(e) => handleUpdatePopupConfig('displayDuration', Number(e.target.value))}
+                    className="w-full rounded-xl border border-ink/20 bg-white px-3 py-2 outline-none focus:border-rose"
+                  >
+                    <option value={4}>4 seconds on screen</option>
+                    <option value={5.5}>5.5 seconds (Recommended)</option>
+                    <option value={7}>7 seconds on screen</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Test Fire Bar */}
+              <div className="rounded-2xl bg-[#faf4ec] p-4 border border-ink/10 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-xs text-ink/80">
+                  <Sparkles size={16} className="text-saffron shrink-0" />
+                  <span>Want to preview how the notification appears on the storefront right now?</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleTriggerTestPopup(null)}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-ink px-4 py-2 text-xs font-bold uppercase tracking-wider text-white hover:bg-rose transition shrink-0"
+                >
+                  <Play size={13} /> Fire Test Popup Now
+                </button>
+              </div>
+              {testTriggerFeedback && (
+                <p className="text-xs font-semibold text-emerald-700">{testTriggerFeedback}</p>
+              )}
+            </div>
+
+            {/* List of Active Social Proof Popups */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="font-serif text-lg font-bold text-ink">
+                  Staff Curated Order Popups ({popupItems.length})
+                </h4>
+                <span className="text-xs text-ink/60">
+                  {popupItems.filter((p) => p.isEnabled).length} active · {popupItems.filter((p) => !p.isEnabled).length} paused
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {popupItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className={`rounded-2xl border p-4 transition-all duration-300 flex flex-col justify-between ${
+                      item.isEnabled
+                        ? 'bg-white border-ink/15 shadow-sm hover:shadow-md'
+                        : 'bg-gray-50/80 border-dashed border-gray-300 opacity-60'
+                    }`}
+                  >
+                    <div>
+                      {/* Ribbon */}
+                      <div className="flex items-center justify-between gap-1 mb-2">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-rose/10 px-2 py-0.5 text-[10px] font-bold text-rose">
+                          <PackageCheck size={11} /> {item.badge}
+                        </span>
+                        <span className="text-[10px] font-semibold text-terracotta bg-saffron/10 px-2 py-0.5 rounded-full">
+                          {item.tag}
+                        </span>
+                      </div>
+
+                      {/* Details with Thumbnail */}
+                      <div className="flex gap-3 items-center">
+                        <div className="h-14 w-14 rounded-xl overflow-hidden border border-ink/10 bg-ivory shrink-0">
+                          <img
+                            src={resolveProductImage(item.productImage)}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1 text-xs">
+                            <strong className="text-ink truncate">{item.buyerName}</strong>
+                            <span className="text-ink/40">•</span>
+                            <span className="text-terracotta font-medium flex items-center gap-0.5 shrink-0 text-[11px]">
+                              <MapPin size={10} className="text-rose" /> {item.city}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-ink/70 mt-0.5">
+                            Order: <strong className="text-rose font-semibold">{item.quantity}</strong>
+                          </p>
+                          <h5 className="font-bold text-xs text-ink truncate mt-0.5">{item.productName}</h5>
+                          <span className="text-[10px] text-ink/40">{item.timeAgo}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bottom Controls */}
+                    <div className="mt-4 pt-3 border-t border-ink/10 flex items-center justify-between gap-2 text-xs">
+                      {/* Active/Pause Toggle */}
+                      <button
+                        type="button"
+                        onClick={() => handleTogglePopupItem(item.id, item.isEnabled)}
+                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg font-bold text-[11px] transition ${
+                          item.isEnabled
+                            ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                            : 'bg-ink/5 text-ink/50 hover:bg-ink/10'
+                        }`}
+                      >
+                        {item.isEnabled ? 'Active' : 'Paused'}
+                      </button>
+
+                      <div className="flex items-center gap-1">
+                        {/* Trigger test */}
+                        <button
+                          type="button"
+                          onClick={() => handleTriggerTestPopup(item)}
+                          title="Test fire this popup"
+                          className="grid h-7 w-7 place-items-center rounded-lg bg-ink/5 text-ink hover:bg-rose hover:text-white transition"
+                        >
+                          <Play size={12} />
+                        </button>
+
+                        {/* Edit */}
+                        <button
+                          type="button"
+                          onClick={() => setEditingPopup(item)}
+                          title="Edit Popup Details"
+                          className="grid h-7 w-7 place-items-center rounded-lg bg-ink/5 text-ink hover:bg-ink hover:text-white transition"
+                        >
+                          <Edit3 size={12} />
+                        </button>
+
+                        {/* Delete */}
+                        <button
+                          type="button"
+                          onClick={() => handleDeletePopupItem(item.id)}
+                          title="Delete Popup"
+                          className="grid h-7 w-7 place-items-center rounded-lg bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ==================================================== */}
+        {/* TAB 5: STORE SETTINGS & SECURITY */}
         {/* ==================================================== */}
         {activeTab === 'settings' && (
           <div className="max-w-3xl space-y-6">
@@ -1067,7 +1435,6 @@ export default function AdminPortal({ onBackToStore }) {
       {selectedLead && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 backdrop-blur-sm p-4">
           <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white p-6 sm:p-8 shadow-2xl border border-ink/10 space-y-6">
-            {/* Header */}
             <div className="flex items-start justify-between border-b border-ink/10 pb-4">
               <div>
                 <div className="flex items-center gap-2">
@@ -1089,7 +1456,6 @@ export default function AdminPortal({ onBackToStore }) {
               </button>
             </div>
 
-            {/* Customer & Order Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div className="rounded-2xl bg-[#faf4ec] p-4 border border-ink/10 space-y-1.5">
                 <p className="font-bold text-[11px] uppercase tracking-wider text-rose">Contact Details</p>
@@ -1106,7 +1472,6 @@ export default function AdminPortal({ onBackToStore }) {
               </div>
             </div>
 
-            {/* Requested Products */}
             <div className="rounded-2xl border border-ink/10 p-4 bg-white">
               <p className="font-bold text-[11px] uppercase tracking-wider text-ink/60 mb-1">Products Requested</p>
               <p className="text-sm font-semibold text-ink">{selectedLead.products}</p>
@@ -1122,7 +1487,6 @@ export default function AdminPortal({ onBackToStore }) {
               )}
             </div>
 
-            {/* 1-Click WhatsApp Quick Triggers */}
             <div className="space-y-2">
               <p className="font-bold text-[11px] uppercase tracking-wider text-ink/60">
                 1-Click WhatsApp Client Triggers
@@ -1163,7 +1527,6 @@ export default function AdminPortal({ onBackToStore }) {
               </div>
             </div>
 
-            {/* Internal Staff Notes */}
             <div className="space-y-3 pt-2 border-t border-ink/10">
               <p className="font-bold text-[11px] uppercase tracking-wider text-ink/60">
                 Internal Karigar & Staff Notes
@@ -1202,7 +1565,6 @@ export default function AdminPortal({ onBackToStore }) {
               </div>
             </div>
 
-            {/* Footer Buttons */}
             <div className="flex items-center justify-between border-t border-ink/10 pt-4">
               <button
                 type="button"
@@ -1344,7 +1706,7 @@ export default function AdminPortal({ onBackToStore }) {
                   <select
                     value={newProductForm.category}
                     onChange={(e) => setNewProductForm({ ...newProductForm, category: e.target.value })}
-                    className="w-full rounded-xl border border-ink/20 px-3 py-2.5 outline-none focus:border-rose bg-white"
+                    className="w-full rounded-xl border border-ink/20 px-3.5 py-2.5 outline-none focus:border-rose bg-white"
                   >
                     <option value="Duffle Bag">Duffle Bag</option>
                     <option value="Pouch">Pouch</option>
@@ -1375,7 +1737,7 @@ export default function AdminPortal({ onBackToStore }) {
                   <select
                     value={newProductForm.badge}
                     onChange={(e) => setNewProductForm({ ...newProductForm, badge: e.target.value })}
-                    className="w-full rounded-xl border border-ink/20 px-3 py-2.5 outline-none focus:border-rose bg-white"
+                    className="w-full rounded-xl border border-ink/20 px-3.5 py-2.5 outline-none focus:border-rose bg-white"
                   >
                     <option value="New Arrival">New Arrival</option>
                     <option value="Bestseller">Bestseller</option>
@@ -1390,7 +1752,7 @@ export default function AdminPortal({ onBackToStore }) {
                   <select
                     value={newProductForm.status}
                     onChange={(e) => setNewProductForm({ ...newProductForm, status: e.target.value })}
-                    className="w-full rounded-xl border border-ink/20 px-3 py-2.5 outline-none focus:border-rose bg-white"
+                    className="w-full rounded-xl border border-ink/20 px-3.5 py-2.5 outline-none focus:border-rose bg-white"
                   >
                     <option value="in_stock">In Stock (Ready to Dispatch)</option>
                     <option value="made_to_order">Made to Order (2-3 Weeks)</option>
@@ -1399,7 +1761,6 @@ export default function AdminPortal({ onBackToStore }) {
                 </div>
               </div>
 
-              {/* Image Selection Tabs */}
               <div className="space-y-2">
                 <label className="block font-bold uppercase tracking-wider text-ink/70">Product Image</label>
                 <div className="flex gap-2">
@@ -1568,6 +1929,234 @@ export default function AdminPortal({ onBackToStore }) {
                 <button
                   type="button"
                   onClick={() => setEditingProduct(null)}
+                  className="px-4 py-2.5 rounded-xl text-ink hover:bg-ink/5"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 rounded-xl bg-rose text-white font-bold uppercase tracking-wider hover:bg-[#962325]"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ==================================================== */}
+      {/* MODAL 5: ADD NEW ORDER POPUP */}
+      {/* ==================================================== */}
+      {isAddPopupModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-lg rounded-3xl bg-white p-6 sm:p-8 shadow-2xl border border-ink/10 space-y-4">
+            <div className="flex items-center justify-between border-b border-ink/10 pb-3">
+              <div>
+                <h3 className="font-serif text-xl font-bold text-ink">Add Social Proof Order Notification</h3>
+                <p className="text-xs text-ink/60">Simulate or display a verified customer order popup</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddPopupModalOpen(false)}
+                className="grid h-8 w-8 place-items-center rounded-full bg-ink/5 hover:bg-rose hover:text-white transition"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreatePopupSubmit} className="space-y-4 text-xs">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-ink/70 mb-1">Customer / Client Name *</label>
+                  <input
+                    required
+                    type="text"
+                    placeholder="e.g. Zara Al-Mansoor"
+                    value={newPopupForm.buyerName}
+                    onChange={(e) => setNewPopupForm({ ...newPopupForm, buyerName: e.target.value })}
+                    className="w-full rounded-xl border border-ink/20 px-3 py-2 outline-none focus:border-rose"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-ink/70 mb-1">City & Country *</label>
+                  <input
+                    required
+                    type="text"
+                    placeholder="e.g. Dubai, UAE"
+                    value={newPopupForm.city}
+                    onChange={(e) => setNewPopupForm({ ...newPopupForm, city: e.target.value })}
+                    className="w-full rounded-xl border border-ink/20 px-3 py-2 outline-none focus:border-rose"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold uppercase tracking-wider text-ink/70 mb-1">Select Product *</label>
+                <select
+                  value={newPopupForm.productName}
+                  onChange={(e) => {
+                    const sel = products.find((p) => p.name === e.target.value)
+                    setNewPopupForm({
+                      ...newPopupForm,
+                      productName: e.target.value,
+                      productImage: sel?.image || newPopupForm.productImage,
+                    })
+                  }}
+                  className="w-full rounded-xl border border-ink/20 px-3 py-2 outline-none focus:border-rose bg-white"
+                >
+                  {products.map((p) => (
+                    <option key={p.id || p.name} value={p.name}>
+                      {p.name} ({p.price})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-ink/70 mb-1">Order Quantity / Batch</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 50 pieces (Boutique Tier)"
+                    value={newPopupForm.quantity}
+                    onChange={(e) => setNewPopupForm({ ...newPopupForm, quantity: e.target.value })}
+                    className="w-full rounded-xl border border-ink/20 px-3 py-2 outline-none focus:border-rose"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-ink/70 mb-1">Time text</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 12 minutes ago"
+                    value={newPopupForm.timeAgo}
+                    onChange={(e) => setNewPopupForm({ ...newPopupForm, timeAgo: e.target.value })}
+                    className="w-full rounded-xl border border-ink/20 px-3 py-2 outline-none focus:border-rose"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-ink/70 mb-1">Ribbon Badge</label>
+                  <select
+                    value={newPopupForm.badge}
+                    onChange={(e) => setNewPopupForm({ ...newPopupForm, badge: e.target.value })}
+                    className="w-full rounded-xl border border-ink/20 px-3 py-2 outline-none focus:border-rose bg-white"
+                  >
+                    <option value="Bulk Order Placed">Bulk Order Placed</option>
+                    <option value="Custom Batch Placed">Custom Batch Placed</option>
+                    <option value="Sample Trial Placed">Sample Trial Placed</option>
+                    <option value="International Export">International Export</option>
+                    <option value="Corporate Gifting">Corporate Gifting</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-ink/70 mb-1">Sub-tag</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Monogram Favors"
+                    value={newPopupForm.tag}
+                    onChange={(e) => setNewPopupForm({ ...newPopupForm, tag: e.target.value })}
+                    className="w-full rounded-xl border border-ink/20 px-3 py-2 outline-none focus:border-rose"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-ink/10">
+                <button
+                  type="button"
+                  onClick={() => setIsAddPopupModalOpen(false)}
+                  className="px-4 py-2.5 rounded-xl text-ink hover:bg-ink/5"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 rounded-xl bg-rose text-white font-bold uppercase tracking-wider hover:bg-[#962325]"
+                >
+                  Save Notification
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ==================================================== */}
+      {/* MODAL 6: EDIT EXISTING POPUP */}
+      {/* ==================================================== */}
+      {editingPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-lg rounded-3xl bg-white p-6 sm:p-8 shadow-2xl border border-ink/10 space-y-4">
+            <div className="flex items-center justify-between border-b border-ink/10 pb-3">
+              <h3 className="font-serif text-xl font-bold text-ink">Edit Order Notification</h3>
+              <button
+                type="button"
+                onClick={() => setEditingPopup(null)}
+                className="grid h-8 w-8 place-items-center rounded-full bg-ink/5 hover:bg-rose hover:text-white transition"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSavePopupEdit} className="space-y-4 text-xs">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-ink/70 mb-1">Customer Name</label>
+                  <input
+                    type="text"
+                    value={editingPopup.buyerName}
+                    onChange={(e) => setEditingPopup({ ...editingPopup, buyerName: e.target.value })}
+                    className="w-full rounded-xl border border-ink/20 px-3 py-2 outline-none focus:border-rose"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-ink/70 mb-1">City & Country</label>
+                  <input
+                    type="text"
+                    value={editingPopup.city}
+                    onChange={(e) => setEditingPopup({ ...editingPopup, city: e.target.value })}
+                    className="w-full rounded-xl border border-ink/20 px-3 py-2 outline-none focus:border-rose"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold uppercase tracking-wider text-ink/70 mb-1">Product</label>
+                <input
+                  type="text"
+                  value={editingPopup.productName}
+                  onChange={(e) => setEditingPopup({ ...editingPopup, productName: e.target.value })}
+                  className="w-full rounded-xl border border-ink/20 px-3 py-2 outline-none focus:border-rose"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-ink/70 mb-1">Quantity</label>
+                  <input
+                    type="text"
+                    value={editingPopup.quantity}
+                    onChange={(e) => setEditingPopup({ ...editingPopup, quantity: e.target.value })}
+                    className="w-full rounded-xl border border-ink/20 px-3 py-2 outline-none focus:border-rose"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-ink/70 mb-1">Time Text</label>
+                  <input
+                    type="text"
+                    value={editingPopup.timeAgo}
+                    onChange={(e) => setEditingPopup({ ...editingPopup, timeAgo: e.target.value })}
+                    className="w-full rounded-xl border border-ink/20 px-3 py-2 outline-none focus:border-rose"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-ink/10">
+                <button
+                  type="button"
+                  onClick={() => setEditingPopup(null)}
                   className="px-4 py-2.5 rounded-xl text-ink hover:bg-ink/5"
                 >
                   Cancel
