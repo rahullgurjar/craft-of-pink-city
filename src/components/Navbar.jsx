@@ -1,4 +1,4 @@
-import { Menu, X, Sparkles, ShoppingBag } from 'lucide-react';
+import { Menu, X, Sparkles, ShoppingBag, LifeBuoy, Heart, Layers } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import logo from '../assets/logo.jpeg';
 import { instagram, whatsapp } from '../data/products';
@@ -82,146 +82,206 @@ export default function Navbar({ onNavigateHome, isThankYouPage = false }) {
     }
   };
 
+  const handleOpenSupport = () => {
+    setOpen(false);
+    window.dispatchEvent(new CustomEvent('open-support-help'));
+  };
+
   return (
-    <header className="sticky top-0 z-40 border-b border-ink/10 bg-ivory/95 backdrop-blur-md transition-shadow duration-300">
+    <header className="sticky top-0 z-40 border-b border-[#EADBC8] bg-[#FFFDF9]/95 backdrop-blur-lg shadow-[0_4px_25px_rgba(90,50,30,0.04)] transition-all duration-300">
       {/* Top Page Scroll Progress Bar */}
       {!isThankYouPage && (
         <div
-          className="fixed top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-rose via-saffron to-rose z-[100] origin-left transition-transform duration-75 ease-out pointer-events-none shadow-sm"
+          className="fixed top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-rose via-saffron to-terracotta z-[100] origin-left transition-transform duration-75 ease-out pointer-events-none shadow-xs"
           style={{ transform: `scaleX(${scrollProgress / 100})` }}
         />
       )}
 
-      <nav className="mx-auto flex h-[76px] max-w-7xl items-center justify-between px-5 lg:px-8">
+      <nav className="mx-auto flex h-[76px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        {/* Brand Logo & Cozy Typography */}
         <a
           href="#home"
           onClick={(e) => handleNavClick(e, 'home')}
-          className="flex items-center gap-3 group"
+          className="flex items-center gap-3 group shrink-0"
           aria-label="Craft of Pink City home"
         >
-          <img
-            className="h-14 w-14 rounded-full object-cover shadow-sm transition-transform duration-300 group-hover:scale-105"
-            src={logo}
-            alt="Craft of Pink City logo"
-          />
-          <span className="hidden font-serif text-xl leading-[.85] text-ink sm:block">
-            Craft of<br />
-            <i className="font-normal text-rose transition-colors group-hover:text-terracotta">Pink City</i>
-          </span>
+          <div className="relative">
+            <img
+              className="h-13 w-13 sm:h-14 sm:w-14 rounded-full object-cover shadow-sm ring-2 ring-rose/25 ring-offset-2 ring-offset-[#FFFDF9] transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3"
+              src={logo}
+              alt="Craft of Pink City logo"
+            />
+            <span className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-saffron text-[8px] text-ink font-bold shadow-xs">
+              🌸
+            </span>
+          </div>
+
+          <div className="hidden xs:block text-left">
+            <span className="font-serif text-xl sm:text-2xl leading-none text-ink tracking-tight block">
+              Craft of <i className="font-normal text-rose transition-colors group-hover:text-terracotta">Pink City</i>
+            </span>
+            <span className="text-[9.5px] font-semibold tracking-wider text-ink/50 uppercase mt-0.5 block">
+              Jaipur Block Print Atelier
+            </span>
+          </div>
         </a>
 
-        {/* Desktop Nav Links */}
-        <div className="hidden items-center gap-4 text-xs font-semibold uppercase tracking-[.13em] lg:flex">
+        {/* Desktop Cozy Pill Nav Links */}
+        <div className="hidden items-center gap-1.5 text-[11.5px] font-bold uppercase tracking-[.11em] lg:flex bg-[#FAF4EC]/80 p-1.5 rounded-full border border-[#E8DCCB] shadow-inner">
           {links.map(([label, id]) => {
             const isActive = !isThankYouPage && activeSection === id;
+            const isBulk = id === 'bulk-orders';
+            const isBundles = id === 'bundles';
+
             return (
               <a
                 key={id}
                 href={`#${id}`}
                 onClick={(e) => handleNavClick(e, id)}
-                className={`relative px-2 py-1.5 transition-all duration-300 ${
-                  id === 'bulk-orders'
-                    ? 'flex items-center gap-1.5 rounded-full border border-rose/30 bg-rose/10 px-3 py-1.5 text-rose font-bold hover:bg-rose hover:text-white shadow-xs hover:-translate-y-0.5'
+                className={`relative px-3 py-1.5 rounded-full transition-all duration-200 whitespace-nowrap flex items-center gap-1.5 ${
+                  isBulk
+                    ? 'bg-gradient-to-r from-rose/15 to-saffron/20 border border-rose/30 text-rose hover:bg-rose hover:text-white shadow-xs'
+                    : isBundles
+                    ? isActive
+                      ? 'bg-rose text-white shadow-xs'
+                      : 'text-ink/75 hover:text-rose hover:bg-white/80'
                     : isActive
-                    ? 'text-rose font-bold'
-                    : 'text-ink/75 hover:text-rose'
+                    ? 'bg-rose text-white shadow-xs font-bold'
+                    : 'text-ink/75 hover:text-rose hover:bg-white/80'
                 }`}
               >
-                {id === 'bulk-orders' && <Sparkles size={13} className="animate-pulse" />}
-                {label}
-                {isActive && id !== 'bulk-orders' && (
-                  <span className="absolute -bottom-1 left-2 right-2 h-[2px] rounded-full bg-rose animate-fadeIn shadow-xs" />
-                )}
+                {isBulk && <Sparkles size={12} className="animate-pulse text-rose" />}
+                {isBundles && !isActive && <Layers size={11} className="text-saffron shrink-0" />}
+                <span>{label}</span>
               </a>
             );
           })}
+
+          {/* Quick Support Pill in Header */}
+          <button
+            type="button"
+            onClick={handleOpenSupport}
+            className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-emerald-800 hover:bg-emerald-100/70 transition-colors"
+            title="Open 24/7 Support & Help"
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+            </span>
+            <span className="text-[11px] font-bold">Help</span>
+          </button>
         </div>
 
-        {/* Right CTA Actions: Cart & Contact */}
-        <div className="flex items-center gap-3">
+        {/* Right CTA Actions: Cart & Cozy WhatsApp */}
+        <div className="flex items-center gap-2.5 sm:gap-3">
           {/* Cart Bag Trigger */}
           <button
             type="button"
             onClick={() => setIsCartOpen(true)}
-            className="relative flex items-center gap-2 rounded-full border border-ink/15 bg-white/80 px-3.5 py-2 text-xs font-bold uppercase tracking-wider text-ink shadow-xs backdrop-blur-sm transition-all hover:border-rose hover:bg-rose hover:text-white hover:shadow-md"
+            className="relative flex items-center gap-2 rounded-full border border-[#E5D7C5] bg-white/90 px-3.5 py-2 text-xs font-bold uppercase tracking-wider text-ink shadow-xs backdrop-blur-sm transition-all hover:border-rose hover:bg-[#FFF8F8] hover:shadow-md hover:scale-105"
             aria-label={`Open shopping cart (${totalCount} items)`}
           >
-            <ShoppingBag size={16} />
-            <span className="hidden sm:inline">Bag</span>
-            <span className="grid h-5 w-5 place-items-center rounded-full bg-rose text-[10px] font-bold text-white transition-colors group-hover:bg-white group-hover:text-rose">
+            <ShoppingBag size={16} className="text-ink/80 group-hover:text-rose transition-colors" />
+            <span className="hidden sm:inline font-bold">Bag</span>
+            <span className="grid h-5 w-5 place-items-center rounded-full bg-rose text-[10px] font-bold text-white shadow-xs ring-1 ring-white">
               {totalCount}
             </span>
           </button>
 
+          {/* Cozy WhatsApp Artisan Button */}
           <a
             href={whatsapp}
             target="_blank"
             rel="noreferrer"
-            className="hidden items-center gap-2 rounded-full bg-ink px-4 py-2 text-xs font-bold uppercase tracking-[.13em] text-ivory transition-transform duration-300 hover:scale-[1.03] hover:bg-rose sm:flex shadow-xs"
+            className="hidden items-center gap-2 rounded-full bg-gradient-to-r from-[#2D1B1E] via-[#3a2027] to-[#2D1B1E] px-4 py-2 text-xs font-bold uppercase tracking-[.12em] text-[#FAF4EC] transition-all duration-300 hover:scale-[1.04] hover:bg-rose shadow-sm hover:shadow-md sm:flex border border-white/10"
           >
-            <WhatsAppIcon size={14} /> WhatsApp
+            <WhatsAppIcon size={14} className="text-[#25D366]" />
+            <span>Studio Chat</span>
           </a>
 
           {/* Mobile Hamburger Toggle */}
           <button
             type="button"
-            className="grid h-10 w-10 place-items-center rounded-full bg-ink/5 text-ink hover:bg-ink/10 lg:hidden"
+            className="grid h-10 w-10 place-items-center rounded-full bg-[#FAF4EC] text-ink hover:bg-rose/10 hover:text-rose border border-[#E8DCCB] transition-colors lg:hidden"
             onClick={() => setOpen(!open)}
             aria-expanded={open}
             aria-controls="mobile-navigation"
             aria-label="Toggle navigation"
           >
-            {open ? <X size={22} /> : <Menu size={22} />}
+            {open ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </nav>
 
-      {/* Mobile Dropdown Menu */}
+      {/* Mobile Dropdown Menu with Cozy Warmth */}
       {open && (
         <div
           id="mobile-navigation"
-          className="border-t border-ink/10 bg-ivory px-5 py-5 lg:hidden animate-slideUp shadow-xl"
+          className="border-t border-[#E8DCCB] bg-[#FFFDF9] px-5 py-5 lg:hidden animate-slideUp shadow-2xl"
         >
-          {links.map(([label, id]) => {
-            const isActive = !isThankYouPage && activeSection === id;
-            return (
+          <div className="space-y-1">
+            {links.map(([label, id]) => {
+              const isActive = !isThankYouPage && activeSection === id;
+              const isBulk = id === 'bulk-orders';
+              const isBundles = id === 'bundles';
+
+              return (
+                <a
+                  key={id}
+                  href={`#${id}`}
+                  onClick={(e) => handleNavClick(e, id)}
+                  className={`flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all ${
+                    isBulk
+                      ? 'bg-rose/10 text-rose font-bold border border-rose/20'
+                      : isActive
+                      ? 'bg-rose text-white font-bold shadow-xs'
+                      : 'text-ink/80 hover:bg-[#FAF4EC] hover:text-rose'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    {isBulk && <Sparkles size={15} className="text-rose" />}
+                    {isBundles && <Layers size={15} className="text-saffron" />}
+                    <span>{label}</span>
+                  </div>
+                  <span className="text-xs text-ink/30 font-normal">→</span>
+                </a>
+              );
+            })}
+          </div>
+
+          <div className="mt-4 border-t border-[#E8DCCB] pt-4 space-y-2.5">
+            <button
+              type="button"
+              onClick={handleOpenSupport}
+              className="flex w-full min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#2D1B1E] to-rose py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md hover:opacity-95"
+            >
+              <LifeBuoy size={15} />
+              <span>24/7 Support & Help Center</span>
+            </button>
+
+            <div className="flex items-center justify-around pt-1">
               <a
-                key={id}
-                href={`#${id}`}
-                onClick={(e) => handleNavClick(e, id)}
-                className={`block py-3 text-sm font-semibold transition-colors ${
-                  id === 'bulk-orders'
-                    ? 'text-rose font-bold flex items-center gap-2'
-                    : isActive
-                    ? 'text-rose font-bold pl-2 border-l-2 border-rose'
-                    : 'text-ink/80 hover:text-rose'
-                }`}
+                className="flex min-h-10 items-center gap-2 text-rose font-bold text-xs hover:underline"
+                href={instagram}
+                target="_blank"
+                rel="noreferrer"
               >
-                {id === 'bulk-orders' && <Sparkles size={15} />}
-                {label}
+                <InstagramIcon size={16} /> Instagram Atelier
               </a>
-            );
-          })}
-          <div className="mt-4 flex gap-5 border-t border-ink/10 pt-4">
-            <a
-              className="flex min-h-11 items-center gap-2 text-rose font-semibold text-sm hover:underline"
-              href={instagram}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <InstagramIcon size={18} /> Instagram
-            </a>
-            <a
-              className="flex min-h-11 items-center gap-2 text-rose font-semibold text-sm hover:underline"
-              href={whatsapp}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <WhatsAppIcon size={18} /> WhatsApp
-            </a>
+              <span className="text-ink/20">·</span>
+              <a
+                className="flex min-h-10 items-center gap-2 text-emerald-700 font-bold text-xs hover:underline"
+                href={whatsapp}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <WhatsAppIcon size={16} /> WhatsApp Studio
+              </a>
+            </div>
           </div>
         </div>
       )}
     </header>
   );
 }
+

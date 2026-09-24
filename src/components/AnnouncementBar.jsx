@@ -41,21 +41,21 @@ export default function AnnouncementBar() {
   const Icon = currentMsg.icon
 
   return (
-    <div className="relative z-[60] bg-[#1e121d] text-white text-[11px] sm:text-xs font-medium border-b border-white/10">
+    <div className="relative z-[60] bg-gradient-to-r from-[#21121d] via-[#2d1827] to-[#21121d] text-white text-[11px] sm:text-xs font-medium border-b border-white/10 shadow-xs">
       <div className="mx-auto flex h-9 max-w-7xl items-center justify-between px-3 sm:px-6 lg:px-8">
         {/* Left: Trust Seal */}
-        <div className="hidden md:flex items-center gap-2 text-white/70">
+        <div className="hidden md:flex items-center gap-2 text-white/80">
           <span className="flex h-2 w-2 rounded-full bg-saffron animate-pulse" />
           <span className="text-[10px] tracking-wider uppercase font-semibold text-saffron">
-            Jaipur Atelier
+            Jaipur Artisan Atelier
           </span>
         </div>
 
         {/* Center: Rotating Heritage Announcement */}
         <div className="flex-1 flex items-center justify-center text-center px-2">
-          <div className="flex items-center gap-1.5 transition-all duration-300 animate-fadeIn key={currentIdx}">
-            <Icon size={13} className="text-saffron shrink-0" />
-            <span className="text-white/90 truncate max-w-[280px] sm:max-w-none">
+          <div className="flex items-center gap-2 transition-all duration-300 animate-fadeIn" key={currentIdx}>
+            <Icon size={13} className="text-saffron shrink-0 animate-spin-slow" />
+            <span className="text-white/95 truncate max-w-[280px] sm:max-w-none tracking-wide">
               {currentMsg.text}
             </span>
           </div>

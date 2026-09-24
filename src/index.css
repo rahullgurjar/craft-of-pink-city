@@ -456,6 +456,23 @@
   animation: soundwave 0.8s ease-in-out 0.4s infinite;
 }
 
+/* Cozy Handcrafted Boutique Utilities */
+.shadow-cozy {
+  box-shadow: 0 6px 24px rgba(110, 60, 40, 0.06);
+}
+.shadow-cozy-lg {
+  box-shadow: 0 16px 40px rgba(110, 60, 40, 0.10);
+}
+.border-cozy {
+  border-color: #EADBC8;
+}
+.bg-cozy-cream {
+  background-color: #FAF4EC;
+}
+.bg-cozy-muslin {
+  background-color: #FFFDF9;
+}
+
 @media (max-width: 640px) {
   .hero-pattern { background: #fffaf1; }
   .hero-photo { height: 390px; }

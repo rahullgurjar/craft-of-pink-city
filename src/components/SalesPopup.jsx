@@ -510,7 +510,7 @@ export default function SalesPopup() {
       aria-live="polite"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`fixed bottom-20 left-3 sm:bottom-4 sm:left-4 z-[70] max-w-[280px] sm:max-w-[390px] w-auto transition-all duration-500 ease-out transform ${
+      className={`fixed bottom-20 left-3 sm:bottom-20 sm:left-6 z-[70] max-w-[280px] sm:max-w-[390px] w-auto transition-all duration-500 ease-out transform ${
         isVisible
           ? 'translate-y-0 opacity-100 scale-100 pointer-events-auto'
           : 'translate-y-8 opacity-0 scale-95 pointer-events-none'

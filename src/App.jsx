@@ -7,6 +7,7 @@ import CraftProcess from './components/CraftProcess';
 import Products from './components/Products';
 import Footer from './components/Footer';
 import FloatingWhatsApp from './components/FloatingWhatsApp';
+import MobileBottomBar from './components/MobileBottomBar';
 import { CartProvider } from './context/CartContext';
 import { CurrencyProvider } from './context/CurrencyContext';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -20,6 +21,7 @@ const WhyChooseUs = lazy(() => import('./components/WhyChooseUs'));
 const FAQ = lazy(() => import('./components/FAQ'));
 const InstagramCTA = lazy(() => import('./components/InstagramCTA'));
 const ArtisanChatbot = lazy(() => import('./components/ArtisanChatbot'));
+const SupportHelpCenter = lazy(() => import('./components/SupportHelpCenter'));
 const CartDrawer = lazy(() => import('./components/CartDrawer'));
 const PolicyModal = lazy(() => import('./components/PolicyModal'));
 const SalesPopup = lazy(() => import('./components/SalesPopup'));
@@ -173,6 +175,19 @@ export default function App() {
 
           <ErrorBoundary><Footer onOpenPolicy={openPolicy} /></ErrorBoundary>
           <ErrorBoundary><FloatingWhatsApp /></ErrorBoundary>
+          <ErrorBoundary>
+            <MobileBottomBar
+              onNavigateSection={handleBackToStore}
+              isThankYouPage={isThankYouPage}
+            />
+          </ErrorBoundary>
+          <Suspense fallback={null}>
+            <ErrorBoundary>
+              <SupportHelpCenter
+                onOpenPolicy={openPolicy}
+              />
+            </ErrorBoundary>
+          </Suspense>
           <Suspense fallback={null}>
             <ErrorBoundary><ArtisanChatbot /></ErrorBoundary>
           </Suspense>
