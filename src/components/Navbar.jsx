@@ -1,4 +1,4 @@
-import { Menu, X, Sparkles, ShoppingBag, LifeBuoy, Heart, Layers } from 'lucide-react';
+import { Menu, X, Sparkles, ShoppingBag, Layers, Phone, LifeBuoy } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import logo from '../assets/logo.jpeg';
 import { instagram, whatsapp } from '../data/products';
@@ -6,12 +6,22 @@ import InstagramIcon from './InstagramIcon';
 import WhatsAppIcon from './WhatsAppIcon';
 import { useCart } from '../context/CartContext';
 
-const links = [
-  ['Home', 'home'],
-  ['About', 'about'],
-  ['Our Craft', 'craft'],
-  ['Products', 'products'],
+// Streamlined high-impact desktop links (optimized to eliminate clutter and give brand breathing room)
+const desktopLinks = [
+  ['Collection', 'products'],
   ['Curated Sets', 'bundles'],
+  ['Our Craft', 'craft'],
+  ['Bulk Orders', 'bulk-orders'],
+  ['Reviews', 'reviews'],
+];
+
+// Full links for mobile drawer
+const mobileLinks = [
+  ['Home', 'home'],
+  ['Collection', 'products'],
+  ['Curated Sets', 'bundles'],
+  ['Our Craft', 'craft'],
+  ['About Us', 'about'],
   ['Bulk Orders', 'bulk-orders'],
   ['Reviews', 'reviews'],
   ['FAQs', 'faq'],
@@ -97,17 +107,17 @@ export default function Navbar({ onNavigateHome, isThankYouPage = false }) {
         />
       )}
 
-      <nav className="mx-auto flex h-[76px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Brand Logo & Cozy Typography */}
+      <nav className="mx-auto flex h-[74px] max-w-7xl items-center justify-between px-3.5 sm:px-6 lg:px-8 gap-3 sm:gap-6">
+        {/* Brand Logo & Prominently Visible Brand Name */}
         <a
           href="#home"
           onClick={(e) => handleNavClick(e, 'home')}
-          className="flex items-center gap-3 group shrink-0"
+          className="flex items-center gap-2.5 sm:gap-3 group shrink-0 min-w-0"
           aria-label="Craft of Pink City home"
         >
-          <div className="relative">
+          <div className="relative shrink-0">
             <img
-              className="h-13 w-13 sm:h-14 sm:w-14 rounded-full object-cover shadow-sm ring-2 ring-rose/25 ring-offset-2 ring-offset-[#FFFDF9] transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3"
+              className="h-11 w-11 sm:h-13 sm:w-13 rounded-full object-cover shadow-sm ring-2 ring-rose/25 ring-offset-2 ring-offset-[#FFFDF9] transition-transform duration-300 group-hover:scale-105"
               src={logo}
               alt="Craft of Pink City logo"
             />
@@ -116,19 +126,19 @@ export default function Navbar({ onNavigateHome, isThankYouPage = false }) {
             </span>
           </div>
 
-          <div className="hidden xs:block text-left">
-            <span className="font-serif text-xl sm:text-2xl leading-none text-ink tracking-tight block">
+          <div className="text-left flex flex-col justify-center min-w-0">
+            <span className="font-serif text-lg sm:text-2xl font-bold leading-none text-ink tracking-tight whitespace-nowrap">
               Craft of <i className="font-normal text-rose transition-colors group-hover:text-terracotta">Pink City</i>
             </span>
-            <span className="text-[9.5px] font-semibold tracking-wider text-ink/50 uppercase mt-0.5 block">
-              Jaipur Block Print Atelier
+            <span className="text-[9px] sm:text-[10px] font-semibold tracking-wider text-ink/50 uppercase mt-0.5 truncate">
+              Jaipur Artisan Atelier
             </span>
           </div>
         </a>
 
-        {/* Desktop Cozy Pill Nav Links */}
-        <div className="hidden items-center gap-1.5 text-[11.5px] font-bold uppercase tracking-[.11em] lg:flex bg-[#FAF4EC]/80 p-1.5 rounded-full border border-[#E8DCCB] shadow-inner">
-          {links.map(([label, id]) => {
+        {/* Streamlined Desktop Navigation Links (Spacious & Clean) */}
+        <div className="hidden items-center gap-1.5 text-[11.5px] font-bold uppercase tracking-[.11em] lg:flex bg-[#FAF4EC]/85 p-1 rounded-full border border-[#E8DCCB] shadow-inner">
+          {desktopLinks.map(([label, id]) => {
             const isActive = !isThankYouPage && activeSection === id;
             const isBulk = id === 'bulk-orders';
             const isBundles = id === 'bundles';
@@ -138,16 +148,16 @@ export default function Navbar({ onNavigateHome, isThankYouPage = false }) {
                 key={id}
                 href={`#${id}`}
                 onClick={(e) => handleNavClick(e, id)}
-                className={`relative px-3 py-1.5 rounded-full transition-all duration-200 whitespace-nowrap flex items-center gap-1.5 ${
+                className={`relative px-3.5 py-1.5 rounded-full transition-all duration-200 whitespace-nowrap flex items-center gap-1.5 ${
                   isBulk
-                    ? 'bg-gradient-to-r from-rose/15 to-saffron/20 border border-rose/30 text-rose hover:bg-rose hover:text-white shadow-xs'
+                    ? 'bg-gradient-to-r from-rose/15 to-saffron/20 border border-rose/30 text-rose hover:bg-rose hover:text-white shadow-xs font-bold'
                     : isBundles
                     ? isActive
                       ? 'bg-rose text-white shadow-xs'
-                      : 'text-ink/75 hover:text-rose hover:bg-white/80'
+                      : 'text-ink/75 hover:text-rose hover:bg-white/90'
                     : isActive
                     ? 'bg-rose text-white shadow-xs font-bold'
-                    : 'text-ink/75 hover:text-rose hover:bg-white/80'
+                    : 'text-ink/75 hover:text-rose hover:bg-white/90'
                 }`}
               >
                 {isBulk && <Sparkles size={12} className="animate-pulse text-rose" />}
@@ -156,29 +166,15 @@ export default function Navbar({ onNavigateHome, isThankYouPage = false }) {
               </a>
             );
           })}
-
-          {/* Quick Support Pill in Header */}
-          <button
-            type="button"
-            onClick={handleOpenSupport}
-            className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-emerald-800 hover:bg-emerald-100/70 transition-colors"
-            title="Open 24/7 Support & Help"
-          >
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-            </span>
-            <span className="text-[11px] font-bold">Help</span>
-          </button>
         </div>
 
-        {/* Right CTA Actions: Cart & Cozy WhatsApp */}
-        <div className="flex items-center gap-2.5 sm:gap-3">
+        {/* Right CTA Actions: Bag & Studio Chat */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {/* Cart Bag Trigger */}
           <button
             type="button"
             onClick={() => setIsCartOpen(true)}
-            className="relative flex items-center gap-2 rounded-full border border-[#E5D7C5] bg-white/90 px-3.5 py-2 text-xs font-bold uppercase tracking-wider text-ink shadow-xs backdrop-blur-sm transition-all hover:border-rose hover:bg-[#FFF8F8] hover:shadow-md hover:scale-105"
+            className="relative flex items-center gap-2 rounded-full border border-[#E5D7C5] bg-white/90 px-3 sm:px-3.5 py-1.5 sm:py-2 text-xs font-bold uppercase tracking-wider text-ink shadow-xs backdrop-blur-sm transition-all hover:border-rose hover:bg-[#FFF8F8] hover:shadow-md hover:scale-105"
             aria-label={`Open shopping cart (${totalCount} items)`}
           >
             <ShoppingBag size={16} className="text-ink/80 group-hover:text-rose transition-colors" />
@@ -193,34 +189,34 @@ export default function Navbar({ onNavigateHome, isThankYouPage = false }) {
             href={whatsapp}
             target="_blank"
             rel="noreferrer"
-            className="hidden items-center gap-2 rounded-full bg-gradient-to-r from-[#2D1B1E] via-[#3a2027] to-[#2D1B1E] px-4 py-2 text-xs font-bold uppercase tracking-[.12em] text-[#FAF4EC] transition-all duration-300 hover:scale-[1.04] hover:bg-rose shadow-sm hover:shadow-md sm:flex border border-white/10"
+            className="hidden items-center gap-1.5 rounded-full bg-gradient-to-r from-[#2D1B1E] via-[#3a2027] to-[#2D1B1E] px-3.5 py-2 text-xs font-bold uppercase tracking-[.11em] text-[#FAF4EC] transition-all duration-300 hover:scale-[1.04] hover:bg-rose shadow-sm hover:shadow-md sm:flex border border-white/10"
           >
             <WhatsAppIcon size={14} className="text-[#25D366]" />
-            <span>Studio Chat</span>
+            <span>Chat</span>
           </a>
 
           {/* Mobile Hamburger Toggle */}
           <button
             type="button"
-            className="grid h-10 w-10 place-items-center rounded-full bg-[#FAF4EC] text-ink hover:bg-rose/10 hover:text-rose border border-[#E8DCCB] transition-colors lg:hidden"
+            className="grid h-9 w-9 sm:h-10 sm:w-10 place-items-center rounded-full bg-[#FAF4EC] text-ink hover:bg-rose/10 hover:text-rose border border-[#E8DCCB] transition-colors lg:hidden"
             onClick={() => setOpen(!open)}
             aria-expanded={open}
             aria-controls="mobile-navigation"
             aria-label="Toggle navigation"
           >
-            {open ? <X size={20} /> : <Menu size={20} />}
+            {open ? <X size={19} /> : <Menu size={19} />}
           </button>
         </div>
       </nav>
 
-      {/* Mobile Dropdown Menu with Cozy Warmth */}
+      {/* Mobile Dropdown Menu with Full Links */}
       {open && (
         <div
           id="mobile-navigation"
           className="border-t border-[#E8DCCB] bg-[#FFFDF9] px-5 py-5 lg:hidden animate-slideUp shadow-2xl"
         >
           <div className="space-y-1">
-            {links.map(([label, id]) => {
+            {mobileLinks.map(([label, id]) => {
               const isActive = !isThankYouPage && activeSection === id;
               const isBulk = id === 'bulk-orders';
               const isBundles = id === 'bundles';
@@ -266,7 +262,7 @@ export default function Navbar({ onNavigateHome, isThankYouPage = false }) {
                 target="_blank"
                 rel="noreferrer"
               >
-                <InstagramIcon size={16} /> Instagram Atelier
+                <InstagramIcon size={16} /> Instagram
               </a>
               <span className="text-ink/20">·</span>
               <a
@@ -284,4 +280,5 @@ export default function Navbar({ onNavigateHome, isThankYouPage = false }) {
     </header>
   );
 }
+
 
