@@ -15,7 +15,10 @@ import {
   Mail,
   MapPin,
   Phone,
-  AlertCircle
+  AlertCircle,
+  Lock,
+  Video,
+  RotateCcw
 } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useCurrency } from '../context/CurrencyContext'
@@ -566,13 +569,34 @@ export default function CartDrawer({ onNavigateThankYou }) {
               </button>
             )}
 
-            <div className="flex items-center justify-between text-[11px] text-ink/60">
-              <span className="flex items-center gap-1 text-emerald-700 font-semibold">
-                <CheckCircle2 size={13} /> Recorded with Artisan Workshop
-              </span>
-              <span className="flex items-center gap-1 text-ink/70 font-medium">
-                <ShieldCheck size={13} /> 100% Handcrafted Guarantee
-              </span>
+            {/* Trust Reassurance Badges */}
+            <div className="rounded-xl border border-ink/10 bg-[#FAF6F0] p-3 space-y-2">
+              <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-rose">
+                <span className="flex items-center gap-1">
+                  <Lock size={12} className="text-emerald-700" />
+                  <span>256-Bit SSL Direct Studio Checkout</span>
+                </span>
+                <span className="text-emerald-700 font-semibold">Verified Safe</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-[10px] text-ink/75 pt-1 border-t border-ink/5">
+                <div className="flex items-center gap-1.5">
+                  <Video size={12} className="text-rose shrink-0" />
+                  <span>WhatsApp Video Proof</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <RotateCcw size={12} className="text-emerald-700 shrink-0" />
+                  <span>48h Defect Replacement</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Sparkles size={12} className="text-amber-600 shrink-0" />
+                  <span>100% Handblock Cotton</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Truck size={12} className="text-blue-600 shrink-0" />
+                  <span>Insured Express Courier</span>
+                </div>
+              </div>
             </div>
           </div>
         )}

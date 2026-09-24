@@ -17,7 +17,8 @@ import {
   Loader2,
   ArrowRight,
   ArrowLeft,
-  AlertCircle
+  AlertCircle,
+  Video
 } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useCurrency } from '../context/CurrencyContext'
@@ -648,6 +649,53 @@ export default function ProductModal({
                   </div>
                 </>
               )}
+
+              {/* Direct Artisan Trust & Purchase Guarantees Strip */}
+              <div className="rounded-2xl border border-ink/10 bg-gradient-to-b from-[#FAF5EE] to-white p-4 space-y-2.5 shadow-xs">
+                <div className="flex items-center justify-between border-b border-ink/10 pb-2">
+                  <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-rose">
+                    <ShieldCheck size={14} className="text-emerald-700" />
+                    <span>Jaipur Workshop Guarantees</span>
+                  </span>
+                  <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
+                    100% Authentic
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-left">
+                  <div className="flex items-start gap-2 bg-white p-2.5 rounded-xl border border-ink/5 shadow-xs">
+                    <Sparkles size={14} className="text-amber-600 mt-0.5 shrink-0" />
+                    <div>
+                      <strong className="block text-ink text-[11px]">100% Handblock Cotton</strong>
+                      <span className="text-[10px] text-ink/60 leading-tight">Teak block print & azo-free dyes</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2 bg-white p-2.5 rounded-xl border border-ink/5 shadow-xs">
+                    <Video size={14} className="text-rose mt-0.5 shrink-0" />
+                    <div>
+                      <strong className="block text-ink text-[11px]">WhatsApp Video Proof</strong>
+                      <span className="text-[10px] text-ink/60 leading-tight">HD footage shared before dispatch</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2 bg-white p-2.5 rounded-xl border border-ink/5 shadow-xs">
+                    <RotateCcw size={14} className="text-emerald-700 mt-0.5 shrink-0" />
+                    <div>
+                      <strong className="block text-ink text-[11px]">48h Unboxing Safety</strong>
+                      <span className="text-[10px] text-ink/60 leading-tight">Free replacement on defects</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2 bg-white p-2.5 rounded-xl border border-ink/5 shadow-xs">
+                    <Truck size={14} className="text-blue-600 mt-0.5 shrink-0" />
+                    <div>
+                      <strong className="block text-ink text-[11px]">Insured Courier AWB</strong>
+                      <span className="text-[10px] text-ink/60 leading-tight">Live tracking via BlueDart/DHL</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               {/* Quick tabs: Details vs Specs vs Craft */}
               <div className="border-t border-ink/10 pt-4">

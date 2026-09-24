@@ -11,9 +11,11 @@ import {
   ShieldCheck,
   Loader2,
   Mail,
-  AlertCircle
+  AlertCircle,
+  Video
 } from 'lucide-react'
 import { whatsappNumber, email } from '../data/products'
+import WhatsAppIcon from './WhatsAppIcon'
 import { submitToGoogleSheet } from '../config/googleSheet'
 import { validateName, validatePhone, validateEmail } from '../utils/validation'
 
@@ -249,6 +251,36 @@ export default function BulkOrder({ onNavigateThankYou }) {
               </div>
             )
           })}
+        </div>
+
+        {/* Live Workshop Video Verification Banner */}
+        <div className="mt-12 rounded-3xl bg-gradient-to-r from-[#2B1727] via-ink to-[#2B1727] p-6 sm:p-8 text-white shadow-xl border border-white/10">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+            <div className="space-y-2 max-w-2xl">
+              <div className="inline-flex items-center gap-2 rounded-full bg-rose/20 px-3 py-1 text-xs font-bold uppercase tracking-wider text-rose-300 border border-rose/30">
+                <Video size={14} className="animate-pulse text-rose-400" />
+                <span>100% Workshop Transparency</span>
+              </div>
+              <h3 className="font-serif text-2xl sm:text-3xl text-white font-bold leading-tight">
+                Schedule a Live 5-Minute Studio Video Call
+              </h3>
+              <p className="text-xs sm:text-sm text-white/75 leading-relaxed">
+                Placing a bulk order of 25+ pieces? Connect directly with our Jaipur workshop manager on a live WhatsApp video call. Inspect authentic wooden block-printing tables, watch our artisans hand-stitch quilted layers, and verify fabric swatches in real time before booking.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0 w-full lg:w-auto">
+              <a
+                href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Hello Craft of Pink City, I would like to schedule a 5-minute live WhatsApp video tour of your Jaipur workshop for a bulk order inquiry.')}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex w-full sm:w-auto items-center justify-center gap-2.5 rounded-2xl bg-[#25D366] px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-white shadow-lg hover:bg-[#20ba59] hover:scale-105 transition-all cursor-pointer"
+              >
+                <WhatsAppIcon size={16} />
+                <span>Book Live Studio Video Call</span>
+              </a>
+            </div>
+          </div>
         </div>
 
         {/* Form Container */}

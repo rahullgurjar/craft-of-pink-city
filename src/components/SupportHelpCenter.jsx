@@ -22,7 +22,8 @@ import {
   Bot,
   HelpCircle,
   ArrowRight,
-  Building2
+  Building2,
+  Video
 } from 'lucide-react'
 import { whatsappNumber, whatsapp, email } from '../data/products'
 import WhatsAppIcon from './WhatsAppIcon'
@@ -68,6 +69,16 @@ const HELP_TOPICS = [
     badge: 'Sample Policy',
     actionText: 'Request Sample',
     whatsappPrompt: 'Hello Craft of Pink City, I want to order a physical sample piece for a potential bulk/corporate order.'
+  },
+  {
+    id: 'video-tour',
+    category: 'Bulk & Wholesale',
+    question: 'Can I schedule a live video call to inspect your Jaipur workshop?',
+    answer:
+      'Yes! We offer 1-on-1 live WhatsApp video tours of our Jaipur studio for wholesale and boutique buyers. You can view our authentic wooden block printing tables, see artisans hand-quilting fabrics, and inspect raw material inventory in real time before placing your bulk order.',
+    badge: 'Transparency',
+    actionText: 'Book Video Call',
+    whatsappPrompt: 'Hello Craft of Pink City, I want to book a live WhatsApp video tour of your Jaipur workshop.'
   },
   {
     id: 'advance-policy',
@@ -125,16 +136,16 @@ const QUICK_PRESETS = [
     prompt: 'Hello Craft of Pink City, I am looking for a wholesale price quote for a bulk order (25+ units).'
   },
   {
+    id: 'video',
+    label: 'Live Video Workshop Tour',
+    icon: Video,
+    prompt: 'Hello Craft of Pink City, I would like to schedule a 5-minute live WhatsApp video tour of your Jaipur studio.'
+  },
+  {
     id: 'custom',
     label: 'Custom Prints & Sizing',
     icon: Sparkles,
     prompt: 'Hello Craft of Pink City, I would like to inquire about custom fabric block-prints and custom dimensions.'
-  },
-  {
-    id: 'sample',
-    label: 'Request Bulk Sample',
-    icon: Package,
-    prompt: 'Hello Craft of Pink City, I want to order a physical sample piece before placing a bulk order.'
   }
 ]
 
